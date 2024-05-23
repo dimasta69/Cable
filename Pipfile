@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+pre-commit = "*"
+pre-commit-hooks = "*"
+bandit = "*"
+isort = "*"
+mypy = "*"
+yesqa = "*"
+pyupgrade = "*"
+black = "*"
+flake8 = "*"
+autoflake = "*"
+pydocstringformatter = "*"
+
+[requires]
+python_version = "3.11"
