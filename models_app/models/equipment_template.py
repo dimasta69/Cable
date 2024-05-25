@@ -1,4 +1,5 @@
 from django.db import models
+from models_app.models.manufacturer import Manufacturer
 
 
 class EquipmentTemplate(models.Model):
@@ -8,15 +9,10 @@ class EquipmentTemplate(models.Model):
         ('Passive', 'Пассивное оборудование'),
     }
     type = models.CharField(choices=TYPE_CHOICES, verbose_name='Тип оборудования', null=False, max_length=100)
-    MANUFACTURER_CHOICES = {
-        ('Huawei', 'Huawei'),
-        ('AlliedTelesis', 'AlliedTelesis'),
-        ('Микролинк', 'Микролинк'),
-    }
-    manufacturer = models.CharField(choices=MANUFACTURER_CHOICES, verbose_name='Производитель', null=False,
-                                    max_length=100)
+    manufacturer = models.ForeignKey(Manufacturer, related_name='equpment_template', null=False,
+                                     on_delete=models.CASCADE, verbose_name='Производитель')
     model = models.CharField(null=False, verbose_name='Модель', max_length=100)
-    number_of_ports = models.IntegerField(null=False, verbose_name='Количество портов')
+    power = models.IntegerField(null=True, verbose_name='Мощность')
     number_of_units = models.IntegerField(null=False, verbose_name='Количество занимаемых юнитов')
 
     class Meta:

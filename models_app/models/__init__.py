@@ -8,3 +8,7 @@ from .equipment_template import EquipmentTemplate
 from .equipment import Equipment
 from .building import Building
 from .access import Access
+from .port_template import PortTemplate
+from .manufacturer import Manufacturer
+from .sfp_template import SfpTemplate
+from .speed_template import SpeedTemplate

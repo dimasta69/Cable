@@ -8,7 +8,6 @@ class Room(models.Model):
     number = models.CharField(null=False, verbose_name='Номер комнаты', max_length=100)
     TYPE_ROOM_CHOICES = {
         ('Server', 'Серверная'),
-        ('Switching', 'Коммутационная'),
         ('Regular', 'Обычная'),
     }
     type = models.CharField(choices=TYPE_ROOM_CHOICES, verbose_name='Тип комнаты', max_length=100)
