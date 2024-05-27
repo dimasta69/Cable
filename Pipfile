@@ -18,6 +18,9 @@ black = "*"
 flake8 = "*"
 autoflake = "*"
 pydocstringformatter = "*"
+drf-yasg = "*"
+djangorestframework = "*"
+django-service-objects = "*"
 
 [requires]
 python_version = "3.11"
