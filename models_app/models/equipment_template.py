@@ -1,0 +1,20 @@
+from django.db import models
+from models_app.models.manufacturer import Manufacturer
+
+
+class EquipmentTemplate(models.Model):
+    TYPE_CHOICES = {
+        ('Server', 'Сервер'),
+        ('Switch', 'Коммутатор'),
+        ('Passive', 'Пассивное оборудование'),
+    }
+    type = models.CharField(choices=TYPE_CHOICES, verbose_name='Тип оборудования', null=False, max_length=100)
+    manufacturer = models.ForeignKey(Manufacturer, related_name='equpment_template', null=False,
+                                     on_delete=models.CASCADE, verbose_name='Производитель')
+    model = models.CharField(null=False, verbose_name='Модель', max_length=100)
+    power = models.IntegerField(null=True, verbose_name='Мощность')
+    number_of_units = models.IntegerField(null=False, verbose_name='Количество занимаемых юнитов')
+
+    class Meta:
+        verbose_name = 'Шаблон оборудования'
+        verbose_name_plural = 'Шаблоны оборудований'
