@@ -19,13 +19,13 @@ class SchemeListService(ServiceWithResult):
     @property
     def scheme_list(self):
         try:
-            return Scheme.objects.filter(id__in=self.access)
+            return Scheme.objects.filter(id__in=self.scheme_to_access)
         except Scheme.DoesNotExist:
             return Scheme.objects.none()
 
     @property
-    def access(self):
+    def scheme_to_access(self):
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user']).scheme.id
+            return Access.objects.filter(user=self.cleaned_data['current_user']).values_list('scheme', flat=True)
         except Access.DoesNotExist:
-            return Access.objects.none
+            return []

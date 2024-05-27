@@ -8,7 +8,8 @@ class Access(models.Model):
     scheme = models.ForeignKey(Scheme, related_name='scheme', on_delete=models.CASCADE, null=False)
     ROLE_CHOICES = {
         ('Read', 'Чтение'),
-        ('Change', 'Изменение')
+        ('Change', 'Изменение'),
+        ('Creator', 'Создатель'),
     }
     role = models.CharField(choices=ROLE_CHOICES, null=False, max_length=100)
 

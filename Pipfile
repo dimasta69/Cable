@@ -21,6 +21,9 @@ pydocstringformatter = "*"
 drf-yasg = "*"
 djangorestframework = "*"
 django-service-objects = "*"
+python-dotenv = "*"
+psycopg2 = "*"
+factory-boy = "*"
 
 [requires]
 python_version = "3.11"
