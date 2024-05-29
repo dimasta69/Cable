@@ -22,7 +22,7 @@ class Port(models.Model):
     vlan = models.IntegerField(verbose_name='Vlan на котором работает порт', null=True)
     ip = models.CharField(max_length=150, verbose_name='IP адрес', null=True)
     mac = models.CharField(max_length=150, verbose_name='Mac адрес', null=True)
-    connection = models.IntegerField(verbose_name='Подключение к порту', null=True)
+    connection = models.OneToOneField('self', related_name='connection_port', on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = 'Порт'
