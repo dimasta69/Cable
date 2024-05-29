@@ -5,6 +5,7 @@ name = "pypi"
 
 [packages]
 django = "*"
+psycopg = "*"
 
 [dev-packages]
 pre-commit = "*"
@@ -22,8 +23,8 @@ drf-yasg = "*"
 djangorestframework = "*"
 django-service-objects = "*"
 python-dotenv = "*"
-psycopg2 = "*"
 factory-boy = "*"
+psycopg = "*"
 
 [requires]
 python_version = "3.11"

@@ -21,3 +21,9 @@ create_scheme = {
     ),
     'responses': {201: openapi.Response('Success', SchemeSerializer)}
 }
+
+scheme = {
+    'operation_description': 'Get scheme',
+    'tags': ['core_api/scheme'],
+    'responses': {200: openapi.Response('Success', SchemeSerializer)}
+}
