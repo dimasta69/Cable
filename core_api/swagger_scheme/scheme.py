@@ -27,3 +27,22 @@ scheme = {
     'tags': ['core_api/scheme'],
     'responses': {200: openapi.Response('Success', SchemeSerializer)}
 }
+
+delete_scheme = {
+    'operation_description': 'Delete scheme',
+    'tags': ['core_api/scheme']
+}
+
+update_scheme = {
+    'operation_description': 'Update scheme',
+    'tags': ['core_api/scheme'],
+    'request_body': openapi.Schema(
+        title='core_api_scheme_update',
+        description='Update scheme',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            title=openapi.Schema(type=openapi.TYPE_STRING),
+        ),
+    ),
+    'responses': {200: openapi.Response('Success', SchemeSerializer)}
+}

@@ -1,7 +1,6 @@
 import json
 
 from django.test import TestCase
-from django.contrib.auth.hashers import make_password
 from django.test.client import Client
 
 from models_app.factories.scheme import SchemeFactory

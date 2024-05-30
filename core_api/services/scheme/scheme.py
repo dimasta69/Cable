@@ -14,7 +14,7 @@ class SchemeService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['scheme_presence', 'access_presence']
+    custom_validations = ['access_presence', 'scheme_presence']
 
     def process(self):
         self.run_custom_validations()
