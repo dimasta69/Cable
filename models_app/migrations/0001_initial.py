@@ -516,7 +516,7 @@ class Migration(migrations.Migration):
                     "manufacturer",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="sfp_template",
+                        related_name="port_template",
                         to="models_app.manufacturer",
                         verbose_name="Производитель",
                     ),
@@ -525,7 +525,7 @@ class Migration(migrations.Migration):
                     "port_template",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="sfp_template",
+                        related_name="port_template",
                         to="models_app.porttemplate",
                         verbose_name="Форм-фактор",
                     ),
@@ -563,7 +563,7 @@ class Migration(migrations.Migration):
                     "port_template",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
-                        related_name="speed_template",
+                        related_name="port_template",
                         to="models_app.porttemplate",
                         verbose_name="Шаблон порта",
                     ),

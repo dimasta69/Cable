@@ -4,7 +4,7 @@ from models_app.models.port_template import PortTemplate
 
 
 class SfpTemplate(models.Model):
-    manufacturer = models.ForeignKey(Manufacturer, related_name='sfp_template', on_delete=models.CASCADE, null=False,
+    manufacturer = models.ForeignKey(Manufacturer, related_name='port_template', on_delete=models.CASCADE, null=False,
                                      verbose_name='Производитель')
-    port_template = models.ForeignKey(PortTemplate, related_name='sfp_template', on_delete=models.CASCADE, null=False,
+    port_template = models.ForeignKey(PortTemplate, related_name='port_template', on_delete=models.CASCADE, null=False,
                                       verbose_name='Форм-фактор')
