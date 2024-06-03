@@ -52,4 +52,4 @@ class SchemeListViewTest(TestCase):
         self.client.login(username=self.user_1.username, password="Dima2012")
         params = {'title': 'Test_1'}
         resp_2 = self.client.post('/core_api/scheme/', params)
-        self.assertEqual(resp_2.status_code, 403)
+        self.assertEqual(resp_2.status_code, 422)

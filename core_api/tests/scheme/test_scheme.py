@@ -70,5 +70,13 @@ class SchemeViewTest(TestCase):
         resp = self.client.put(f'/core_api/scheme/{self.scheme_1.id}/',
                                content,
                                content_type=content_type)
-        resp_json = json.loads(resp.content)
-        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_404_not_found(self):
+        self.client.login(username=self.user_1.username, password='Dima2012')
+        resp_get = self.client.get('/core_api/scheme/55/')
+        resp_delete = self.client.delete('/core_api/scheme/55/')
+        resp_update = self.client.put('core_api/scheme/55/')
+        self.assertEqual(resp_delete.status_code, 404)
+        self.assertEqual(resp_get.status_code, 404)
+        self.assertEqual(resp_update.status_code, 404)

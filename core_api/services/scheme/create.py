@@ -46,4 +46,4 @@ class CreateScheme(ServiceWithResult):
             if scheme.title.lower() == self.cleaned_data['title'].lower():
                 self.add_error('title', ValidationError("Title="
                                                         f"{self.cleaned_data['title']} already exists"))
-                self.response_status = status.HTTP_403_FORBIDDEN
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
