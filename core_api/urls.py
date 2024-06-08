@@ -7,6 +7,9 @@ from core_api.views.scheme.scheme_list import SchemeListView
 from core_api.views.scheme.scheme import SchemeView
 from core_api.views.port_template.port_template_list import PortTemplateListView
 from core_api.views.port_template.port_template import PortTemplateView
+from core_api.views.manufacturer.manufacturer import ManufacturerView
+from core_api.views.manufacturer.manufacturer_list import ManufacturerListView
+from core_api.views.equipment_template.equipment_tamplate_list import EquipmentTemplateListView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -21,5 +24,8 @@ urlpatterns = [
     path('scheme/<int:id>/', SchemeView.as_view()),
     path('port_template/', PortTemplateListView.as_view()),
     path('port_template/<int:id>/', PortTemplateView.as_view()),
+    path('manufacturer/', ManufacturerListView.as_view()),
+    path('manufacturer/<int:id>/', ManufacturerView.as_view()),
+    path('equipment_template/', EquipmentTemplateListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

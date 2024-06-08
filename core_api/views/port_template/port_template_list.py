@@ -6,6 +6,7 @@ from models_app.models.port_template import PortTemplate
 from core_api.serializers.port_template.port_template_list import PortTemplateListSerializer
 from core_api.services.port_template.port_template_list import PortTemplateListService
 from core_api.services.port_template.create import CreatePortTemplateService
+from core_api.serializers.port_template.create_port_template import CreatePortTemplateSerializer
 from core_api.swagger_scheme.port_template import port_template_list, create_port_template
 from rest_framework.permissions import IsAuthenticated
 from utils.services import ServiceOutcome
@@ -13,7 +14,7 @@ from utils.pagination import CustomPagination
 
 
 class PortTemplateListView(APIView):
-    serializer_class = PortTemplateListSerializer
+    serializer_class = CreatePortTemplateSerializer
     queryset = PortTemplate.objects.all()
     permission_classes = [IsAuthenticated]
 

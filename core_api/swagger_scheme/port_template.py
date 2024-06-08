@@ -21,6 +21,11 @@ port_template_list = {
                         {
                             "id": 0,
                             "name": "String",
+                            "equipment_tmp": {
+                                "manufacturer": 'test_1',
+                                "model": "test_1"
+                            },
+                            'count': 0,
                         },
                     ]
                 }
@@ -40,10 +45,18 @@ port_template_list = {
                           in_=openapi.IN_QUERY,
                           description='Order photo by columns',
                           type=openapi.TYPE_STRING,
-                          enum=['-name', '+name']),
+                          enum=['-name', '+name', 'count', '-count']),
         openapi.Parameter(name='search_filter',
                           in_=openapi.IN_QUERY,
                           description='Search by symbols',
+                          type=openapi.TYPE_STRING),
+        openapi.Parameter(name='filter_manufacturer',
+                          in_=openapi.IN_QUERY,
+                          description='Search by manufacturer',
+                          type=openapi.TYPE_INTEGER),
+        openapi.Parameter(name='filter_model',
+                          in_=openapi.IN_QUERY,
+                          description='Search by model',
                           type=openapi.TYPE_STRING),
     ]
 }
@@ -57,8 +70,10 @@ create_port_template = {
         type=openapi.TYPE_OBJECT,
         properties=dict(
             name=openapi.Schema(type=openapi.TYPE_STRING),
+            count=openapi.Schema(type=openapi.TYPE_INTEGER),
+            equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER),
         ),
-        required=['name']
+        required=['name', 'equipment_tmp_id', 'count']
     ),
     'responses': {201: openapi.Response('Success', PortTemplateListSerializer)}
 }
@@ -77,7 +92,9 @@ update_port_template = {
         description='Update port template',
         type=openapi.TYPE_OBJECT,
         properties=dict(
-            title=openapi.Schema(type=openapi.TYPE_STRING),
+            name=openapi.Schema(type=openapi.TYPE_STRING),
+            count=openapi.Schema(type=openapi.TYPE_INTEGER),
+            equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER), 
         ),
     ),
     'responses': {200: openapi.Response('Success', PortTemplateListSerializer)}

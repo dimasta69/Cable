@@ -9,10 +9,10 @@ class EquipmentTemplate(models.Model):
         ('Passive', 'Пассивное оборудование'),
     }
     type = models.CharField(choices=TYPE_CHOICES, verbose_name='Тип оборудования', null=False, max_length=100)
-    manufacturer = models.ForeignKey(Manufacturer, related_name='equpment_template', null=False,
+    manufacturer = models.ForeignKey(Manufacturer, related_name='equipment_template', null=True,
                                      on_delete=models.CASCADE, verbose_name='Производитель')
     model = models.CharField(null=False, verbose_name='Модель', max_length=100)
-    power = models.IntegerField(null=True, verbose_name='Мощность')
+    power = models.IntegerField(null=True, verbose_name='Мощность', default=0)
     number_of_units = models.IntegerField(null=False, verbose_name='Количество занимаемых юнитов')
 
     class Meta:
