@@ -80,3 +80,8 @@ class SchemeViewTest(TestCase):
         self.assertEqual(resp_delete.status_code, 404)
         self.assertEqual(resp_get.status_code, 404)
         self.assertEqual(resp_update.status_code, 404)
+
+    def test_return_204_delete(self):
+        self.client.login(username=self.user_1.username, password='Dima2012')
+        resp = self.client.delete(f'/core_api/manufacturer/{self.scheme_1.id}/')
+        self.assertTrue(resp.status_code, 204)

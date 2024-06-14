@@ -1,5 +1,6 @@
 from django.db import models
 from models_app.models.equipment import Equipment
+from models_app.models.port_template import PortTemplate
 
 
 class Port(models.Model):
@@ -22,6 +23,8 @@ class Port(models.Model):
     vlan = models.IntegerField(verbose_name='Vlan на котором работает порт', null=True)
     ip = models.CharField(max_length=150, verbose_name='IP адрес', null=True)
     mac = models.CharField(max_length=150, verbose_name='Mac адрес', null=True)
+    port_template = models.ForeignKey(PortTemplate, related_name='port', verbose_name='Шаблон порта', null=False,
+                                      on_delete=models.CASCADE)
     connection = models.OneToOneField('self', related_name='connection_port', on_delete=models.CASCADE, null=True)
 
     class Meta:

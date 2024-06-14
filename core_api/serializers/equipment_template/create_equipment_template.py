@@ -7,4 +7,3 @@ class CreateEquipmentTemplateSerializer(serializers.Serializer):
     model = serializers.CharField(required=True)
     number_of_units = serializers.IntegerField(required=False)
     power = serializers.IntegerField(required=False)
-    count_port = serializers.SerializerMethodField()

@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
 
 from models_app.models.equipment_template import EquipmentTemplate
 from core_api.serializers.equipment_template.equipment_template_list import EquipmentTemplateListSerializer
@@ -8,6 +9,7 @@ from core_api.serializers.equipment_template.equipment_template import Equipment
 from core_api.serializers.equipment_template.create_equipment_template import CreateEquipmentTemplateSerializer
 from core_api.services.equipment_template.equipment_template_list import EquipmentTemplateListService
 from core_api.services.equipment_template.create import CreateEquipmentTemplateService
+from core_api.swagger_scheme.equipment_template import equipment_template_list, create_equipment_template
 from utils.services import ServiceOutcome
 from utils.pagination import CustomPagination
 
@@ -17,6 +19,7 @@ class EquipmentTemplateListView(APIView):
     serializer_class = CreateEquipmentTemplateSerializer
     queryset = EquipmentTemplate
 
+    @swagger_auto_schema(**equipment_template_list)
     def get(self, request):
         outcome = ServiceOutcome(EquipmentTemplateListService, dict(request.GET.items()))
         if bool(outcome.errors):
@@ -27,6 +30,7 @@ class EquipmentTemplateListView(APIView):
                          'results': EquipmentTemplateListSerializer(outcome.result, many=True).data},
                         status=outcome.response_status)
 
+    @swagger_auto_schema(**create_equipment_template)
     def post(self, request):
         outcome = ServiceOutcome(CreateEquipmentTemplateService, request.data.dict())
         if bool(outcome.errors):

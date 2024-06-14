@@ -102,7 +102,6 @@ class PortTemplateListTest(TestCase):
                                content_type='application/json')
         self.assertEqual(resp.status_code, 200)
         resp_json = json.loads(resp.content)
-        print(resp_json['results'][0])
         self.assertTrue(resp_json['results'][0]['name'] == self.port_template2.name)
 
         resp = self.client.get('/core_api/port_template/',

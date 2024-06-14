@@ -94,7 +94,7 @@ update_port_template = {
         properties=dict(
             name=openapi.Schema(type=openapi.TYPE_STRING),
             count=openapi.Schema(type=openapi.TYPE_INTEGER),
-            equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER), 
+            equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER),
         ),
     ),
     'responses': {200: openapi.Response('Success', PortTemplateListSerializer)}

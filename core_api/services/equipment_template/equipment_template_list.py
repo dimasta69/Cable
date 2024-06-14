@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from functools import lru_cache
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Q
 
 from utils.services import ServiceWithResult
 from models_app.models.equipment_template import EquipmentTemplate
@@ -16,8 +17,9 @@ class EquipmentTemplateListService(ServiceWithResult):
     order_by = forms.CharField(required=False)
     filter_manufacturer = forms.IntegerField(required=False)
     filter_type = forms.CharField(required=False)
+    search_filter = forms.CharField(required=False)
 
-    custom_validations = ['type_presence', 'order_presence', 'type_presence']
+    custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -43,6 +45,11 @@ class EquipmentTemplateListService(ServiceWithResult):
             equipment_template_list = equipment_template_list.filter(manufacturer=self.manufacturer)
         if self.cleaned_data['filter_type']:
             equipment_template_list = equipment_template_list.filter(type=self.filter_type)
+        if self.cleaned_data['search_filter']:
+            equipment_template_list = equipment_template_list.filter(
+                Q(model__icontains=self.cleaned_data['search_filter']) |
+                Q(manufacturer__name__icontains=self.cleaned_data['search_filter']) |
+                Q(type__icontains=self.cleaned_data['search_filter']))
         if self.cleaned_data['order_by']:
             equipment_template_list = equipment_template_list.order_by(self.cleaned_data['order_by'])
         return equipment_template_list
@@ -73,12 +80,12 @@ class EquipmentTemplateListService(ServiceWithResult):
     def order_presence(self):
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['power', '-power', 'number_of_units', '-number_of_units',
-                                                     'count_port', '-count_port']:
+                                                     'count_port', '-count_port', 'model', '-model']:
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["title"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def manufacturer_presence(self):
-        if self.cleaned_data['manufacturer_presence']:
+        if self.cleaned_data['filter_manufacturer']:
             if not self.manufacturer:
                 self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
                                                                          f'{self.cleaned_data["filter_manufacturer"]} '

@@ -10,6 +10,7 @@ from core_api.views.port_template.port_template import PortTemplateView
 from core_api.views.manufacturer.manufacturer import ManufacturerView
 from core_api.views.manufacturer.manufacturer_list import ManufacturerListView
 from core_api.views.equipment_template.equipment_tamplate_list import EquipmentTemplateListView
+from core_api.views.equipment_template.equipment_template import EquipmentTemplateView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -27,5 +28,6 @@ urlpatterns = [
     path('manufacturer/', ManufacturerListView.as_view()),
     path('manufacturer/<int:id>/', ManufacturerView.as_view()),
     path('equipment_template/', EquipmentTemplateListView.as_view()),
+    path('equipment_template/<int:id>/', EquipmentTemplateView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
