@@ -31,6 +31,9 @@ class PortTemplateListView(APIView):
 
     @swagger_auto_schema(**create_port_template)
     def post(self, request):
+        print(123)
+        print(request.data.dict())
+        print(123)
         outcome = ServiceOutcome(CreatePortTemplateService, request.data.dict())
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)

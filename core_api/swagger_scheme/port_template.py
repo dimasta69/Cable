@@ -25,6 +25,7 @@ port_template_list = {
                                 "manufacturer": 'test_1',
                                 "model": "test_1"
                             },
+                            'speed': [0, 0],
                             'count': 0,
                         },
                     ]

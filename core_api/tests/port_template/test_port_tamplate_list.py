@@ -59,16 +59,17 @@ class PortTemplateListTest(TestCase):
 
     def test_create_return_200(self):
         self.client.login(username=self.user_1.username, password="Dima2012")
-        data = {'name': 'test', 'count': 3, 'equipment_tmp_id': self.equipment_template_1.id}
+        data = {'name': 'test', 'count': 3, 'equipment_tmp_id': self.equipment_template_1.id, 'speed': [1, 10, 100]}
         resp = self.client.post('/core_api/port_template/', data)
+        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 201)
 
     def test_create_return_422_warning_title(self):
         self.client.login(username=self.user_1.username, password="Dima2012")
-        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3}
+        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100]}
         resp = self.client.post('/core_api/port_template/', data)
         self.assertEqual(resp.status_code, 201)
-        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3}
+        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100]}
         resp = self.client.post('/core_api/port_template/', data)
         self.assertEqual(resp.status_code, 422)
 
@@ -102,6 +103,7 @@ class PortTemplateListTest(TestCase):
                                content_type='application/json')
         self.assertEqual(resp.status_code, 200)
         resp_json = json.loads(resp.content)
+        print(resp_json['results'][0])
         self.assertTrue(resp_json['results'][0]['name'] == self.port_template2.name)
 
         resp = self.client.get('/core_api/port_template/',
@@ -119,6 +121,7 @@ class PortTemplateListTest(TestCase):
                                content_type='application/json')
         self.assertEqual(resp.status_code, 200)
         resp_json = json.loads(resp.content)
+        print(resp_json['results'][0])
         self.assertTrue(resp_json['results'][0]['name'] == self.port_template3.name)
 
         resp = self.client.get('/core_api/port_template/',

@@ -49,7 +49,7 @@ class ManufacturerListService(ServiceWithResult):
     def manufacturer_list(self):
         try:
             return Manufacturer.objects.all()
-        except Manufacturer.DoesNotExist():
+        except Manufacturer.DoesNotExist:
             return Manufacturer.objects.none()
 
     def order_presence(self):

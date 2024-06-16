@@ -5,6 +5,7 @@ class PortTemplateListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     name = serializers.CharField(required=True)
     equipment_tmp = serializers.SerializerMethodField(required=False)
+    speed = serializers.ListField(child=serializers.IntegerField())
     count = serializers.IntegerField(required=True)
 
     class Meta:

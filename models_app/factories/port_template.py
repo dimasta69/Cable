@@ -12,4 +12,4 @@ class PortTemplateFactory(DjangoModelFactory):
     name = factory.Faker('sentence', nb_words=3)
     equipment_tmp = factory.Iterator(EquipmentTemplate.objects.all().values_list('id', flat=True))
     count = factory.Faker('random_int')
-    
+    speed = factory.LazyAttribute(lambda _: [1, 2, 3, 4, 5])
