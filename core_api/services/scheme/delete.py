@@ -37,7 +37,6 @@ class SchemeDeleteService(ServiceWithResult):
             return None
 
     def scheme_presence(self):
-        print(2)
         if not self.scheme:
             self.add_error('id', ObjectDoesNotExist(f'Scheme id =  {self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND

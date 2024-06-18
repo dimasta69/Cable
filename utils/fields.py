@@ -29,11 +29,11 @@ class MultipleFormField(forms.Field):
         })
     """
     error_min = _("There needs to be at least %(num)d item.",
-                               "There needs to be at least %(num)d items.",
-                               'num')
+                  "There needs to be at least %(num)d items.",
+                  'num')
     error_max = _("There needs to be at most %(num)d item.",
-                               "There needs to be at most %(num)d items.",
-                               'num')
+                  "There needs to be at most %(num)d items.",
+                  'num')
     error_required = _("Input is required. "
                        "Expected not empty list but got %(values)r.")
 
@@ -146,8 +146,8 @@ class ModelField(forms.Field):
         if not isinstance(item, self.model_class):
             raise ValidationError(self.error_type % {
                 'model_class': self.model_class
-                }
-            )
+            }
+                                  )
 
     def check_unsaved(self, item):
         if (self.allow_unsaved is False and item.pk is None):
@@ -276,3 +276,29 @@ class ListField(forms.Field):
             raise ValidationError(self.error_type)
 
         return value
+
+
+class ListIntegerField(forms.Field):
+    error_required = _("Input is required. Expected list but got %(value)r.")
+    error_type = _("Input needs to be of type list.")
+    error_invalid_element = _("Invalid element in the list: %(element)r")
+
+    def clean(self, value):
+        if not value and value is not False:
+            if self.required:
+                raise ValidationError(self.error_required % {
+                    'value': value
+                })
+            else:
+                return {}
+        if not isinstance(value, list):
+            raise ValidationError(self.error_type)
+
+        cleaned_data = []
+        for element in value:
+            try:
+                cleaned_data.append(int(element))
+            except ValueError:
+                raise ValidationError(self.error_invalid_element % {'element': element})
+
+        return cleaned_data

@@ -75,10 +75,21 @@ class PortTemplateTest(TestCase):
                                content, content_type=content_type)
         self.assertEqual(resp.status_code, 404)
 
+    def test_return_200_change_speed(self):
+        self.client.login(username=self.user_1.username, password='Dima2012')
+        content = encode_multipart('BoUnDaRyStRiNg', {'speed': [1, 20]})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
+                               content, content_type=content_type)
+        self.assertEqual(resp.status_code, 200)
+        resp_json = json.loads(resp.content)
+        print(resp_json)
+        self.assertTrue(resp_json['speed'] == [1, 20])
+
     def test_return_200_update_max_params(self):
         self.client.login(username=self.user_1.username, password='Dima2012')
         content = encode_multipart('BoUnDaRyStRiNg', {'equipment_tmp_id': self.equipment_template_1.id,
-                                                      'name': 'test_10', 'count': 10})
+                                                      'name': 'test_10', 'count': 10, 'speed': ['10', '100']})
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
                                content, content_type=content_type)

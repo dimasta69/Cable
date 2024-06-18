@@ -4,7 +4,7 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
-from utils.array_form import ArrayField
+from utils.fields import ListIntegerField
 from models_app.models.port_template import PortTemplate
 from models_app.models.equipment_template import EquipmentTemplate
 
@@ -13,7 +13,7 @@ class CreatePortTemplateService(ServiceWithResult):
     name = forms.CharField(required=True)
     equipment_tmp_id = forms.IntegerField(required=False)
     count = forms.IntegerField(required=True)
-    speed = ArrayField()
+    speed = ListIntegerField()
 
     custom_validations = ['name_presence', 'equipment_template_presence']
 
