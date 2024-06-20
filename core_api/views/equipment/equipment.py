@@ -1,0 +1,30 @@
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+
+from utils.services import ServiceOutcome
+from models_app.models.equipment import Equipment
+from core_api.services.equipment.equipment import EquipmentService
+from core_api.serializers.equipment.equipment import EquipmentSerializer
+from core_api.services.equipment.delete import DeleteEquipmentService
+from core_api.swagger_scheme.equipment import equipment, delete_equipment
+
+
+class EquipmentView(APIView):
+    queryset = Equipment.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(**equipment)
+    def get(self, request, **kwargs):
+        outcome = ServiceOutcome(EquipmentService, kwargs)
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)
+
+    @swagger_auto_schema(**delete_equipment)
+    def delete(self, request, **kwargs):
+        outcome = ServiceOutcome(DeleteEquipmentService, kwargs)
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)

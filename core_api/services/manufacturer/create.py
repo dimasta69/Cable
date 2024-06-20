@@ -31,7 +31,7 @@ class CreateManufactureService(ServiceWithResult):
 
     def name_presence(self):
         for port in self.manufacture_list:
-            if port.name == self.cleaned_data['name']:
-                self.add_error('name', ValidationError(f'Field with title={self.cleaned_data["name"]}'
+            if port.name.lower() == self.cleaned_data['name'].lower():
+                self.add_error('name', ValidationError(f'Field with name={self.cleaned_data["name"]}'
                                                        ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

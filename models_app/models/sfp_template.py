@@ -6,3 +6,4 @@ class SfpTemplate(models.Model):
     manufacturer = models.ForeignKey(Manufacturer, related_name='port_template', on_delete=models.CASCADE, null=False,
                                      verbose_name='Производитель')
     speed = models.IntegerField(null=False, verbose_name='Скорость')
+    name = models.CharField(null=False, verbose_name='Наименование sfp')

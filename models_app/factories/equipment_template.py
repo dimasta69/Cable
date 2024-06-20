@@ -13,4 +13,4 @@ class EquipmentTemplateFactory(DjangoModelFactory):
     model = factory.Faker('sentence', nb_words=1)
     number_of_units = factory.Faker('random_int')
     power = factory.Faker('random_int')
-    type = factory.Faker('word')
+    type = factory.Iterator(['Сервер', 'Коммутатор', 'Пассивное оборудование'])

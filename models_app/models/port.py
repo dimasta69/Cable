@@ -1,12 +1,15 @@
 from django.db import models
 from models_app.models.equipment import Equipment
 from models_app.models.port_template import PortTemplate
+from models_app.models.sfp_template import SfpTemplate
 
 
 class Port(models.Model):
     uid = models.IntegerField(verbose_name='Номер порта в оборудовании', null=False)
     equipment = models.ForeignKey(Equipment, related_name='port', on_delete=models.CASCADE, verbose_name='Оборудование',
                                   null=False)
+    sfp = models.ForeignKey(SfpTemplate, related_name='port', on_delete=models.SET_NULL, null=True,
+                            verbose_name='sfp модуль')
     LINE_CHOICES = {
         ('single-mode', 'Одномодовый'),
         ('multi_mode', 'Многомодовый'),

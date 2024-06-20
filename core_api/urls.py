@@ -11,6 +11,10 @@ from core_api.views.manufacturer.manufacturer import ManufacturerView
 from core_api.views.manufacturer.manufacturer_list import ManufacturerListView
 from core_api.views.equipment_template.equipment_tamplate_list import EquipmentTemplateListView
 from core_api.views.equipment_template.equipment_template import EquipmentTemplateView
+from core_api.views.equipment.equipment import EquipmentView
+from core_api.views.equipment.equipment_list import EquipmentListView
+from core_api.views.sfp_template.sfp_template import SfpTemplateView
+from core_api.views.sfp_template.sfp_template_list import SfpTemplateListView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -29,5 +33,9 @@ urlpatterns = [
     path('manufacturer/<int:id>/', ManufacturerView.as_view()),
     path('equipment_template/', EquipmentTemplateListView.as_view()),
     path('equipment_template/<int:id>/', EquipmentTemplateView.as_view()),
+    path('equipment/', EquipmentListView.as_view()),
+    path('equipment/<int:id>/', EquipmentView.as_view()),
+    path('sfp_template/', SfpTemplateListView.as_view()),
+    path('sfp_template/<int:id>/', SfpTemplateView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

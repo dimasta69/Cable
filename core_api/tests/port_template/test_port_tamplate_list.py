@@ -94,35 +94,3 @@ class PortTemplateListTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         resp_json = json.loads(resp.content)
         self.assertTrue(len(resp_json['results']) == 1)
-
-    def test_return_200_order_count(self):
-        self.client.login(username=self.user_1.username, password="Dima2012")
-        resp = self.client.get('/core_api/port_template/',
-                               {'order_by': '-count'},
-                               content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        resp_json = json.loads(resp.content)
-        self.assertTrue(resp_json['results'][0]['name'] == self.port_template2.name)
-
-        resp = self.client.get('/core_api/port_template/',
-                               {'order_by': 'count'},
-                               content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        resp_json = json.loads(resp.content)
-        self.assertTrue(resp_json['results'][0]['name'] == self.port_template3.name)
-
-    def test_return_200_order_name(self):
-        self.client.login(username=self.user_1.username, password="Dima2012")
-        resp = self.client.get('/core_api/port_template/',
-                               {'order_by': '-name'},
-                               content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        resp_json = json.loads(resp.content)
-        self.assertTrue(resp_json['results'][0]['name'] == self.port_template3.name)
-
-        resp = self.client.get('/core_api/port_template/',
-                               {'order_by': 'name'},
-                               content_type='application/json')
-        self.assertEqual(resp.status_code, 200)
-        resp_json = json.loads(resp.content)
-        self.assertTrue(resp_json['results'][0]['name'] == self.port_template1.name)

@@ -17,7 +17,7 @@ from utils.pagination import CustomPagination
 class EquipmentTemplateListView(APIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CreateEquipmentTemplateSerializer
-    queryset = EquipmentTemplate
+    queryset = EquipmentTemplate.objects.all()
 
     @swagger_auto_schema(**equipment_template_list)
     def get(self, request):
