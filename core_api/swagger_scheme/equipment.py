@@ -21,6 +21,9 @@ equipment_list = {
                     "results": [
                         {
                             'id': 0,
+                            "vlan_ip": {
+                                "2": "10.16.7.10"
+                            },
                             'template':
                                 {
                                     "manufacturer": "test",
@@ -77,6 +80,7 @@ create_equipment = {
         type=openapi.TYPE_OBJECT,
         properties=dict(
             equipment_template_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+            vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
         ),
         required=['equipment_template_id',]
     ),
@@ -92,4 +96,18 @@ equipment = {
 delete_equipment = {
     'operation_description': 'Delete equipment template',
     'tags': ['core_api/equipment']
+}
+
+update_equipment = {
+    'operation_description': 'Update equipment',
+    'tags': ['core_api/equipment'],
+    'request_body': openapi.Schema(
+        title='core_api_equipment_update',
+        description='Update equipment',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
+        ),
+    ),
+    'responses': {200: openapi.Response('Success', EquipmentSerializer)}
 }

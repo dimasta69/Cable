@@ -1,7 +1,12 @@
+import ipaddress
+import socket
+
 from django import forms
 from django.apps import apps
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+import json
 
 
 class MultipleFormField(forms.Field):
@@ -302,3 +307,34 @@ class ListIntegerField(forms.Field):
                 raise ValidationError(self.error_invalid_element % {'element': element})
 
         return cleaned_data
+
+
+class JsonIpField(forms.Field):
+    error_required = _("Input is required. Expected dict but got %(value)r.")
+    error_type = _("Input needs to be of type ipv4.")
+
+    def clean(self, value):
+        if not value and value is not False:
+            if self.required:
+                raise ValidationError(self.error_required % {'value': value})
+            else:
+                return {}
+
+        try:
+            data = json.loads(value)
+        except json.JSONDecodeError:
+            raise ValidationError("Данные должны быть в формате JSON.")
+
+        if not isinstance(data, dict):
+            raise ValidationError("Данные должны быть представлены в виде словаря.")
+
+        for key, val in data.items():
+            if not isinstance(val, str):
+                raise ValidationError(self.error_type)
+
+            try:
+                ipaddress.IPv4Address(val)
+            except ipaddress.AddressValueError:
+                raise ValidationError(self.error_type)
+
+        return data

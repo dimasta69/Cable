@@ -15,25 +15,27 @@ class PortListSerializer(serializers.Serializer):
 
     @classmethod
     def get_sfp(cls, obj):
-        return {
-            'manufacturer': cls.sfp.manufacturer.name,
-            'speed': cls.sfp.speed,
-            'name': cls.sfp.name,
-        }
+        if obj.sfp:
+            return {
+                'manufacturer': cls.sfp.manufacturer.name,
+                'speed': cls.sfp.speed,
+                'name': cls.sfp.name,
+            }
+        return None
 
     @classmethod
     def get_speed(cls, obj):
-        return {
-            obj.port_template.speed
-        }
+        return obj.port_template.speed
 
     @classmethod
     def get_connection(cls, obj):
-        return {
-            'id': obj.connection.id,
-            'uid': obj.connection.uid,
-            'ip': obj.connection.ip,
-            'manufacturer': obj.connection.equipment.template.manufacturer.name,
-            'type': obj.connection.equipment.template.type,
-            'model': obj.connection.equipment.template.model,
-        }
+        if obj.connection:
+            return {
+                'id': obj.connection.id,
+                'uid': obj.connection.uid,
+                'ip': obj.connection.ip,
+                'manufacturer': obj.connection.equipment.template.manufacturer.name,
+                'type': obj.connection.equipment.template.type,
+                'model': obj.connection.equipment.template.model,
+            }
+        return None

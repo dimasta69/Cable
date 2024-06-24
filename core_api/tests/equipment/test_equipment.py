@@ -1,6 +1,6 @@
 import json
 from django.test import TestCase
-from django.test.client import Client
+from django.test.client import Client, encode_multipart
 
 from models_app.factories.port_template import PortTemplateFactory
 from models_app.factories.user import UserFactory
@@ -53,4 +53,24 @@ class EquipmentListTest(TestCase):
     def test_return_404_delete(self):
         self.client.login(username=self.user_1.username, password="Dima2012")
         resp = self.client.delete('/core_api/equipment/99/')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_200_update_change(self):
+        self.client.login(username=self.user_1.username, password="Dima2012")
+        content = encode_multipart('BoUnDaRyStRiNg', {
+            'vlan_ip': '{"2": "10.16.7.150"}',
+        })
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/equipment/{self.equipment_3.id}/',
+                               content,
+                               content_type=content_type)
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_404_update_not_found(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {
+            'vlan_ip': '{"2": "10.16.7.150"}',
+        })
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        self.client.login(username=self.user_1.username, password="Dima2012")
+        resp = self.client.put('/core_api/equipment/99/', content, content_type=content_type)
         self.assertEqual(resp.status_code, 404)

@@ -6,6 +6,7 @@ from models_app.models.port import Port
 
 class EquipmentSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
+    vlan_ip = serializers.JSONField(required=False)
     template = serializers.SerializerMethodField()
     count_port = serializers.SerializerMethodField()
     free_ports = serializers.IntegerField()

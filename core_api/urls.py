@@ -15,6 +15,7 @@ from core_api.views.equipment.equipment import EquipmentView
 from core_api.views.equipment.equipment_list import EquipmentListView
 from core_api.views.sfp_template.sfp_template import SfpTemplateView
 from core_api.views.sfp_template.sfp_template_list import SfpTemplateListView
+from core_api.views.port.port_list import PortListView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -37,5 +38,6 @@ urlpatterns = [
     path('equipment/<int:id>/', EquipmentView.as_view()),
     path('sfp_template/', SfpTemplateListView.as_view()),
     path('sfp_template/<int:id>/', SfpTemplateView.as_view()),
+    path('port/', PortListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

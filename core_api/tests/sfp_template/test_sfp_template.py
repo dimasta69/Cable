@@ -38,7 +38,6 @@ class SfpTemplateTest(TestCase):
         resp = self.client.put(f'/core_api/sfp_template/{self.sfp_template_1.id}/', content,
                                content_type=content_type)
         resp_json = json.loads(resp.content)
-        print(resp_json)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp_json['speed'] == 1000)
         self.assertTrue(resp_json['name'] == 'name')
@@ -49,6 +48,7 @@ class SfpTemplateTest(TestCase):
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         resp = self.client.put(f'/core_api/sfp_template/{self.sfp_template_2.id}/', content,
                                content_type=content_type)
+        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 422)
 
     def test_return_404_not_found_sfp_template(self):

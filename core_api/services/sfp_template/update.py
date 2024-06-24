@@ -12,8 +12,9 @@ class UpdateSfpTemplateService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     name = forms.CharField(required=False)
     speed = forms.IntegerField(required=False)
+    line_type = forms.CharField(required=False)
 
-    custom_validations = ['name_presence', 'sfp_template_presence']
+    custom_validations = ['name_presence', 'sfp_template_presence', 'line_type_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -29,6 +30,8 @@ class UpdateSfpTemplateService(ServiceWithResult):
             sfp_template.name = self.cleaned_data['name']
         if self.cleaned_data['speed']:
             sfp_template.speed = self.cleaned_data['speed']
+        if self.cleaned_data['line_type']:
+            sfp_template.line_type = self.cleaned_data['line_type']
         sfp_template.save()
         return sfp_template
 
@@ -52,3 +55,9 @@ class UpdateSfpTemplateService(ServiceWithResult):
         if not self.sfp_template_list.get(id=self.cleaned_data['id']):
             self.add_error('id', ObjectDoesNotExist(f'Sfp template id={self.cleaned_data["id"]} is not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
+
+    def line_type_presence(self):
+        if self.cleaned_data['line_type']:
+            if not any(line_type[1] == self.cleaned_data['line_type'] for line_type in SfpTemplate.LINE_CHOICES):
+                self.add_error('type', ObjectDoesNotExist(f'Line type {self.cleaned_data["line_type"]} not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND

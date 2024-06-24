@@ -13,8 +13,9 @@ class CreateSfpTemplateService(ServiceWithResult):
     manufacturer_id = forms.IntegerField(required=True)
     name = forms.CharField(required=True)
     speed = forms.IntegerField(required=True)
+    line_type = forms.CharField(required=False)
 
-    custom_validations = ['manufacturer_presence', 'name_presence']
+    custom_validations = ['manufacturer_presence', 'name_presence', 'line_type_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -27,7 +28,8 @@ class CreateSfpTemplateService(ServiceWithResult):
     def create_sfp_template(self):
         return SfpTemplate.objects.create(manufacturer=self.manufacturer,
                                           name=self.cleaned_data['name'],
-                                          speed=self.cleaned_data['speed'])
+                                          speed=self.cleaned_data['speed'],
+                                          line_type=self.cleaned_data['line_type'])
 
     @property
     def sfp_template_list(self):
@@ -57,3 +59,9 @@ class CreateSfpTemplateService(ServiceWithResult):
                 self.add_error('name', ValidationError(f'Field with name={self.cleaned_data["name"]}'
                                                        ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def line_type_presence(self):
+        if self.cleaned_data['line_type']:
+            if not any(line_type[1] == self.cleaned_data['line_type'] for line_type in SfpTemplate.LINE_CHOICES):
+                self.add_error('type', ObjectDoesNotExist(f'Line type {self.cleaned_data["line_type"]} not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND

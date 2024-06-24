@@ -5,6 +5,7 @@ from functools import lru_cache
 from rest_framework import status
 
 from utils.services import ServiceWithResult
+from utils.fields import JsonIpField
 from models_app.models.equipment import Equipment
 from models_app.models.equipment_template import EquipmentTemplate
 from models_app.models.port import Port
@@ -13,6 +14,7 @@ from models_app.models.port_template import PortTemplate
 
 class CreateEquipmentService(ServiceWithResult):
     equipment_template_id = forms.IntegerField(required=True)
+    vlan_ip = JsonIpField(required=False)
 
     custom_validations = ['equipment_template_presence', 'port_template_presence']
 
@@ -25,11 +27,12 @@ class CreateEquipmentService(ServiceWithResult):
 
     @property
     def create_equipment(self):
-        equipment = Equipment.objects.create(template=self.equipment_template)
-
+        equipment = Equipment.objects.create(template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'])
+        number = 1
         for port_template in self.port_template_list:
             for port in range(port_template.count):
-                Port.objects.create(uid=port, equipment=equipment, port_template=port_template)
+                Port.objects.create(uid=number, equipment=equipment, port_template=port_template)
+                number += 1
 
         equipment.set_free_ports()
         return equipment

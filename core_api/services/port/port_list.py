@@ -11,7 +11,7 @@ from models_app.models.equipment import Equipment
 class PortListService(ServiceWithResult):
     filter_equipment = forms.IntegerField(required=True)
     filter_vlan = forms.IntegerField(required=False)
-    order_by = forms.CharField(required=True)
+    order_by = forms.CharField(required=False)
 
     custom_validations = ['order_presence', 'equipment_presence']
 
@@ -35,7 +35,7 @@ class PortListService(ServiceWithResult):
     def port_list(self):
         try:
             return Port.objects.filter(equipment=self.equipment)
-        except Port.DoesNotExist():
+        except Port.DoesNotExist:
             return Port.objects.none()
 
     @property
@@ -43,7 +43,7 @@ class PortListService(ServiceWithResult):
     def equipment(self):
         try:
             return Equipment.objects.get(id=self.cleaned_data['filter_equipment'])
-        except Equipment.DoesNotExist():
+        except Equipment.DoesNotExist:
             return None
 
     def order_presence(self):
