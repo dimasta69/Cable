@@ -32,9 +32,11 @@ class Port(models.Model):
         verbose_name_plural = 'Порты'
 
     def set_connection(self, port):
+        if self.connection and not self.connection == self:
+            self.connection.connection(None)
         self.connection = port
         if port or (self.connection and not port):
-            self.conenction_port.set_pre_connection(self)
+            self.connection.set_pre_connection(self)
 
     def set_pre_connection(self, parent_port):
         self.connection = parent_port

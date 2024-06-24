@@ -43,7 +43,7 @@ class UpdatePortService(ServiceWithResult):
         if self.cleaned_data['vlan_type']:
             port.vlan_type = self.cleaned_data['vlan_type']
         if self.cleaned_data['vlan']:
-            port.vlan = self.vlan
+            port.vlan = self.cleaned_data['vlan']
         if self.cleaned_data['ip']:
             port.ip = self.cleaned_data['ip']
         if self.cleaned_data['mac']:
@@ -81,12 +81,12 @@ class UpdatePortService(ServiceWithResult):
                                                         " not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-            if not ((self.port_connection.connection == self.port) or None):
+            if (not self.port_connection.connection == self.port) and not (self.port_connection.connection is None):
                 self.add_error('id', SuspiciousOperation(f"Port connection = {self.cleaned_data['connection_id']} "
                                                          "connected to another port"))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-            if not set(self.port_connection.speed).intersection(self.port.speed):
+            if not set(self.port_connection.port_template.speed).intersection(self.port.port_template.speed):
                 self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"
                                                                     f"{self.port.speed} connection:"
                                                                     f"{self.port_connection.speed}"))
