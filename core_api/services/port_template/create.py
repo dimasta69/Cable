@@ -29,7 +29,7 @@ class CreatePortTemplateService(ServiceWithResult):
         return PortTemplate.objects.create(name=self.cleaned_data['name'],
                                            count=self.cleaned_data['count'],
                                            equipment_tmp=self.equipment_tmp,
-                                           speed=self.cleaned_data['speed'])
+                                           speed=self.cleaned_data['speed'],)
 
     @property
     def port_template(self):

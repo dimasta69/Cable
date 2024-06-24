@@ -10,4 +10,3 @@ from .building import Building
 from .access import Access
 from .port_template import PortTemplate
 from .manufacturer import Manufacturer
-from .sfp_template import SfpTemplate

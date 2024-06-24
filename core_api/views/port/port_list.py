@@ -7,13 +7,14 @@ from utils.services import ServiceOutcome
 from models_app.models.port import Port
 from core_api.services.port.port_list import PortListService
 from core_api.serializers.port.port_list import PortListSerializer
+from core_api.swagger_scheme.port import port_list
 
 
 class PortListView(APIView):
     permission_classes = [IsAuthenticated]
     queryset = Port.objects.all()
 
-    @swagger_auto_schema()
+    @swagger_auto_schema(**port_list)
     def get(self, request, **kwargs):
         outcome = ServiceOutcome(PortListService, dict(request.GET.items()))
         if bool(outcome.errors):

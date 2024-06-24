@@ -64,7 +64,6 @@ class EquipmentListTest(TestCase):
         resp = self.client.post('/core_api/equipment/', {'equipment_template_id': self.equipment_template_1.
                                 id, 'vlan_ip': '{"2": "10.16.7.110"}'})
         resp_json = json.loads(resp.content)
-        print(resp_json)
         self.assertEqual(resp.status_code, 201)
         self.assertTrue(resp_json['free_ports'] == 24)
 
