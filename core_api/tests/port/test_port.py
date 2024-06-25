@@ -19,10 +19,13 @@ class EquipmentListTest(TestCase):
 
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
+        cls.equipment_template_2 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
 
         cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20)
+        cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=7, speed=[10000])
 
         cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
+        cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_2)
 
         cls.port_1 = PortFactory.create(equipment=cls.equipment_1, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
@@ -31,6 +34,10 @@ class EquipmentListTest(TestCase):
         cls.port_2 = PortFactory.create(equipment=cls.equipment_1, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_1)
+
+        cls.port_3 = PortFactory.create(equipment=cls.equipment_2, connection=None, vlan_type=None,
+                                        line_type=None, ip=None, mac=None,
+                                        port_template=cls.port_template_2)
 
     def test_return_200_update_max_params(self):
         self.client.login(username=self.user_1.username, password='Dima2012')
@@ -41,3 +48,33 @@ class EquipmentListTest(TestCase):
         resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
                                content, content_type=content_type)
         self.assertEqual(resp.status_code, 200)
+
+    def test_return_404_not_found_port(self):
+        self.client.login(username=self.user_1.username, password='Dima2012')
+        content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
+                                                      'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
+                                                      'connection_id': self.port_2.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put('/core_api/port/99/',
+                               content, content_type=content_type)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_404_not_found_connection(self):
+        self.client.login(username=self.user_1.username, password='Dima2012')
+        content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
+                                                      'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
+                                                      'connection_id': 99})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
+                               content, content_type=content_type)
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_422_speed_error(self):
+        self.client.login(username=self.user_1.username, password='Dima2012')
+        content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
+                                                      'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
+                                                      'connection_id': self.port_3.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
+                               content, content_type=content_type)
+        self.assertEqual(resp.status_code, 422)

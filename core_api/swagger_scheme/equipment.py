@@ -33,6 +33,7 @@ equipment_list = {
                                     'power': 0,
                                 },
                             'free_ports': 0,
+                            'room': 0,
                         },
                     ]
                 }
@@ -81,6 +82,7 @@ create_equipment = {
         properties=dict(
             equipment_template_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
+            room_id=openapi.Schema(type=openapi.TYPE_STRING),
         ),
         required=['equipment_template_id',]
     ),
@@ -107,6 +109,7 @@ update_equipment = {
         type=openapi.TYPE_OBJECT,
         properties=dict(
             vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
+            room_id=openapi.Schema(type=openapi.TYPE_STRING),
         ),
     ),
     'responses': {200: openapi.Response('Success', EquipmentSerializer)}

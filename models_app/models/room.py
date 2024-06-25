@@ -11,7 +11,12 @@ class Room(models.Model):
         ('Regular', 'Обычная'),
     }
     type = models.CharField(choices=TYPE_ROOM_CHOICES, verbose_name='Тип комнаты', max_length=100)
+    count_free_socket = models.IntegerField(verbose_name='Количетсво свободных разеток', default=0)
 
     class Meta:
         verbose_name = 'Комната'
         verbose_name_plural = 'Комнаты'
+
+    def set_count_free_socket(self):
+        if self.type == 'Regular':
+            self.count_free_socket = self.equipment.free_ports

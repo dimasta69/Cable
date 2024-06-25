@@ -11,6 +11,7 @@ class EquipmentSerializer(serializers.Serializer):
     count_port = serializers.SerializerMethodField()
     free_ports = serializers.IntegerField()
     number_of_free_ports = serializers.SerializerMethodField()
+    room_id = serializers.IntegerField(required=False)
 
     @classmethod
     def get_template(cls, obj):

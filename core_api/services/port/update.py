@@ -75,22 +75,28 @@ class UpdatePortService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def port_connection_presence(self):
-        if self.cleaned_data['connection_id']:
-            if not self.port_connection:
-                self.add_error('id', ObjectDoesNotExist(f"Port connection id ={self.cleaned_data['connection_id']}"
-                                                        " not found"))
-                self.response_status = status.HTTP_404_NOT_FOUND
+        if self.port:
+            if self.cleaned_data['connection_id']:
+                if not self.port_connection:
+                    self.add_error('id', ObjectDoesNotExist(f"Port connection id ={self.cleaned_data['connection_id']}"
+                                                            " not found"))
+                    self.response_status = status.HTTP_404_NOT_FOUND
+                else:
+                    if (not self.port_connection.connection == self.port) and not (self.port_connection.connection is
+                                                                                   None):
+                        self.add_error('id', SuspiciousOperation("Port connection = "
+                                                                 f"{self.cleaned_data['connection_id']} "
+                                                                 "connected to another port"))
+                        self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-            if (not self.port_connection.connection == self.port) and not (self.port_connection.connection is None):
-                self.add_error('id', SuspiciousOperation(f"Port connection = {self.cleaned_data['connection_id']} "
-                                                         "connected to another port"))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-            if not set(self.port_connection.port_template.speed).intersection(self.port.port_template.speed):
-                self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"
-                                                                    f"{self.port.speed} connection:"
-                                                                    f"{self.port_connection.speed}"))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+                    if not set(self.port_connection.port_template.speed).intersection(
+                            set(self.port.port_template.speed)):
+                        self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed "
+                                                                            "mismatch"
+                                                                            f"{self.port.port_template.speed}"
+                                                                            " connection:"
+                                                                            f"{self.port_connection.port_template.speed}"))
+                        self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def vlan_presence(self):
         if self.cleaned_data['vlan_type']:
