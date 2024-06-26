@@ -12,8 +12,7 @@ from models_app.factories.port import PortFactory
 class PortListTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user_1 = UserFactory.create()
-        cls.client = Client()
+        cls.user_1 = UserFactory.create(create_token=True)
 
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
@@ -31,13 +30,13 @@ class PortListTest(TestCase):
                                               port_template=cls.port_template_2)
 
     def test_return_200(self):
-        self.client.login(username=self.user_1.username, password='Dima2012')
         resp = self.client.get(f'/core_api/port/', {'filter_equipment': self.equipment_1.id,
-                                                    'order_by': '-uid'})
+                                                    'order_by': '-uid'},
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_equipment_not_found(self):
-        self.client.login(username=self.user_1.username, password='Dima2012')
-        resp = self.client.get(f'/core_api/port/', {'filter_equipment':99,
-                                                    'order_by': '-uid'})
+        resp = self.client.get(f'/core_api/port/', {'filter_equipment': 99,
+                                                    'order_by': '-uid'},
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)

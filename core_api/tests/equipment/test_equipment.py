@@ -11,8 +11,7 @@ from models_app.factories.equipment import EquipmentFactory
 class EquipmentListTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user_1 = UserFactory.create()
-        cls.client = Client()
+        cls.user_1 = UserFactory.create(create_token=True)
 
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.manufacturer_2 = ManufacturerFactory.create()
@@ -35,34 +34,31 @@ class EquipmentListTest(TestCase):
         cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_4)
 
     def test_return_200_get_equipment(self):
-        self.client.login(username=self.user_1.username, password="Dima2012")
-        resp = self.client.get(f'/core_api/equipment/{self.equipment_3.id}/')
+        resp = self.client.get(f'/core_api/equipment/{self.equipment_3.id}/',
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_not_found(self):
-        self.client.login(username=self.user_1.username, password="Dima2012")
-        resp = self.client.get('/core_api/equipment/99/')
+        resp = self.client.get('/core_api/equipment/99/', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_204_delete(self):
-        self.client.login(username=self.user_1.username, password="Dima2012")
-        resp = self.client.delete(f'/core_api/equipment/{self.equipment_3.id}/')
+        resp = self.client.delete(f'/core_api/equipment/{self.equipment_3.id}/',
+                                  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 204)
 
     def test_return_404_delete(self):
-        self.client.login(username=self.user_1.username, password="Dima2012")
-        resp = self.client.delete('/core_api/equipment/99/')
+        resp = self.client.delete('/core_api/equipment/99/', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_200_update_change(self):
-        self.client.login(username=self.user_1.username, password="Dima2012")
         content = encode_multipart('BoUnDaRyStRiNg', {
             'vlan_ip': '{"2": "10.16.7.150"}',
         })
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         resp = self.client.put(f'/core_api/equipment/{self.equipment_3.id}/',
                                content,
-                               content_type=content_type)
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_update_not_found(self):
@@ -71,5 +67,6 @@ class EquipmentListTest(TestCase):
         })
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         self.client.login(username=self.user_1.username, password="Dima2012")
-        resp = self.client.put('/core_api/equipment/99/', content, content_type=content_type)
+        resp = self.client.put('/core_api/equipment/99/', content, content_type=content_type,
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)

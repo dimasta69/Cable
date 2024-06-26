@@ -14,8 +14,7 @@ from models_app.factories.port import PortFactory
 class EquipmentListTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.user_1 = UserFactory.create()
-        cls.client = Client()
+        cls.user_1 = UserFactory.create(create_token=True)
 
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
@@ -40,41 +39,37 @@ class EquipmentListTest(TestCase):
                                         port_template=cls.port_template_2)
 
     def test_return_200_update_max_params(self):
-        self.client.login(username=self.user_1.username, password='Dima2012')
         content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
                                                       'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
                                                       'connection_id': self.port_2.id})
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
-                               content, content_type=content_type)
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_not_found_port(self):
-        self.client.login(username=self.user_1.username, password='Dima2012')
         content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
                                                       'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
                                                       'connection_id': self.port_2.id})
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         resp = self.client.put('/core_api/port/99/',
-                               content, content_type=content_type)
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_404_not_found_connection(self):
-        self.client.login(username=self.user_1.username, password='Dima2012')
         content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
                                                       'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
                                                       'connection_id': 99})
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
-                               content, content_type=content_type)
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_422_speed_error(self):
-        self.client.login(username=self.user_1.username, password='Dima2012')
         content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
                                                       'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
                                                       'connection_id': self.port_3.id})
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
         resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
-                               content, content_type=content_type)
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
