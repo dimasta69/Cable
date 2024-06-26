@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
@@ -27,6 +27,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('auth/', include('rest_framework.urls')),
     path('scheme/', SchemeListView.as_view()),
     path('scheme/<int:id>/', SchemeView.as_view()),
     path('port_template/', PortTemplateListView.as_view()),

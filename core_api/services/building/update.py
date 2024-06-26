@@ -58,8 +58,9 @@ class UpdateBuildingService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def number_presence(self):
-        for building in self.building_list:
-            if building.number.lower() == self.cleaned_data['number'].lower():
-                self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["number"]}'
-                                                         ' already exists'))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+        if self.building:
+            for building in self.building_list:
+                if building.number.lower() == self.cleaned_data['number'].lower():
+                    self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["number"]}'
+                                                             ' already exists'))
+                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
