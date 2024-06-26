@@ -2,8 +2,8 @@ from drf_yasg import openapi
 from core_api.serializers.port.port_list import PortListSerializer
 
 port_list = {
-    'operation_description': 'Get port template list',
-    'tags': ['core_api/port_template'],
+    'operation_description': 'Get port list',
+    'tags': ['core_api/port'],
     'responses': {
         '200': openapi.Response(
             description='Success',
