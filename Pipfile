@@ -25,6 +25,8 @@ django-service-objects = "*"
 python-dotenv = "*"
 factory-boy = "*"
 psycopg = "*"
+django-cors-headers = "*"
+djoser = "*"
 
 [requires]
 python_version = "3.11"

@@ -1,8 +1,10 @@
-from django.urls import path, include
+from django.urls import path
 
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
+from core_api.views.auth.login import TokenCreateView
+from core_api.views.auth.logout import TokenDestroyView
 from core_api.views.scheme.scheme_list import SchemeListView
 from core_api.views.scheme.scheme import SchemeView
 from core_api.views.port_template.port_template_list import PortTemplateListView
@@ -27,7 +29,8 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('auth/', include('rest_framework.urls')),
+    path('auth/token/login/', TokenCreateView.as_view()),
+    path('auth/token/logout/', TokenDestroyView.as_view()),
     path('scheme/', SchemeListView.as_view()),
     path('scheme/<int:id>/', SchemeView.as_view()),
     path('port_template/', PortTemplateListView.as_view()),

@@ -16,7 +16,7 @@ from utils.pagination import CustomPagination
 class ManufacturerListView(APIView):
     serializer_class = ManufacturerListSerializer
     queryset = Manufacturer.objects.all()
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(**manufacturer_list)
     def get(self, request):
@@ -31,7 +31,7 @@ class ManufacturerListView(APIView):
 
     @swagger_auto_schema(**create_manufacturer)
     def post(self, request):
-        outcome = ServiceOutcome(CreateManufactureService, request.data.dict())
+        outcome = ServiceOutcome(CreateManufactureService, {'user': 1} | request.data.dict())
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ManufacturerListSerializer(outcome.result).data, status=outcome.response_status)
