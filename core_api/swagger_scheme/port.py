@@ -22,14 +22,6 @@ port_list = {
         )
     },
     'manual_parameters': [
-        openapi.Parameter(name="page",
-                          in_=openapi.IN_QUERY,
-                          description='Page number',
-                          type=openapi.TYPE_INTEGER),
-        openapi.Parameter(name='per_page',
-                          in_=openapi.IN_QUERY,
-                          description='Page size',
-                          type=openapi.TYPE_INTEGER),
         openapi.Parameter(name='order_by',
                           in_=openapi.IN_QUERY,
                           description='Order photo by columns',

@@ -19,7 +19,7 @@ class RoomListService(ServiceWithResult):
     filter_type = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
 
-    custom_validations = ['building_presence', 'filter_type', 'order_presence']
+    custom_validations = ['building_presence', 'type_presence', 'order_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -61,7 +61,7 @@ class RoomListService(ServiceWithResult):
     @lru_cache()
     def building(self):
         try:
-            return Building.objects.get(id=self.cleaned_data['filter_manufacturer'])
+            return Building.objects.get(id=self.cleaned_data['filter_building_id'])
         except Building.DoesNotExist:
             return None
 

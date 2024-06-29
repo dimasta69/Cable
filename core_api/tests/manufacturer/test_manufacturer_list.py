@@ -47,8 +47,8 @@ class ManufacturerListTest(TestCase):
 
     def test_create_return_200(self):
         data = {'name': 'test'}
-        resp = self.client.post('/core_api/manufacturer/', data,
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/manufacturer/', data, HTTP_AUTHORIZATION='Token '
+                                                                                    f'{self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 201)
 
     def test_create_return_422_warning_title(self):
@@ -57,6 +57,6 @@ class ManufacturerListTest(TestCase):
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 201)
         data = {'name': 'test'}
-        resp = self.client.post('/core_api/manufacturer/', data,
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/manufacturer/', data, HTTP_AUTHORIZATION='Token '
+                                                                                    f'{self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
