@@ -19,6 +19,7 @@ from core_api.views.port.port_list import PortListView
 from core_api.views.port.port import PortView
 from core_api.views.building.building_list import BuildingListView
 from core_api.views.building.building import BuildingView
+from core_api.views.room.room_list import RoomListView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -45,5 +46,6 @@ urlpatterns = [
     path('port/<int:id>/', PortView.as_view()),
     path('building/', BuildingListView.as_view()),
     path('building/<int:id>/', BuildingView.as_view()),
+    path('room/', RoomListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

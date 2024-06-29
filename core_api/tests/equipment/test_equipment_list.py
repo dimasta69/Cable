@@ -1,6 +1,5 @@
 import json
 from django.test import TestCase
-from django.test.client import Client
 
 from models_app.factories.port_template import PortTemplateFactory
 from models_app.factories.user import UserFactory
