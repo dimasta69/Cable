@@ -8,7 +8,7 @@ class Unit(models.Model):
     server_rack = models.ForeignKey(ServerRack, related_name='unit', on_delete=models.CASCADE, verbose_name='Стойка',
                                     null=False)
     equipment = models.ForeignKey(Equipment, related_name='unit', on_delete=models.CASCADE, verbose_name='Оборудование',
-                                  null=False)
+                                  null=True, blank=True)
     SIDE_CHOICES = {
         ("Front", "Лицевая"),
         ("Back", "Тыльная"),

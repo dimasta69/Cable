@@ -21,6 +21,8 @@ from core_api.views.building.building_list import BuildingListView
 from core_api.views.building.building import BuildingView
 from core_api.views.room.room_list import RoomListView
 from core_api.views.room.room import RoomView
+from core_api.views.server_rack.server_rack_list import ServerRackListView
+from core_api.views.server_rack.server_rack import ServerRackView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -49,5 +51,7 @@ urlpatterns = [
     path('building/<int:id>/', BuildingView.as_view()),
     path('room/', RoomListView.as_view()),
     path('room/<int:id>/', RoomView.as_view()),
+    path('server_rack/', ServerRackListView.as_view()),
+    path('server_rack/<int:id>/', ServerRackView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]

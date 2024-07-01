@@ -32,7 +32,7 @@ class CreateRoomService(ServiceWithResult):
         try:
             return Room.objects.all()
         except Room.DoesNotExist:
-            return None
+            return Room.objects.none()
 
     @property
     @lru_cache()
