@@ -15,6 +15,7 @@ from core_api.views.equipment_template.equipment_tamplate_list import EquipmentT
 from core_api.views.equipment_template.equipment_template import EquipmentTemplateView
 from core_api.views.equipment.equipment import EquipmentView
 from core_api.views.equipment.equipment_list import EquipmentListView
+from core_api.views.equipment.add_equipment_for_unit import AddEquipmentForUnitView
 from core_api.views.port.port_list import PortListView
 from core_api.views.port.port import PortView
 from core_api.views.building.building_list import BuildingListView
@@ -45,6 +46,7 @@ urlpatterns = [
     path('equipment_template/<int:id>/', EquipmentTemplateView.as_view()),
     path('equipment/', EquipmentListView.as_view()),
     path('equipment/<int:id>/', EquipmentView.as_view()),
+    path('equipment/<int:id>/add_equipment_for_unit/', AddEquipmentForUnitView.as_view()),
     path('port/', PortListView.as_view()),
     path('port/<int:id>/', PortView.as_view()),
     path('building/', BuildingListView.as_view()),

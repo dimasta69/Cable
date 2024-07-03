@@ -12,5 +12,5 @@ class UnitFactory(DjangoModelFactory):
 
     uid = factory.Faker('random_int')
     server_rack = factory.Iterator(Equipment.objects.all().values_list('id', flat=True))
-    equipment = factory.Iterator(ServerRack.objects.all().values_list('id', flat=True))
+    equipment = factory.Iterator(ServerRack.objects.all().values_list('id', flat=True) or None)
     side = factory.Iterator(['Лицевая', 'Тыльная'])

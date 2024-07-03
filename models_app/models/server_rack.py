@@ -16,9 +16,16 @@ class ServerRack(models.Model):
         verbose_name_plural = 'Стойки'
 
     def check_free_power(self):
-        if not self.max_power:
-            self.free_power = self.max_power - sum(self.unit.equipment.template.values_list('power', flat=True))
+        if self.max_power:
+            power_list = []
+            for unit in self.unit.all():
+                if unit.equipment and unit.equipment.template.power is not None:
+                    power_list.append(unit.equipment.template.power)
+            self.free_power = self.max_power - sum(power_list)
 
     def check_free_units(self):
-        self.free_units = self.number_of_units - sum(self.unit.equipment.template.values_list('number_of_units',
-                                                                                              flat=True))
+        unit_list = []
+        for unit in self.unit.all():
+            if unit.equipment:
+                unit_list.append(unit.equipment.template.number_of_units)
+        self.free_units = self.number_of_units - sum(unit_list)
