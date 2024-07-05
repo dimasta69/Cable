@@ -87,7 +87,7 @@ class AddEquipmentUnitService(ServiceWithResult):
 
     def power_presence(self):
         if self.unit_list_int and self.equipment:
-            if self.unit_list_int[0].server_rack:
+            if self.unit_list_int[0].server_rack.free_power and self.equipment.template.power:
                 if self.unit_list_int[0].server_rack.free_power < self.equipment.template.power:
                     self.add_error('unit_list_id', ValidationError('Not enough power'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

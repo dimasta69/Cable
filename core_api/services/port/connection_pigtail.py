@@ -62,8 +62,8 @@ class ConnectionPigtailService(ServiceWithResult):
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def equipment_type_presence(self):
-        if self.port and self.connection_port:
-            if (self.port.equipment.template.type != 'Пассивное оборудование' and self.connection_port.template.type !=
-                    'Пассивное оборудование'):
+        if self.port and self.port_connection_pigtail:
+            if (self.port.equipment.template.type != 'Пассивное оборудование' or
+                    self.port_connection_pigtail.equipment.template.type != 'Пассивное оборудование'):
                 self.add_error('id', SuspiciousOperation('The equipment is not a patch panel'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

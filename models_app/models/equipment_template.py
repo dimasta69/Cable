@@ -12,7 +12,7 @@ class EquipmentTemplate(models.Model):
     manufacturer = models.ForeignKey(Manufacturer, related_name='equipment_template', null=True,
                                      on_delete=models.CASCADE, verbose_name='Производитель')
     model = models.CharField(null=False, verbose_name='Модель', max_length=100)
-    power = models.IntegerField(null=True, verbose_name='Мощность', default=0)
+    power = models.IntegerField(null=True, verbose_name='Мощность')
     number_of_units = models.IntegerField(null=False, verbose_name='Количество занимаемых юнитов')
 
     class Meta:

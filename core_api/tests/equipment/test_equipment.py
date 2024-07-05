@@ -25,7 +25,8 @@ class EquipmentListTest(TestCase):
         cls.manufacturer_3 = ManufacturerFactory.create()
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
         cls.equipment_template_2 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_2, type='Сервер')
-        cls.equipment_template_3 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1, number_of_units=3)
+        cls.equipment_template_3 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1, number_of_units=3,
+                                                                   power=None)
         cls.equipment_template_4 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_3)
 
         cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20)
@@ -111,6 +112,7 @@ class EquipmentListTest(TestCase):
         resp = self.client.put(f'/core_api/equipment/{self.equipment_2.id}/add_equipment_for_unit/',
                                content,
                                content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 404)
 
     def test_return_404_add_equipment_not_found(self):
