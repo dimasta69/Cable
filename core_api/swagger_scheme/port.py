@@ -56,3 +56,17 @@ update_port = {
     ),
     'responses': {200: openapi.Response('Success', PortListSerializer)}
 }
+
+port_connection_pigtail = {
+    'operation_description': 'Port connection pigtail',
+    'tags': ['core_api/port'],
+    'request_body': openapi.Schema(
+        title='core_api_port_connection_pigtail',
+        description='Update port',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            connection_pigtail_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+        ),
+    ),
+    'responses': {200: openapi.Response('Success', PortListSerializer)}
+}

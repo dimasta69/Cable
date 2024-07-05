@@ -11,6 +11,7 @@ class PortListSerializer(serializers.Serializer):
     ip = serializers.IPAddressField()
     mac = serializers.CharField()
     connection = serializers.SerializerMethodField()
+    connection_pigtail = serializers.SerializerMethodField()
 
     @classmethod
     def get_speed(cls, obj):
@@ -26,5 +27,18 @@ class PortListSerializer(serializers.Serializer):
                 'manufacturer': obj.connection.equipment.template.manufacturer.name,
                 'type': obj.connection.equipment.template.type,
                 'model': obj.connection.equipment.template.model,
+            }
+        return None
+
+    @classmethod
+    def get_connection_pigtail(cls, obj):
+        if obj.connection_pigtail:
+            return {
+                'id': obj.connection_pigtail.id,
+                'uid': obj.connection_pigtail.uid,
+                'ip': obj.connection_pigtail.ip,
+                'manufacturer': obj.connection_pigtail.equipment.template.manufacturer.name,
+                'type': obj.connection_pigtail.equipment.template.type,
+                'model': obj.connection_pigtail.equipment.template.model,
             }
         return None

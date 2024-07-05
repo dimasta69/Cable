@@ -91,11 +91,12 @@ class UpdatePortService(ServiceWithResult):
 
                     if not set(self.port_connection.port_template.speed).intersection(
                             set(self.port.port_template.speed)):
-                        self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed "
-                                                                            "mismatch"
-                                                                            f"{self.port.port_template.speed}"
-                                                                            " connection:"
-                                                                            f"{self.port_connection.port_template.speed}"))
+                        self.add_error('connection_id',
+                                       SuspiciousOperation("Cannot be connected due to speed "
+                                                           "mismatch"
+                                                           f"{self.port.port_template.speed}"
+                                                           " connection:"
+                                                           f"{self.port_connection.port_template.speed}"))
                         self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def vlan_presence(self):

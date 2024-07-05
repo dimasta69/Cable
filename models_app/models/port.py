@@ -26,6 +26,8 @@ class Port(models.Model):
     port_template = models.ForeignKey(PortTemplate, related_name='port', verbose_name='Шаблон порта', null=False,
                                       on_delete=models.CASCADE)
     connection = models.OneToOneField('self', related_name='connection_port', on_delete=models.CASCADE, null=True)
+    connection_pigtail = models.OneToOneField('self', related_name='connection_pig', on_delete=models.CASCADE,
+                                              null=True)
 
     class Meta:
         verbose_name = 'Порт'
@@ -33,7 +35,7 @@ class Port(models.Model):
 
     def set_connection(self, port):
         if self.connection and not self.connection == self:
-            self.connection.connection(None)
+            self.connection.connection = None
         self.connection = port
         if port or (self.connection and not port):
             self.connection.set_pre_connection(self)
@@ -42,3 +44,10 @@ class Port(models.Model):
         self.connection = parent_port
         if parent_port:
             self.line_type = parent_port.line_type
+
+    def set_connection_pigtail(self, port):
+        if self.connection_pigtail and self.connection_pigtail != self:
+            self.connection_pigtail.connection_pigtail = None
+        self.connection_pigtail = port
+        if port or (self.connection_pigtail and not port):
+            self.connection_pigtail = self

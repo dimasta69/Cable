@@ -27,6 +27,7 @@ factory-boy = "*"
 psycopg = "*"
 django-cors-headers = "*"
 djoser = "*"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3.11"
