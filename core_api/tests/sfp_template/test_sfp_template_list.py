@@ -8,7 +8,7 @@ from models_app.factories.manufacturer import ManufacturerFactory
 from cabel.settings.rest_framework import REST_FRAMEWORK
 
 
-class PortTemplateListTest(TestCase):
+class SfpTemplateListTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_1 = UserFactory.create(create_token=True)
@@ -19,10 +19,13 @@ class PortTemplateListTest(TestCase):
         cls.type_port_1 = TypePortFactory.create()
         cls.type_port_2 = TypePortFactory.create()
 
-        cls.sfp_template_list_1 = SfpTemplateFactory.create_batch(15, manufacturer=cls.manufacturer_1,
+        cls.sfp_template_list_1 = SfpTemplateFactory.create_batch(14, manufacturer=cls.manufacturer_1,
                                                                   type_port=cls.type_port_1, line_type='Многомодовый')
         cls.sfp_template_list_2 = SfpTemplateFactory.create_batch(6, manufacturer=cls.manufacturer_2,
-                                                                  type_port=cls.type_port_1, line_type='Одномодовый')
+                                                                  type_port=cls.type_port_2, line_type='Одномодовый',
+                                                                  speed=[10, 100])
+        cls.sfp_template_1 = SfpTemplateFactory.create(manufacturer=cls.manufacturer_2, type_port=cls.type_port_1,
+                                                       line_type='Многомодовый', )
 
     def test_return_200_min_params(self):
         resp = self.client.get('/core_api/sfp_template/', content_type='application/json',
@@ -34,3 +37,66 @@ class PortTemplateListTest(TestCase):
         self.assertTrue(resp_json['pagination']['per_page'] == REST_FRAMEWORK['PAGE_SIZE'])
         self.assertTrue(resp_json['pagination']['total_count'] == 21)
         self.assertTrue(len(resp_json['results']) == REST_FRAMEWORK['PAGE_SIZE'])
+
+    def test_return_401_not_auth(self):
+        resp = self.client.get('/core_api/sfp_template/', content_type='application/json')
+        self.assertEqual(resp.status_code, 401)
+
+    def test_return_200_filter_manufacturer(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_manufacturer_id': self.manufacturer_1.id},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp_json['pagination']['total_count'] == 14)
+
+    def test_return_404_not_found_manufacturer(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_manufacturer_id': 99},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_200_filter_type_port(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_type_port_id': self.type_port_2.id},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp_json['pagination']['total_count'] == 6)
+
+    def test_return_404_type_port_not_found(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_type_port_id': 99},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_200_filter_speed(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_speed': 100},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp_json['pagination']['total_count'] == 6)
+
+    def test_200_search_filter(self):
+        resp = self.client.get('/core_api/sfp_template/', {'search_filter': self.sfp_template_1.name},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp_json['pagination']['total_count'] == 1)
+
+    def test_return_200_filter_line_type(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_line_type': "Одномодовый"},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp_json['pagination']['total_count'] == 6)
+
+    def test_return_404_line_type_not_found(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_line_type': "fdsf"},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_200_max_params(self):
+        resp = self.client.get('/core_api/sfp_template/', {'filter_line_type': "Многомодовый", 'filter_manufacturer_id':
+            self.manufacturer_2.id, 'filter_type_port_id': self.type_port_1.id, 'filter_speed': 1, 'search_filter':
+                                                               self.sfp_template_1.name},
+                               content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(resp_json['pagination']['total_count'] == 1)

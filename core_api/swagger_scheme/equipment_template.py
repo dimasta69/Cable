@@ -26,7 +26,10 @@ equipment_template_list = {
                                 "name": "test_1"
                             },
                             'type': 'test',
-                            'model': 'test'
+                            'model': 'test',
+                            'count_port': 0,
+                            'power': 0,
+                            'number_of_units': 0,
                         },
                     ]
                 }

@@ -1,11 +1,13 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from functools import lru_cache
 
 from rest_framework import status
 
+from models_app.models import Unit
 from utils.services import ServiceWithResult
 from utils.fields import JsonIpField
+from utils.fields import ListIntegerField
 from models_app.models.equipment import Equipment
 from models_app.models.equipment_template import EquipmentTemplate
 from models_app.models.port import Port
@@ -17,8 +19,10 @@ class CreateEquipmentService(ServiceWithResult):
     equipment_template_id = forms.IntegerField(required=True)
     vlan_ip = JsonIpField(required=False)
     room_id = forms.IntegerField(required=False)
+    unit_list_id = ListIntegerField(required=False)
 
-    custom_validations = ['equipment_template_presence', 'port_template_presence', 'room_presence']
+    custom_validations = ['equipment_template_presence', 'port_template_presence', 'room_presence',
+                          'unit_free_presence', 'count_unit_presence', 'unit_list_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -64,6 +68,24 @@ class CreateEquipmentService(ServiceWithResult):
         except Room.DoesNotExist:
             return None
 
+    @property
+    @lru_cache()
+    def unit_list_int(self):
+        unit_list = []
+        for uid in self.cleaned_data['unit_list_id']:
+            try:
+                unit_list.append(self.unit_list.get(id=uid))
+            except Unit.DoesNotExist:
+                return None
+        return unit_list
+
+    @property
+    def unit_list(self):
+        try:
+            return Unit.objects.all()
+        except Unit.DoesNotExist:
+            return Unit.objects.none()
+
     def equipment_template_presence(self):
         if not self.equipment_template:
             self.add_error('equipment_template_id', ObjectDoesNotExist('Equipment template id='
@@ -83,3 +105,25 @@ class CreateEquipmentService(ServiceWithResult):
             if not self.room:
                 self.add_error('room_id', ObjectDoesNotExist(f'Room id= {self.cleaned_data["room_id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
+
+    def unit_list_presence(self):
+        if self.cleaned_data['unit_list_id']:
+            if not self.unit_list_int:
+                self.add_error('unit_list_id', ObjectDoesNotExist('Unit list id='
+                                                                  f'{self.cleaned_data["unit_list_id"]} not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def count_unit_presence(self):
+        if self.cleaned_data['unit_list_id']:
+            if self.unit_list_int and self.equipment_template:
+                if not len(self.unit_list_int) == self.equipment_template.number_of_units:
+                    self.add_error('unit_list_id', ValidationError('Quantities units do not match'))
+                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def unit_free_presence(self):
+        if self.cleaned_data['unit_list_id']:
+            if self.unit_list_int and self.equipment_template:
+                for unit in self.unit_list_int:
+                    if unit.equipment:
+                        self.add_error('unit_list_id', ValidationError('Not all units are free'))
+                        self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

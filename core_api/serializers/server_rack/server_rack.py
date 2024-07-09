@@ -26,6 +26,7 @@ class ServerRackSerializer(serializers.Serializer):
                 equipment_data = None
 
             unit_data = {
+                'id': unit.id,
                 'uid': unit.uid,
                 'side': unit.side,
                 'equipment': equipment_data

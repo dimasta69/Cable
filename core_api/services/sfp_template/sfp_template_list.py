@@ -34,12 +34,12 @@ class SfpTemplateListService(ServiceWithResult):
     @property
     def sfp_template_pagination(self):
         try:
-            return (Paginator(self.equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                    REST_FRAMEWORK['PAGE_SIZE'])).
+            return (Paginator(self.sfp_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                              REST_FRAMEWORK['PAGE_SIZE'])).
                     page(self.cleaned_data['page'] or 1))
         except EmptyPage:
-            return (Paginator(self.equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                    REST_FRAMEWORK['PAGE_SIZE'])).page(1))
+            return (Paginator(self.sfp_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                              REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def sfp_filter_list(self):
@@ -47,9 +47,9 @@ class SfpTemplateListService(ServiceWithResult):
         if self.cleaned_data['filter_manufacturer_id']:
             sfp_template_list = sfp_template_list.filter(manufacturer=self.manufacturer)
         if self.cleaned_data['filter_type_port_id']:
-            sfp_template_list = sfp_template_list.filter(type=self.type_port)
+            sfp_template_list = sfp_template_list.filter(type_port=self.type_port)
         if self.cleaned_data['filter_line_type']:
-            sfp_template_list = sfp_template_list.filter(type=self.cleaned_data['filter_line_type'])
+            sfp_template_list = sfp_template_list.filter(line_type=self.cleaned_data['filter_line_type'])
         if self.cleaned_data['filter_speed']:
             sfp_template_list = sfp_template_list.filter(
                 speed__contains=[self.cleaned_data['filter_speed']]
@@ -57,8 +57,7 @@ class SfpTemplateListService(ServiceWithResult):
         if self.cleaned_data['search_filter']:
             sfp_template_list = sfp_template_list.filter(
                 Q(name__icontains=self.cleaned_data['search_filter']) |
-                Q(manufacturer__name__icontains=self.cleaned_data['search_filter']) |
-                Q(type__icontains=self.cleaned_data['search_filter']))
+                Q(manufacturer__name__icontains=self.cleaned_data['search_filter']))
         if self.cleaned_data['order_by']:
             sfp_template_list = sfp_template_list.order_by(self.cleaned_data['order_by'])
         return sfp_template_list
@@ -88,10 +87,10 @@ class SfpTemplateListService(ServiceWithResult):
 
     def line_type_presence(self):
         if self.cleaned_data['filter_line_type']:
-            if not any(type_tuple[1] == self.cleaned_data['type'] for type_tuple in SfpTemplate.LINE_CHOICES):
+            if not any(type_tuple[1] == self.cleaned_data['filter_line_type'] for type_tuple in SfpTemplate.LINE_CHOICES):
                 self.add_error('filter_line_type', ObjectDoesNotExist('Line type id='
-                                                                 f'{self.cleaned_data["filter_line_type"]} '
-                                                                 f'not found'))
+                                                                      f'{self.cleaned_data["filter_line_type"]} '
+                                                                      f'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def order_presence(self):
@@ -101,10 +100,10 @@ class SfpTemplateListService(ServiceWithResult):
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def manufacturer_presence(self):
-        if self.cleaned_data['filter_manufacturer']:
+        if self.cleaned_data['filter_manufacturer_id']:
             if not self.manufacturer:
-                self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
-                                                                         f'{self.cleaned_data["filter_manufacturer"]} '
+                self.add_error('filter_manufacturer_id', ObjectDoesNotExist('Manufacturer id='
+                                                                         f'{self.cleaned_data["filter_manufacturer_id"]} '
                                                                          f'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 

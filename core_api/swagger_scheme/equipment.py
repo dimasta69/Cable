@@ -83,6 +83,8 @@ create_equipment = {
             equipment_template_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
             room_id=openapi.Schema(type=openapi.TYPE_STRING),
+            unit_list_id=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                        items=openapi.Schema(type=openapi.TYPE_INTEGER))
         ),
         required=['equipment_template_id', ]
     ),
