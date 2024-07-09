@@ -4,6 +4,7 @@ from rest_framework import serializers
 class PortListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     uid = serializers.IntegerField(required=True)
+    type = serializers.SerializerMethodField()
     speed = serializers.SerializerMethodField()
     line_type = serializers.CharField()
     vlan_type = serializers.CharField()
@@ -42,3 +43,15 @@ class PortListSerializer(serializers.Serializer):
                 'model': obj.connection_pigtail.equipment.template.model,
             }
         return None
+
+    @classmethod
+    def get_type(cls, obj):
+        if obj.port_template.type_port:
+            return {
+                'name': obj.port_template.type_port.name,
+                'modular': obj.port_template.modular,
+            }
+        return {
+                'name': None,
+                'modular': obj.port_template.modular
+            }

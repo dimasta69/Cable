@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.test.client import Client
 
 from models_app.factories.port_template import PortTemplateFactory
+from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
@@ -19,7 +20,10 @@ class EquipmentTemplateListTest(TestCase):
         cls.equipment_template = EquipmentTemplateFactory.create_batch(20, manufacturer=cls.manufacturer_1)
         cls.equipment_template_2 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_2)
 
-        cls.port_template = PortTemplateFactory.create_batch(18, equipment_tmp=cls.equipment_template_2, count=3)
+        cls.type_port_1 = TypePortFactory.create()
+
+        cls.port_template = PortTemplateFactory.create_batch(18, equipment_tmp=cls.equipment_template_2, count=3,
+                                                             modular=False, type_port=cls.type_port_1)
 
     def test_return_200_min_params(self):
         resp = self.client.get('/core_api/equipment_template/', content_type='application/json',

@@ -1,6 +1,5 @@
 from drf_yasg import openapi
 
-from core_api.serializers.server_rack.server_rack import ServerRackSerializer
 
 server_rack_list = {
     'operation_description': 'Get server rack list',

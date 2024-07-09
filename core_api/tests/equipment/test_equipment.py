@@ -13,6 +13,7 @@ from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
 from models_app.factories.equipment import EquipmentFactory
+from models_app.factories.type_port import TypePortFactory
 
 
 class EquipmentListTest(TestCase):
@@ -29,13 +30,20 @@ class EquipmentListTest(TestCase):
                                                                    power=None)
         cls.equipment_template_4 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_3)
 
-        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20)
-        cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4)
+        cls.type_port_1 = TypePortFactory.create()
 
-        cls.port_template_3 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=18)
-        cls.port_template_4 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=2)
+        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
+                                                         modular=False, type_port=cls.type_port_1)
+        cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4,
+                                                         modular=False, type_port=cls.type_port_1)
 
-        cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=14)
+        cls.port_template_3 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=18,
+                                                         modular=False, type_port=cls.type_port_1)
+        cls.port_template_4 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=2,
+                                                         modular=False, type_port=cls.type_port_1)
+
+        cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=14,
+                                                         modular=False, type_port=cls.type_port_1)
 
         cls.equipment = EquipmentFactory.create_batch(17, template=cls.equipment_template_1)
         cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_3)
@@ -101,7 +109,6 @@ class EquipmentListTest(TestCase):
         resp = self.client.put(f'/core_api/equipment/{self.equipment_2.id}/add_equipment_for_unit/',
                                content,
                                content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_add_equipment_list_id_not_found(self):
@@ -112,7 +119,6 @@ class EquipmentListTest(TestCase):
         resp = self.client.put(f'/core_api/equipment/{self.equipment_2.id}/add_equipment_for_unit/',
                                content,
                                content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 404)
 
     def test_return_404_add_equipment_not_found(self):

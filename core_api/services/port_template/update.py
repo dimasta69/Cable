@@ -10,12 +10,14 @@ from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
 from models_app.models.port_template import PortTemplate
 from models_app.models.equipment_template import EquipmentTemplate
+from models_app.models.type_port import TypePort
 
 
 class UpdatePortTemplateService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     name = forms.CharField(required=False)
     count = forms.IntegerField(required=False)
+    type_port_id = forms.IntegerField(required=False)
     equipment_tmp_id = forms.IntegerField(required=False)
     speed = ListIntegerField(required=False)
 
@@ -64,6 +66,14 @@ class UpdatePortTemplateService(ServiceWithResult):
         try:
             return EquipmentTemplate.objects.get(id=self.cleaned_data['equipment_tmp_id'])
         except EquipmentTemplate.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def type_port(self):
+        try:
+            return TypePort.objects.get(id=self.cleaned_data['type_port_id'])
+        except TypePort.DoesNotExist:
             return None
 
     def name_presence(self):

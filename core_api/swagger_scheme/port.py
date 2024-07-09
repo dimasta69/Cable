@@ -11,6 +11,8 @@ port_list = {
                 "id": 0,
                 "uid": 0,
                 "sfp": 'null',
+                "type": {'name': 'test',
+                         'modular': "bool"},
                 'speed': [0, 1],
                 'line_type': 'null',
                 'vlan_type': 'null',

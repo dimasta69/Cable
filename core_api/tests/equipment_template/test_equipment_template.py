@@ -2,6 +2,7 @@ import json
 from django.test import TestCase
 from django.test.client import Client, encode_multipart
 
+from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
@@ -18,7 +19,10 @@ class EquipmentTemplateTest(TestCase):
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
         cls.equipment_template_2 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_2)
 
-        cls.port_template = PortTemplateFactory.create_batch(3, equipment_tmp=cls.equipment_template_2, count=3)
+        cls.type_port_1 = TypePortFactory.create()
+
+        cls.port_template = PortTemplateFactory.create_batch(3, equipment_tmp=cls.equipment_template_2, count=3,
+                                                             modular=False, type_port=cls.type_port_1)
 
     def test_return_200_get(self):
         resp = self.client.get(f'/core_api/equipment_template/{self.equipment_template_1.id}/',

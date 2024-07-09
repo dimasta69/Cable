@@ -2,6 +2,7 @@ import json
 from django.test import TestCase
 
 from models_app.factories.port_template import PortTemplateFactory
+from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
@@ -22,13 +23,20 @@ class EquipmentListTest(TestCase):
         cls.equipment_template_3 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
         cls.equipment_template_4 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_3)
 
-        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20)
-        cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4)
+        cls.type_port_1 = TypePortFactory.create()
 
-        cls.port_template_3 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=18)
-        cls.port_template_4 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=2)
+        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
+                                                       type_port=cls.type_port_1)
+        cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4,
+                                                        type_port=cls.type_port_1)
 
-        cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=14)
+        cls.port_template_3 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=18,
+                                                         type_port=cls.type_port_1)
+        cls.port_template_4 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=2,
+                                                          type_port=cls.type_port_1)
+
+        cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=14,
+                                                         type_port=cls.type_port_1)
 
         cls.equipment = EquipmentFactory.create_batch(17, template=cls.equipment_template_1)
         cls.equipment_2 = EquipmentFactory.create_batch(2, template=cls.equipment_template_2)

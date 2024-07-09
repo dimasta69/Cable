@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.test.client import Client
 
 from models_app.factories.port_template import PortTemplateFactory
+from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
@@ -19,10 +20,16 @@ class PortTemplateListTest(TestCase):
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
         cls.equipment_template_2 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_2)
 
-        cls.port_template = PortTemplateFactory.create_batch(18, equipment_tmp=cls.equipment_template_1, count=3)
-        cls.port_template1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=3, name='AAA')
-        cls.port_template2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=500)
-        cls.port_template3 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=0, name='WWW')
+        cls.type_port_1 = TypePortFactory.create()
+
+        cls.port_template = PortTemplateFactory.create_batch(18, equipment_tmp=cls.equipment_template_1, count=3,
+                                                             modular=False, type_port=cls.type_port_1)
+        cls.port_template1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=3, name='AAA',
+                                                        modular=False, type_port=cls.type_port_1)
+        cls.port_template2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=500,
+                                                        modular=False, type_port=cls.type_port_1)
+        cls.port_template3 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=0, name='WWW',
+                                                        modular=False, type_port=cls.type_port_1)
 
     def test_return_200_min_params(self):
         resp = self.client.get('/core_api/port_template/', content_type='application/json',
@@ -55,20 +62,23 @@ class PortTemplateListTest(TestCase):
         self.assertTrue(len(resp_json['results']) == 1)
 
     def test_create_return_200(self):
-        data = {'name': 'test', 'count': 3, 'equipment_tmp_id': self.equipment_template_1.id, 'speed': [1, 10, 100]}
+        data = {'name': 'test', 'count': 3, 'equipment_tmp_id': self.equipment_template_1.id, 'speed': [1, 10, 100],
+                'modular': True}
         resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 201)
 
     def test_create_return_422_warning_title(self):
-        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100]}
+        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100],
+                'modular': True}
         resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 201)
-        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100]}
+        data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100],
+                'modular': True}
         resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
 
     def test_create_return_404_not_found_equipment_template(self):
-        data = {'name': 'test', 'equipment_tmp_id': 99, 'count': 3, 'speed': [10, 100]}
+        data = {'name': 'test', 'equipment_tmp_id': 99, 'count': 3, 'speed': [10, 100], 'modular': True}
         resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 

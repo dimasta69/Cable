@@ -5,8 +5,10 @@ class PortTemplateListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     name = serializers.CharField(required=True)
     equipment_tmp = serializers.SerializerMethodField(required=False)
+    type_port = serializers.SerializerMethodField()
     speed = serializers.ListField(child=serializers.IntegerField())
     count = serializers.IntegerField(required=True)
+    modular = serializers.BooleanField(required=False)
 
     class Meta:
         ref = 'core_api_port_template_list_serializer'
@@ -17,3 +19,9 @@ class PortTemplateListSerializer(serializers.Serializer):
             'manufacturer': obj.equipment_tmp.manufacturer.name,
             'model': obj.equipment_tmp.model,
         }
+
+    @classmethod
+    def get_type_port(cls, obj):
+        if obj.type_port:
+            return obj.type_port.name
+        return None

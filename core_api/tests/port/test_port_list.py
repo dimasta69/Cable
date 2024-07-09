@@ -1,7 +1,10 @@
+import json
+
 from django.test import TestCase
 from django.test.client import Client
 
 from models_app.factories.port_template import PortTemplateFactory
+from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
@@ -17,8 +20,12 @@ class PortListTest(TestCase):
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
 
-        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20)
-        cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4)
+        cls.type_port_1 = TypePortFactory.create()
+
+        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
+                                                         modular=False, type_port=cls.type_port_1)
+        cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4,
+                                                         modular=False, type_port=cls.type_port_1)
 
         cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
 

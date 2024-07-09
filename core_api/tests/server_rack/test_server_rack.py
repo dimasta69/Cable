@@ -9,6 +9,7 @@ from models_app.factories.port_template import PortTemplateFactory
 from models_app.factories.room import RoomFactory
 from models_app.factories.building import BuildingFactory
 from models_app.factories.scheme import SchemeFactory
+from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.server_rack import ServerRackFactory
 from models_app.factories.unit import UnitFactory
@@ -20,8 +21,10 @@ class RoomTest(TestCase):
         cls.user_1 = UserFactory.create(create_token=True)
 
         cls.manufacturer_1 = ManufacturerFactory.create()
+        cls.type_port_1 = TypePortFactory.create()
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
-        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20)
+        cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
+                                                         type_port=cls.type_port_1)
         cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)

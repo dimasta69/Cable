@@ -3,6 +3,7 @@ from django.test.client import Client, encode_multipart
 import json
 
 from models_app.factories.port_template import PortTemplateFactory
+from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
@@ -16,7 +17,10 @@ class PortTemplateTest(TestCase):
         cls.manufacturer = ManufacturerFactory.create()
         cls.equipment_template = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer)
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer)
-        cls.port_template1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template)
+
+        cls.type_port_1 = TypePortFactory.create()
+
+        cls.port_template1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template, type_port=cls.type_port_1)
 
     def test_return_200_valid_login(self):
         resp = self.client.get(f'/core_api/port_template/{self.port_template1.id}/',
