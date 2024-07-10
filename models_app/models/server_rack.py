@@ -11,6 +11,13 @@ class ServerRack(models.Model):
     free_power = models.IntegerField(null=True, verbose_name='Свободноя мощность')
     free_units = models.IntegerField(null=True, verbose_name='Свободные юниты')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.max_power:
+            self.free_power = self.max_power
+        if self.number_of_units:
+            self.free_units = self.number_of_units
+
     class Meta:
         verbose_name = 'Стойка'
         verbose_name_plural = 'Стойки'

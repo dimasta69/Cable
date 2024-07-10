@@ -1,6 +1,7 @@
 from drf_yasg import openapi
 
 from core_api.serializers.equipment.equipment import EquipmentSerializer
+from core_api.serializers.server_rack.server_rack import ServerRackSerializer
 
 equipment_list = {
     'operation_description': 'Get equipment template list',
@@ -82,13 +83,13 @@ create_equipment = {
         properties=dict(
             equipment_template_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
-            room_id=openapi.Schema(type=openapi.TYPE_STRING),
             unit_list_id=openapi.Schema(type=openapi.TYPE_ARRAY,
-                                        items=openapi.Schema(type=openapi.TYPE_INTEGER))
+                                        items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            server_rack_id=openapi.Schema(type=openapi.TYPE_INTEGER),
         ),
-        required=['equipment_template_id', ]
+        required=['equipment_template_id', 'unit_list_id', 'server_rack_id']
     ),
-    'responses': {201: openapi.Response('Success', EquipmentSerializer)}
+    'responses': {201: openapi.Response('Success', ServerRackSerializer)}
 }
 
 equipment = {

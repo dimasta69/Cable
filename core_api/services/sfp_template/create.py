@@ -34,7 +34,14 @@ class CreateSfpTemplateService(ServiceWithResult):
                                           type_port=self.type_port,
                                           line_type=self.cleaned_data['line_type'],
                                           speed=self.speed)
-
+    def add_equipment(self):
+        self.remove_equipment()
+        for unit in self.unit_list_int:
+            unit.equipment = self.equipment
+            unit.save()
+            unit.server_rack.check_free_power()
+            unit.server_rack.check_free_units()
+        return self.equipment
     @property
     @lru_cache()
     def manufacturer(self):

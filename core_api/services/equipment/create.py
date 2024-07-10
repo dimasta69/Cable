@@ -12,17 +12,18 @@ from models_app.models.equipment import Equipment
 from models_app.models.equipment_template import EquipmentTemplate
 from models_app.models.port import Port
 from models_app.models.port_template import PortTemplate
-from models_app.models.room import Room
+from models_app.models.server_rack import ServerRack
 
 
 class CreateEquipmentService(ServiceWithResult):
     equipment_template_id = forms.IntegerField(required=True)
     vlan_ip = JsonIpField(required=False)
-    room_id = forms.IntegerField(required=False)
-    unit_list_id = ListIntegerField(required=False)
+    unit_list_id = ListIntegerField(required=True)
+    server_rack_id = forms.IntegerField(required=True)
 
-    custom_validations = ['equipment_template_presence', 'port_template_presence', 'room_presence',
-                          'unit_free_presence', 'count_unit_presence', 'unit_list_presence']
+    custom_validations = ['equipment_template_presence', 'port_template_presence',
+                          'unit_free_presence', 'count_unit_presence', 'unit_list_presence', 'server_rack_presence',
+                          'server_rack_correspond_presence', 'power_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -33,8 +34,7 @@ class CreateEquipmentService(ServiceWithResult):
 
     @property
     def create_equipment(self):
-        equipment = Equipment.objects.create(template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'],
-                                             room=self.room)
+        equipment = Equipment.objects.create(template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'])
         number = 1
         for port_template in self.port_template_list:
             for port in range(port_template.count):
@@ -42,7 +42,15 @@ class CreateEquipmentService(ServiceWithResult):
                 number += 1
 
         equipment.set_free_ports()
-        return equipment
+        self.add_equipment(equipment)
+        return self.server_rack
+
+    def add_equipment(self, equipment):
+        for unit in self.unit_list_int:
+            unit.equipment = equipment
+            unit.save()
+        self.server_rack.check_free_power()
+        self.server_rack.check_free_units()
 
     @property
     @lru_cache()
@@ -62,10 +70,10 @@ class CreateEquipmentService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def room(self):
+    def server_rack(self):
         try:
-            return Room.objects.get(id=self.cleaned_data['room_id'])
-        except Room.DoesNotExist:
+            return ServerRack.objects.get(id=self.cleaned_data['server_rack_id'])
+        except ServerRack.DoesNotExist:
             return None
 
     @property
@@ -100,12 +108,6 @@ class CreateEquipmentService(ServiceWithResult):
                                                                     ' not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def room_presence(self):
-        if self.cleaned_data['room_id']:
-            if not self.room:
-                self.add_error('room_id', ObjectDoesNotExist(f'Room id= {self.cleaned_data["room_id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
     def unit_list_presence(self):
         if self.cleaned_data['unit_list_id']:
             if not self.unit_list_int:
@@ -127,3 +129,25 @@ class CreateEquipmentService(ServiceWithResult):
                     if unit.equipment:
                         self.add_error('unit_list_id', ValidationError('Not all units are free'))
                         self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def server_rack_presence(self):
+        if not self.server_rack:
+            self.add_error('server_rack_id', ObjectDoesNotExist('Server rack id= '
+                                                                f'{self.cleaned_data["server_rack_id"]} not found'))
+            self.response_status = status.HTTP_404_NOT_FOUND
+
+    def server_rack_correspond_presence(self):
+        if self.server_rack and self.unit_list_int:
+            for unit in self.unit_list_int:
+                if unit.server_rack.id != self.server_rack.id:
+                    self.add_error('unit_list_id', ValidationError('Server rack do not correspond unit with id='
+                                                                   f'{unit.id}'))
+                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def power_presence(self):
+        if self.server_rack and self.equipment_template:
+            if self.server_rack.free_power and self.equipment_template.power:
+                if self.server_rack.free_power < self.equipment_template.power:
+                    self.add_error('server_rack_id', ValidationError('Not enough freer power = '
+                                                                     f'{self.server_rack.free_power}'))
+                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

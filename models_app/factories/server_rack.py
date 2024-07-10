@@ -13,5 +13,3 @@ class ServerRackFactory(DjangoModelFactory):
     number_of_units = factory.Faker('random_int')
     title = factory.Faker('sentence', nb_words=1)
     max_power = factory.Faker('random_int')
-    free_power = factory.Faker('random_int')
-    free_units = factory.Faker('random_int')
