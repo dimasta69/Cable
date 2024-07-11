@@ -10,9 +10,10 @@ from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
 from models_app.factories.equipment import EquipmentFactory
 from models_app.factories.port import PortFactory
+from models_app.factories.sfp_template import SfpTemplateFactory
 
 
-class EquipmentListTest(TestCase):
+class PortTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_1 = UserFactory.create(create_token=True)
@@ -28,6 +29,11 @@ class EquipmentListTest(TestCase):
 
         cls.type_port_1 = TypePortFactory.create()
 
+        cls.sfp_template_1 = SfpTemplateFactory.create(manufacturer=cls.manufacturer_1, type_port=cls.type_port_1,
+                                                       line_type='Многомодовый', speed=[10000])
+        cls.sfp_template_2 = SfpTemplateFactory.create(manufacturer=cls.manufacturer_1, type_port=cls.type_port_1,
+                                                       line_type='Многомодовый', speed=[1000])
+
         cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
                                                          modular=False, type_port=cls.type_port_1)
         cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=7, speed=[10000],
@@ -36,6 +42,10 @@ class EquipmentListTest(TestCase):
                                                          modular=False, type_port=cls.type_port_1)
         cls.port_template_4 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=7, speed=[10000],
                                                          modular=False, type_port=cls.type_port_1)
+        cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=7, speed=[10000],
+                                                         modular=True, type_port=cls.type_port_1)
+        cls.port_template_6 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=7, speed=[1000],
+                                                         modular=True, type_port=cls.type_port_1)
 
         cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
         cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_2)
@@ -60,6 +70,18 @@ class EquipmentListTest(TestCase):
         cls.port_5 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_4)
+        cls.port_6 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
+                                        line_type=None, ip=None, mac=None,
+                                        port_template=cls.port_template_5)
+        cls.port_7 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
+                                        line_type=None, ip=None, mac=None,
+                                        port_template=cls.port_template_5, sfp=cls.sfp_template_1)
+        cls.port_8 = PortFactory.create(equipment=cls.equipment_2, connection=None, vlan_type=None,
+                                        line_type=None, ip=None, mac=None,
+                                        port_template=cls.port_template_5, sfp=cls.sfp_template_1)
+        cls.port_9 = PortFactory.create(equipment=cls.equipment_2, connection=None, vlan_type=None,
+                                        line_type=None, ip=None, mac=None,
+                                        port_template=cls.port_template_6, sfp=cls.sfp_template_2)
 
     def test_return_200_update_max_params(self):
         content = encode_multipart('BoUnDaRyStRiNg', {'line_type': 'Одномодовый', 'vlan_type': 'Access',
@@ -136,3 +158,74 @@ class EquipmentListTest(TestCase):
         resp = self.client.put(f'/core_api/port/{self.port_4.id}/connection_pigtail/',
                                content, content_type=content_type)
         self.assertEqual(resp.status_code, 401)
+
+    def test_return_200_add_sfp(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'sfp_template_id': self.sfp_template_1.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_6.id}/add_sfp/', content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_404_add_sfp_not_found_sfp(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'sfp_template_id': 99})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_6.id}/add_sfp/', content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_404_add_sfp_not_found_port(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'sfp_template_id': self.sfp_template_1.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put('/core_api/port/99/add_sfp/', content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_422_add_sfp_speed_matching(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'sfp_template_id': self.sfp_template_2.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_6.id}/add_sfp/', content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_422_add_sfp_port_modular_false(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'sfp_template_id': self.sfp_template_2.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_5.id}/add_sfp/', content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_200_add_sfp_already_available(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'sfp_template_id': self.sfp_template_1.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_7.id}/add_sfp/', content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        print(json.loads(resp.content))
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_422_SFP_module_required(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'connection_id': self.port_7.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_6.id}/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_422_SFP_module_required_connection(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'connection_id': self.port_6.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_7.id}/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_200_SFP_module(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'connection_id': self.port_8.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_7.id}/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_422_sfp_speed_error(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {'connection_id': self.port_7.id})
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/port/{self.port_9.id}/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)

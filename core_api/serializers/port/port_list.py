@@ -5,6 +5,7 @@ class PortListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     uid = serializers.IntegerField(required=True)
     type = serializers.SerializerMethodField()
+    sfp = serializers.SerializerMethodField()
     speed = serializers.SerializerMethodField()
     line_type = serializers.CharField()
     vlan_type = serializers.CharField()
@@ -54,4 +55,14 @@ class PortListSerializer(serializers.Serializer):
         return {
                 'name': None,
                 'modular': obj.port_template.modular
+            }
+
+    def get_sfp(self, obj):
+        if obj.sfp:
+            return {
+                'manufacturer': obj.sfp.manufacturer.name,
+                'name': obj.sfp.name,
+                'type_port': obj.sfp.type_port.name,
+                'speed': obj.sfp.speed,
+                'line_type': obj.sfp.line_type
             }

@@ -32,8 +32,7 @@ class EquipmentListView(APIView):
 
     @swagger_auto_schema(**create_equipment)
     def post(self, request):
-        outcome = ServiceOutcome(CreateEquipmentService, request.data.dict() |
-                                 {'unit_list_id': request.data.getlist('unit_list_id') or None})
+        outcome = ServiceOutcome(CreateEquipmentService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ServerRackSerializer(outcome.result).data, status=outcome.response_status)

@@ -19,6 +19,7 @@ from core_api.views.equipment.add_equipment_for_unit import AddEquipmentForUnitV
 from core_api.views.port.port_list import PortListView
 from core_api.views.port.port import PortView
 from core_api.views.port.connection_pigtail import ConnectionPigtailView
+from core_api.views.port.add_sfp import AddSfpView
 from core_api.views.building.building_list import BuildingListView
 from core_api.views.building.building import BuildingView
 from core_api.views.room.room_list import RoomListView
@@ -26,6 +27,7 @@ from core_api.views.room.room import RoomView
 from core_api.views.server_rack.server_rack_list import ServerRackListView
 from core_api.views.server_rack.server_rack import ServerRackView
 from core_api.views.sfp_template.sfp_template_list import SfpTemplateListView
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -52,6 +54,7 @@ urlpatterns = [
     path('port/', PortListView.as_view()),
     path('port/<int:id>/', PortView.as_view()),
     path('port/<int:id>/connection_pigtail/', ConnectionPigtailView.as_view()),
+    path('port/<int:id>/add_sfp/', AddSfpView.as_view()),
     path('building/', BuildingListView.as_view()),
     path('building/<int:id>/', BuildingView.as_view()),
     path('room/', RoomListView.as_view()),
