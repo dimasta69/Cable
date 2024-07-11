@@ -7,15 +7,23 @@ sfp_template_list = {
     'responses': {200: openapi.Response('Success', SfpTemplateListSerializer)}
 }
 
-create_scheme = {
+create_sfp_template = {
     'operation_description': 'Create scheme',
-    'tags': ['core_api/scheme'],
+    'tags': ['core_api/sfp_template'],
     'request_body': openapi.Schema(
         title='core_api_create_scheme',
         description='Create schema',
         type=openapi.TYPE_OBJECT,
         properties=dict(
-            title=openapi.Schema(type=openapi.TYPE_STRING),
+            manufacturer_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+            name=openapi.Schema(type=openapi.TYPE_STRING),
+            type_port_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+            line_type=openapi.Schema(
+                type=openapi.TYPE_STRING,
+                enum=['Одномодовый', 'Многомодовый', 'Медный провод', 'None']
+            ),
+            speed=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                 items=openapi.Schema(type=openapi.TYPE_INTEGER)),
         ),
         required=['title']
     ),

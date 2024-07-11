@@ -55,7 +55,7 @@ class EquipmentTemplateListTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(len(resp_json['results']) == 1)
 
-    def test_create_return_200(self):
+    def test_create_return_201(self):
         data = {'type': 'Сервер', 'model': 'test', 'number_of_units': 3, 'power': 250,
                 'manufacturer_id': self.manufacturer_1.id}
         resp = self.client.post('/core_api/equipment_template/', data,

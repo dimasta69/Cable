@@ -95,8 +95,45 @@ class SfpTemplateListTest(TestCase):
     def test_return_200_max_params(self):
         resp = self.client.get('/core_api/sfp_template/', {'filter_line_type': "Многомодовый", 'filter_manufacturer_id':
             self.manufacturer_2.id, 'filter_type_port_id': self.type_port_1.id, 'filter_speed': 1, 'search_filter':
-                                                               self.sfp_template_1.name},
+            self.sfp_template_1.name},
                                content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp_json['pagination']['total_count'] == 1)
+
+    def test_201_create_sfp(self):
+        resp = self.client.post('/core_api/sfp_template/', {'manufacturer_id': self.manufacturer_1.id, 'name': 'test123',
+                                                           'type_port_id': self.type_port_1.id,
+                                                           'line_type': 'Многомодовый', 'speed': [1, 10, 100]},
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 201)
+        self.assertTrue(resp_json['manufacturer'] == self.manufacturer_1.name)
+        self.assertTrue(resp_json['name'] == "test123")
+        self.assertTrue(resp_json['type_port'] == self.type_port_1.name)
+        self.assertTrue(resp_json['speed'] == [1, 10, 100])
+        self.assertTrue(resp_json['line_type'] == "Многомодовый")
+
+    def test_return_404_create_manufacturer_not_found(self):
+        resp = self.client.post('/core_api/sfp_template/',
+                                {'manufacturer_id': 99, 'name': 'test123',
+                                 'type_port_id': self.type_port_1.id,
+                                 'line_type': 'Многомодовый', 'speed': [1, 10, 100]},
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_404_create_type_port_not_found(self):
+        resp = self.client.post('/core_api/sfp_template/',
+                                {'manufacturer_id': self.manufacturer_1.id, 'name': 'test123',
+                                 'type_port_id': 99,
+                                 'line_type': 'Многомодовый', 'speed': [1, 10, 100]},
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_404_create_line_type_not_found(self):
+        resp = self.client.post('/core_api/sfp_template/',
+                                {'manufacturer_id': self.manufacturer_1.id, 'name': 'test123',
+                                 'type_port_id': 99,
+                                 'line_type': 'test', 'speed': [1, 10, 100]},
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)

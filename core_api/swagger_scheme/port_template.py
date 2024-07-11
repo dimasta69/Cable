@@ -72,7 +72,8 @@ create_port_template = {
         properties=dict(
             name=openapi.Schema(type=openapi.TYPE_STRING),
             count=openapi.Schema(type=openapi.TYPE_INTEGER),
-            speed=openapi.Schema(type=openapi.TYPE_INTEGER),
+            speed=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                 items=openapi.Schema(type=openapi.TYPE_INTEGER)),
             equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             port_type_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             modular=openapi.Schema(type=openapi.TYPE_BOOLEAN),
@@ -98,7 +99,8 @@ update_port_template = {
         properties=dict(
             name=openapi.Schema(type=openapi.TYPE_STRING),
             count=openapi.Schema(type=openapi.TYPE_INTEGER),
-            speed=openapi.Schema(type=openapi.TYPE_INTEGER),
+            speed=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                 items=openapi.Schema(type=openapi.TYPE_INTEGER)),
             equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER),
         ),
     ),
