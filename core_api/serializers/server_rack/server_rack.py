@@ -14,10 +14,10 @@ class ServerRackSerializer(serializers.Serializer):
 
     def get_units(self, obj):
         units = []
-        for unit in Unit.objects.filter(server_rack=obj):
+        for unit in Unit.objects.filter(server_rack=obj).order_by('uid'):
             if unit.equipment:
                 equipment_data = {
-                    'id': unit.equipment.template.id,
+                    'id': unit.equipment.id,
                     'manufacturer': unit.equipment.template.manufacturer.name,
                     'type': unit.equipment.template.type,
                     'model': unit.equipment.template.model

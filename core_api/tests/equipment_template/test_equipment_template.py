@@ -41,14 +41,14 @@ class EquipmentTemplateTest(TestCase):
         self.assertEqual(resp_delete.status_code, 404)
 
     def test_return_200_update_max_params(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {
+        content = {
             'manufacturer_id': self.manufacturer_2.id,
             'type': 'Коммутатор',
             'model': 'test_1',
             'number_of_units': 1,
             'power': 1,
-        })
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        }
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/equipment_template/{self.equipment_template_1.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
@@ -60,10 +60,10 @@ class EquipmentTemplateTest(TestCase):
         self.assertTrue(resp_json['power'] == 1)
 
     def test_return_404_update_manufacturer_not_found(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {
+        content = {
             'manufacturer_id': 99,
-        })
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        }
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/equipment_template/{self.equipment_template_1.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)

@@ -63,22 +63,26 @@ class PortTemplateListTest(TestCase):
     def test_create_return_200(self):
         data = {'name': 'test', 'count': 3, 'equipment_tmp_id': self.equipment_template_1.id, 'speed': [1, 10, 100],
                 'modular': True}
-        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 201)
 
     def test_create_return_422_warning_title(self):
         data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100],
                 'modular': True}
-        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 201)
         data = {'name': 'test', 'equipment_tmp_id': self.equipment_template_1.id, 'count': 3, 'speed': [1, 10, 100],
                 'modular': True}
-        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 422)
 
     def test_create_return_404_not_found_equipment_template(self):
         data = {'name': 'test', 'equipment_tmp_id': 99, 'count': 3, 'speed': [10, 100], 'modular': True}
-        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/port_template/', data, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_200_filter_manufacturer(self):

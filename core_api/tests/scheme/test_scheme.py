@@ -42,10 +42,9 @@ class SchemeViewTest(TestCase):
 
     def test_update_scheme_return_200_valid_login(self):
         data = {'title': 'title113'}
-        content = encode_multipart('BoUnDaRyStRiNg', data)
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/scheme/{self.scheme_1.id}/',
-                               content,
+                               data,
                                content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
         self.assertEqual(resp.status_code, 200)
@@ -63,10 +62,9 @@ class SchemeViewTest(TestCase):
 
     def test_update_scheme_duplicate_title_return_400_valid_login(self):
         data = {'title': self.scheme_2.title}
-        content = encode_multipart('BoUnDaRyStRiNg', data)
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/scheme/{self.scheme_1.id}/',
-                               content,
+                               data,
                                content_type=content_type,
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)

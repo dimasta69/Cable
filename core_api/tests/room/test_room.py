@@ -34,8 +34,8 @@ class RoomTest(TestCase):
         self.assertEqual(resp.status_code, 401)
 
     def test_return_422_number_retry(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {'number': self.room_1.number})
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        content = {'number': self.room_1.number}
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/room/{self.room_2.id}/', content, content_type=content_type,
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)

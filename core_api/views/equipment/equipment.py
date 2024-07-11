@@ -25,7 +25,7 @@ class EquipmentView(APIView):
 
     @swagger_auto_schema(**update_equipment)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdateEquipmentService, request.data.dict() | kwargs)
+        outcome = ServiceOutcome(UpdateEquipmentService, request.data | kwargs)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)

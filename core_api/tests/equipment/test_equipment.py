@@ -82,20 +82,20 @@ class EquipmentListTest(TestCase):
         self.assertEqual(resp.status_code, 404)
 
     def test_return_200_update_change(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {
+        content = {
             'vlan_ip': '{"2": "10.16.7.150"}',
-        })
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        }
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/equipment/{self.equipment_3.id}/',
                                content,
                                content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_update_not_found(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {
+        content = {
             'vlan_ip': '{"2": "10.16.7.150"}',
-        })
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        }
+        content_type = 'application/json'
         self.client.login(username=self.user_1.username, password="Dima2012")
         resp = self.client.put('/core_api/equipment/99/', content, content_type=content_type,
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')

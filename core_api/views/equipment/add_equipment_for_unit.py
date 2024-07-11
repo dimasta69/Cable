@@ -14,7 +14,7 @@ class AddEquipmentForUnitView(APIView):
 
     @swagger_auto_schema(**add_equipment_for_unit)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(AddEquipmentUnitService, {'unit_list_id': request.data.getlist('unit_list_id')}
+        outcome = ServiceOutcome(AddEquipmentUnitService, request.data
                                  | kwargs)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)

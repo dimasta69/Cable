@@ -16,7 +16,7 @@ class ConnectionPigtailView(APIView):
 
     @swagger_auto_schema(**port_connection_pigtail)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(ConnectionPigtailService, kwargs | request.data.dict())
+        outcome = ServiceOutcome(ConnectionPigtailService, kwargs | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortListSerializer(outcome.result).data, status=outcome.response_status)

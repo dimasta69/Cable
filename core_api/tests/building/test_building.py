@@ -18,12 +18,12 @@ class BuildingListTest(TestCase):
         cls.building_2 = BuildingFactory.create(scheme=cls.scheme_1)
 
     def test_return_200_update_max_params(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {
+        content = {
             'number': 'test',
             'coord_x': 1.22,
             'coord_y': 1.23,
-        })
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        }
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/building/{self.building_1.id}/',
                                content,
                                content_type=content_type,
@@ -35,12 +35,12 @@ class BuildingListTest(TestCase):
         self.assertTrue(resp_json['coord_y'] == 1.23)
 
     def test_return_422_number_error(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {
+        content = {
             'number': self.building_2.number.upper(),
             'coord_x': 1.22,
             'coord_y': 1.23,
-        })
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        }
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/building/{self.building_1.id}/',
                                content,
                                content_type=content_type,
@@ -48,12 +48,12 @@ class BuildingListTest(TestCase):
         self.assertEqual(resp.status_code, 422)
 
     def test_return_404_not_found(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {
+        content = {
             'number': 'test',
             'coord_x': 1.22,
             'coord_y': 1.23,
-        })
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        }
+        content_type = 'application/json'
         resp = self.client.put('/core_api/building/99/',
                                content,
                                content_type=content_type,

@@ -28,7 +28,7 @@ class EquipmentTemplateView(APIView):
 
     @swagger_auto_schema(**update_equipment_template)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdateEquipmentTemplate, kwargs | request.data.dict())
+        outcome = ServiceOutcome(UpdateEquipmentTemplate, kwargs | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentTemplateSerializer(outcome.result).data, status=outcome.response_status)

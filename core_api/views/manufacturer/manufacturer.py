@@ -33,7 +33,7 @@ class ManufacturerView(APIView):
 
     @swagger_auto_schema(**update_manufacturer)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(ManufacturerUpdateService, kwargs | request.data.dict())
+        outcome = ServiceOutcome(ManufacturerUpdateService, kwargs | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ManufacturerListSerializer(outcome.result).data, status=outcome.response_status)

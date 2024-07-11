@@ -32,7 +32,7 @@ class EquipmentTemplateListView(APIView):
 
     @swagger_auto_schema(**create_equipment_template)
     def post(self, request):
-        outcome = ServiceOutcome(CreateEquipmentTemplateService, request.data.dict())
+        outcome = ServiceOutcome(CreateEquipmentTemplateService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentTemplateSerializer(outcome.result).data, status=outcome.response_status)

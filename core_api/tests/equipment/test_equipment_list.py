@@ -97,7 +97,8 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_1.id, self.unit_2.id],
             'server_rack_id': self.server_rack_1.id,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 201)
 
     def test_return_404_create_equipment_template_not_found(self):
@@ -105,14 +106,16 @@ class EquipmentListTest(TestCase):
                                                          'unit_list_id': [self.unit_1.id, self.unit_2.id],
                                                          'server_rack_id': self.server_rack_1.id,
                                                          },
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_404_create_port_template_not_found(self):
         resp = self.client.post('/core_api/equipment/', {'equipment_template_id': self.equipment_template_3.id,
                                                          'unit_list_id': [self.unit_1.id, self.unit_2.id],
                                                          'server_rack_id': self.server_rack_1.id, },
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 404)
 
@@ -153,7 +156,8 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_1.id, self.unit_2.id, self.unit_3.id],
             'server_rack_id': self.server_rack_1.id,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 422)
 
     def test_return_422_units_less_number_of_units(self):
@@ -163,7 +167,8 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_1.id],
             'server_rack_id': self.server_rack_1.id,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 422)
 
     def test_return_404_not_valid_unit(self):
@@ -173,7 +178,8 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_1.id, 99],
             'server_rack_id': self.server_rack_1.id,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_404_server_rack_not_found(self):
@@ -183,7 +189,8 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_1.id, self.unit_2.id],
             'server_rack_id': 99,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_422_unit_correspond(self):
@@ -193,7 +200,8 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_1.id, self.unit_4.id],
             'server_rack_id': self.server_rack_1.id,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 422)
 
     def test_return_422_max_power(self):
@@ -203,7 +211,8 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_5.id, self.unit_6.id],
             'server_rack_id': self.server_rack_3.id,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 422)
 
     def test_return_201_max_power(self):
@@ -213,5 +222,6 @@ class EquipmentListTest(TestCase):
             'unit_list_id': [self.unit_7.id, self.unit_8.id],
             'server_rack_id': self.server_rack_4.id,
         }
-        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/equipment/', content, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 201)

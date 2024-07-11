@@ -29,8 +29,7 @@ class SfpTemplateListView(APIView):
 
     @swagger_auto_schema(**create_sfp_template)
     def post(self, request):
-        outcome = ServiceOutcome(CreateSfpTemplateService, request.data.dict() |
-                                 {'speed': request.data.getlist('speed') or None})
+        outcome = ServiceOutcome(CreateSfpTemplateService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(SfpTemplateListSerializer(outcome.result).data, status=outcome.response_status)

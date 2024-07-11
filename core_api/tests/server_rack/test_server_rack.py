@@ -38,16 +38,16 @@ class RoomTest(TestCase):
         cls.unit_1 = UnitFactory.create(server_rack=cls.server_rack_1, side='Лицевая', equipment=cls.equipment_1)
 
     def test_return_200_update_max_params(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {'title': 'test_1', 'max_power': 100})
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        content = {'title': 'test_1', 'max_power': 100}
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/server_rack/{self.server_rack_1.id}/', content,
                                content_type=content_type,
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_update_notfound_server_rack(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {'title': 'test_1', 'max_power': 100})
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        content = {'title': 'test_1', 'max_power': 100}
+        content_type = 'application/json'
         resp = self.client.put('/core_api/server_rack/99/', content, content_type=content_type,
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)

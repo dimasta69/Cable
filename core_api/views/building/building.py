@@ -19,7 +19,7 @@ class BuildingView(APIView):
 
     @swagger_auto_schema(**update_building)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdateBuildingService, request.data.dict() | kwargs)
+        outcome = ServiceOutcome(UpdateBuildingService, request.data | kwargs)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(BuildingListSerializer(outcome.result).data, status=outcome.response_status)

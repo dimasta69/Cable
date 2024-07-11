@@ -26,7 +26,7 @@ class ServerRackView(APIView):
 
     @swagger_auto_schema(**delete_server_rack)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdateServerRackService, request.data.dict() | kwargs)
+        outcome = ServiceOutcome(UpdateServerRackService, request.data | kwargs)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ServerRackListSerializer(outcome.result).data, status=outcome.response_status)

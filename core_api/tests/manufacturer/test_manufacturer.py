@@ -26,8 +26,8 @@ class ManufacturerTest(TestCase):
         self.assertEqual(resp.status_code, 401)
 
     def test_return_200_change_name(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {'name': 'test_1'})
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        content = {'name': 'test_1'}
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/manufacturer/{self.manufacturer_1.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
@@ -35,8 +35,8 @@ class ManufacturerTest(TestCase):
         self.assertTrue(resp_json['name'] == 'test_1')
 
     def test_return_422_change_valid_name(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {'name': self.manufacturer_1.name})
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        content = {'name': self.manufacturer_1.name}
+        content_type = 'application/json'
         resp = self.client.put(f'/core_api/manufacturer/{self.manufacturer_1.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)

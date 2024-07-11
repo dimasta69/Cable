@@ -26,7 +26,7 @@ class BuildingListView(APIView):
 
     @swagger_auto_schema(**create_building)
     def post(self, request, **kwargs):
-        outcome = ServiceOutcome(CreateBuildingService, request.data.dict())
+        outcome = ServiceOutcome(CreateBuildingService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(BuildingListSerializer(outcome.result).data, status=outcome.response_status)

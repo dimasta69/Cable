@@ -16,7 +16,7 @@ class AddSfpView(APIView):
 
     @swagger_auto_schema(**add_sfp)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(AddSfpService, kwargs | request.data.dict())
+        outcome = ServiceOutcome(AddSfpService, kwargs | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortListSerializer(outcome.result, many=True).data, status=outcome.response_status)

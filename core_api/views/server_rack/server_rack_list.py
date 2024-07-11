@@ -24,7 +24,7 @@ class ServerRackListView(APIView):
 
     @swagger_auto_schema(**create_server_rack)
     def post(self, request):
-        outcome = ServiceOutcome(CreateServerRackService, request.data.dict())
+        outcome = ServiceOutcome(CreateServerRackService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ServerRackListSerializer(outcome.result).data, status=outcome.response_status)

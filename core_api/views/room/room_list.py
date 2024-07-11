@@ -31,7 +31,7 @@ class RoomListView(APIView):
 
     @swagger_auto_schema(**create_room)
     def post(self, request):
-        outcome = ServiceOutcome(CreateRoomService, request.data.dict())
+        outcome = ServiceOutcome(CreateRoomService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(CreateRoomSerializer(outcome.result).data, status=outcome.response_status)

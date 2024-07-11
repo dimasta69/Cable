@@ -18,7 +18,7 @@ class PortView(APIView):
 
     @swagger_auto_schema(**update_port)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdatePortService, kwargs | request.data.dict())
+        outcome = ServiceOutcome(UpdatePortService, kwargs | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortListSerializer(outcome.result).data, status=outcome.response_status)

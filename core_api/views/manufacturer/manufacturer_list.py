@@ -31,7 +31,7 @@ class ManufacturerListView(APIView):
 
     @swagger_auto_schema(**create_manufacturer)
     def post(self, request):
-        outcome = ServiceOutcome(CreateManufactureService, {'user': 1} | request.data.dict())
+        outcome = ServiceOutcome(CreateManufactureService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ManufacturerListSerializer(outcome.result).data, status=outcome.response_status)
