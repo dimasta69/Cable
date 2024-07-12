@@ -8,6 +8,8 @@ class CreatePortTemplateSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     speed = serializers.ListField(child=serializers.IntegerField())
     count = serializers.IntegerField(required=False)
+    lines = serializers.IntegerField(required=True)
+    unit = serializers.ListField(child=serializers.IntegerField(), required=True)
 
     class Meta:
         ref = 'core_api_create_port_template'

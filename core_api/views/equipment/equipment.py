@@ -9,7 +9,6 @@ from core_api.serializers.equipment.equipment import EquipmentSerializer
 from core_api.services.equipment.delete import DeleteEquipmentService
 from core_api.services.equipment.update import UpdateEquipmentService
 from core_api.serializers.equipment.update import UpdateEquipmentSerializer
-from core_api.serializers.server_rack.server_rack import ServerRackSerializer
 from core_api.swagger_scheme.equipment import equipment, delete_equipment, update_equipment
 
 
@@ -36,4 +35,4 @@ class EquipmentView(APIView):
         outcome = ServiceOutcome(DeleteEquipmentService, kwargs)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(ServerRackSerializer(outcome.result).data, status=outcome.response_status)
+        return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)

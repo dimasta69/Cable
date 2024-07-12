@@ -11,8 +11,11 @@ class PortTemplate(models.Model):
     speed = ArrayField(models.IntegerField(), blank=True, default=list, verbose_name='Поддерживаемые скорости')
     count = models.IntegerField(null=False, verbose_name='Количество портов')
     type_port = models.ForeignKey(TypePort, related_name='port_template', verbose_name='Тип порта', null=True,
-                             on_delete=models.CASCADE)
+                                  on_delete=models.CASCADE)
     modular = models.BooleanField(null=False, default=False)
+    unit = ArrayField(models.IntegerField(), blank=True, verbose_name='В каком юните расположен', default=list,
+                      null=True)
+    lines = models.IntegerField(null=True, verbose_name='Количество занимаемых линий', default=2)
 
     class Meta:
         verbose_name = 'Шаблон порта'

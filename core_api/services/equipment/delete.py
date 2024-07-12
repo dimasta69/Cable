@@ -22,10 +22,9 @@ class DeleteEquipmentService(ServiceWithResult):
 
     @property
     def delete_equipment(self):
-        server_rack = self.equipment.unit.server_rack
         self.port_list.delete()
         self.equipment.delete()
-        return server_rack
+        return None
 
     @property
     @lru_cache()
@@ -46,10 +45,4 @@ class DeleteEquipmentService(ServiceWithResult):
     def equipment_presence(self):
         if not self.equipment:
             self.add_error('id', ObjectDoesNotExist(f'Equipment id={self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def port_list_presence(self):
-        if not self.port_list:
-            self.add_error('id', ObjectDoesNotExist(f'Port list where equipment id={self.cleaned_data["id"]} '
-                                                    'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND

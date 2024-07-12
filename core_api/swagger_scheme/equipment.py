@@ -117,7 +117,7 @@ equipment = {
 
 delete_equipment = {
     'operation_description': 'Delete equipment template',
-    'tags': ['core_api/equipment']
+    'tags': ['core_api/equipment'],
 }
 
 update_equipment = {

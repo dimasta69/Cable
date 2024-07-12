@@ -204,7 +204,6 @@ class PortTest(TestCase):
         content_type = 'application/json'
         resp = self.client.put(f'/core_api/port/{self.port_7.id}/add_sfp/', content,
                                content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 200)
 
     def test_return_422_SFP_module_required(self):

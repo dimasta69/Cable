@@ -9,6 +9,8 @@ class PortTemplateListSerializer(serializers.Serializer):
     speed = serializers.ListField(child=serializers.IntegerField())
     count = serializers.IntegerField(required=True)
     modular = serializers.BooleanField(required=False)
+    unit = serializers.ListField(child=serializers.IntegerField())
+    lines = serializers.IntegerField(required=True)
 
     class Meta:
         ref = 'core_api_port_template_list_serializer'

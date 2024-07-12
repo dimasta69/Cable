@@ -27,6 +27,8 @@ port_template_list = {
                             },
                             'speed': [0, 0],
                             'count': 0,
+                            'unit': [0],
+                            'lines': 2,
                         },
                     ]
                 }
@@ -77,8 +79,11 @@ create_port_template = {
             equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             port_type_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             modular=openapi.Schema(type=openapi.TYPE_BOOLEAN),
+            unit=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            lines=openapi.Schema(type=openapi.TYPE_INTEGER)
         ),
-        required=['name', 'equipment_tmp_id', 'count']
+        required=['name', 'equipment_tmp_id', 'count', 'unit', 'lines']
     ),
     'responses': {201: openapi.Response('Success', PortTemplateListSerializer)}
 }
@@ -102,6 +107,9 @@ update_port_template = {
             speed=openapi.Schema(type=openapi.TYPE_ARRAY,
                                  items=openapi.Schema(type=openapi.TYPE_INTEGER)),
             equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+            unit=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            lines=openapi.Schema(type=openapi.TYPE_INTEGER)
         ),
     ),
     'responses': {200: openapi.Response('Success', PortTemplateListSerializer)}

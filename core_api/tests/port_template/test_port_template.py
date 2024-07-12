@@ -15,12 +15,13 @@ class PortTemplateTest(TestCase):
         cls.user_1 = UserFactory.create(create_token=True)
 
         cls.manufacturer = ManufacturerFactory.create()
-        cls.equipment_template = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer)
+        cls.equipment_template = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer, number_of_units=1)
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer)
 
         cls.type_port_1 = TypePortFactory.create()
 
-        cls.port_template1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template, type_port=cls.type_port_1)
+        cls.port_template1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template, type_port=cls.type_port_1,
+                                                        lines=2, unit=[1])
 
     def test_return_200_valid_login(self):
         resp = self.client.get(f'/core_api/port_template/{self.port_template1.id}/',
@@ -47,50 +48,6 @@ class PortTemplateTest(TestCase):
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
 
-    def test_return_200_update_count(self):
-        content = {'count': 3}
-        content_type = 'application/json'
-        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
-                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        resp_json = json.loads(resp.content)
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue(resp_json['count'] == 3)
-
-    def test_return_200_update_equipment_template(self):
-        content = {'equipment_tmp_id': self.equipment_template_1.id}
-        content_type = 'application/json'
-        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
-                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        resp_json = json.loads(resp.content)
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue(resp_json['equipment_tmp']['model'] == self.equipment_template_1.model)
-
-    def test_return_404_not_found_equipment_template(self):
-        content = {'equipment_tmp_id': 99}
-        content_type = 'application/json'
-        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
-                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        self.assertEqual(resp.status_code, 404)
-
-    def test_return_200_change_speed(self):
-        content = encode_multipart('BoUnDaRyStRiNg', {'speed': [1, 20]})
-        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
-        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
-                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        self.assertEqual(resp.status_code, 200)
-        resp_json = json.loads(resp.content)
-        self.assertTrue(resp_json['speed'] == [1, 20])
-
-    def test_return_200_update_max_params(self):
-        content = {'equipment_tmp_id': self.equipment_template_1.id,
-                   'name': 'test_10', 'count': 10, 'speed': ['10', '100']}
-        content_type = 'application/json'
-        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
-                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        resp_json = json.loads(resp.content)
-        self.assertEqual(resp.status_code, 200)
-        self.assertTrue(resp_json['equipment_tmp']['model'] == self.equipment_template_1.model)
-
     def test_return_404_not_found(self):
         resp_get = self.client.get('/core_api/port_template/99/', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         content = encode_multipart('BoUnDaRyStRiNg', {'name': 'test_1'})
@@ -108,3 +65,31 @@ class PortTemplateTest(TestCase):
         resp = self.client.delete(f'/core_api/port_template/{self.port_template1.id}/',
                                   HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertTrue(resp.status_code, 204)
+
+    def test_return_422_line_presence(self):
+        content = {'lines': 6, 'unit': [1]}
+        content_type = 'application/json'
+        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_422_update_port_template_count_port(self):
+        data = {'unit': [1, 2, 3]}
+        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/', data,
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                               content_type='application/json')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_422_update_port_template_line_presence(self):
+        data = {'unit': [1], 'lines': 3}
+        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/', data,
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                               content_type='application/json')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_200_update_port_template_line_presence(self):
+        data = {'unit': [1], 'lines': 2}
+        resp = self.client.put(f'/core_api/port_template/{self.port_template1.id}/', data,
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                               content_type='application/json')
+        self.assertEqual(resp.status_code, 200)

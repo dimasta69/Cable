@@ -116,7 +116,6 @@ class EquipmentListTest(TestCase):
                                                          'server_rack_id': self.server_rack_1.id, },
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
                                 content_type='application/json')
-        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 404)
 
     def test_return_200_filter_manufacturer(self):

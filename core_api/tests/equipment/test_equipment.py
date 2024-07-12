@@ -14,6 +14,7 @@ from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
 from models_app.factories.equipment import EquipmentFactory
 from models_app.factories.type_port import TypePortFactory
+from models_app.factories.port import PortFactory
 
 
 class EquipmentListTest(TestCase):
@@ -33,21 +34,25 @@ class EquipmentListTest(TestCase):
         cls.type_port_1 = TypePortFactory.create()
 
         cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
-                                                         modular=False, type_port=cls.type_port_1)
+                                                         modular=False, type_port=cls.type_port_1, lines=2, unit=[1])
         cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4,
-                                                         modular=False, type_port=cls.type_port_1)
+                                                         modular=False, type_port=cls.type_port_1, lines=2, unit=[1])
 
         cls.port_template_3 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=18,
-                                                         modular=False, type_port=cls.type_port_1)
+                                                         modular=False, type_port=cls.type_port_1, lines=2, unit=[1])
         cls.port_template_4 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_2, count=2,
-                                                         modular=False, type_port=cls.type_port_1)
+                                                         modular=False, type_port=cls.type_port_1, lines=2, unit=[1])
 
         cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=14,
-                                                         modular=False, type_port=cls.type_port_1)
+                                                         modular=False, type_port=cls.type_port_1, lines=2, unit=[1])
 
         cls.equipment = EquipmentFactory.create_batch(17, template=cls.equipment_template_1)
         cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_3)
         cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_4)
+
+        cls.port_1 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
+                                        line_type=None, ip=None, mac=None,
+                                        port_template=cls.port_template_1)
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
         cls.scheme_2 = SchemeFactory.create(creator=cls.user_1)

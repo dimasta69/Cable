@@ -7,14 +7,14 @@ from utils.services import ServiceOutcome
 from models_app.models.port_template import PortTemplate
 from core_api.services.port_template.port_template import PortTemplateService
 from core_api.serializers.port_template.port_template_list import PortTemplateListSerializer
-from core_api.serializers.port_template.create_port_template import CreatePortTemplateSerializer
+from core_api.serializers.port_template.update import UpdatePortTemplateSerializer
 from core_api.services.port_template.update import UpdatePortTemplateService
 from core_api.services.port_template.delete import PortTemplateDeleteService
 from core_api.swagger_scheme.port_template import port_temple, update_port_template, delete_port_template
 
 
 class PortTemplateView(APIView):
-    serializer_class = CreatePortTemplateSerializer
+    serializer_class = UpdatePortTemplateSerializer
     permission_classes = [IsAuthenticated]
     queryset = PortTemplate.objects.all()
 

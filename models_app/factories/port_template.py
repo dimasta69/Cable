@@ -16,3 +16,5 @@ class PortTemplateFactory(DjangoModelFactory):
     type_port = factory.Iterator(TypePort.objects.all().values_list('id', flat=True))
     speed = factory.LazyAttribute(lambda _: [1, 2, 3, 4, 5])
     modular = False
+    lines = factory.Faker('random_int')
+    unit = factory.LazyAttribute(lambda _: [1, 2])

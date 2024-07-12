@@ -1,7 +1,6 @@
 from django import forms
 from rest_framework import status
 from functools import lru_cache
-from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.exceptions import NotFound
 
@@ -9,19 +8,16 @@ from utils.errors import ValidationError
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
 from models_app.models.port_template import PortTemplate
-from models_app.models.equipment_template import EquipmentTemplate
-from models_app.models.type_port import TypePort
 
 
 class UpdatePortTemplateService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     name = forms.CharField(required=False)
-    count = forms.IntegerField(required=False)
-    type_port_id = forms.IntegerField(required=False)
-    equipment_tmp_id = forms.IntegerField(required=False)
-    speed = ListIntegerField(required=False)
+    unit = ListIntegerField(required=False)
+    lines = forms.IntegerField(required=False)
 
-    custom_validations = ['name_presence', 'port_template_presence', 'equipment_template_presence']
+    custom_validations = ['name_presence', 'port_template_presence', 'count_unit',
+                          'lines_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -35,12 +31,10 @@ class UpdatePortTemplateService(ServiceWithResult):
         port_template = self.port_template
         if self.cleaned_data['name']:
             port_template.name = self.cleaned_data['name']
-        if self.cleaned_data['equipment_tmp_id']:
-            port_template.equipment_tmp = self.equipment_template
-        if self.cleaned_data['count']:
-            port_template.count = self.cleaned_data['count']
-        if self.cleaned_data['speed']:
-            port_template.speed = self.cleaned_data['speed']
+        if self.cleaned_data['unit']:
+            port_template.unit = self.cleaned_data['unit']
+        if self.cleaned_data['lines']:
+            port_template.lines = self.cleaned_data['lines']
         port_template.save()
         return port_template
 
@@ -60,22 +54,6 @@ class UpdatePortTemplateService(ServiceWithResult):
         except PortTemplate.DoesNotExist:
             return None
 
-    @property
-    @lru_cache()
-    def equipment_template(self):
-        try:
-            return EquipmentTemplate.objects.get(id=self.cleaned_data['equipment_tmp_id'])
-        except EquipmentTemplate.DoesNotExist:
-            return None
-
-    @property
-    @lru_cache()
-    def type_port(self):
-        try:
-            return TypePort.objects.get(id=self.cleaned_data['type_port_id'])
-        except TypePort.DoesNotExist:
-            return None
-
     def name_presence(self):
         if self.port_template:
             for port in self.port_template_list:
@@ -89,9 +67,15 @@ class UpdatePortTemplateService(ServiceWithResult):
             self.add_error('id', NotFound(f'Port template id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def equipment_template_presence(self):
-        if self.cleaned_data['equipment_tmp_id']:
-            if not self.equipment_template:
-                self.add_error('equipment_tmp_id', ObjectDoesNotExist('Equipment template id='
-                                                                      f'{self.cleaned_data["equipment_tmp_id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
+    def count_unit(self):
+        if self.cleaned_data['unit']:
+            if self.port_template.equipment_tmp.number_of_units < len(self.cleaned_data['unit']):
+                self.add_error('unit', ValidationError('The number of units does not match'))
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def lines_presence(self):
+        if self.cleaned_data['lines'] or self.cleaned_data['unit']:
+            if (len((self.cleaned_data['unit']) or self.port_template.unit) / (self.cleaned_data['lines'] or
+                                                                               self.port_template.lines)) < 0.5:
+                self.add_error('unit', ValidationError('Еhe number of lines per unit should not exceed 2'))
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

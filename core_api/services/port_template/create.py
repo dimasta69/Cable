@@ -17,9 +17,11 @@ class CreatePortTemplateService(ServiceWithResult):
     count = forms.IntegerField(required=True)
     modular = forms.BooleanField(required=False)
     speed = ListIntegerField()
+    unit = ListIntegerField()
+    lines = forms.IntegerField(required=True)
 
     custom_validations = ['name_presence', 'equipment_template_presence', 'type_port_presence',
-                          'type_and_modular_presence']
+                          'type_and_modular_presence', 'count_unit', 'lines_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -35,7 +37,9 @@ class CreatePortTemplateService(ServiceWithResult):
                                            equipment_tmp=self.equipment_tmp,
                                            speed=self.cleaned_data['speed'],
                                            type_port=self.type_port,
-                                           modular=self.cleaned_data['modular'])
+                                           modular=self.cleaned_data['modular'],
+                                           unit=self.cleaned_data['unit'],
+                                           lines=self.cleaned_data['lines'])
 
     @property
     def port_template(self):
@@ -84,3 +88,15 @@ class CreatePortTemplateService(ServiceWithResult):
         if not self.type_port and (not self.cleaned_data['modular'] or self.cleaned_data['modular'] is False):
             self.add_error('modular', ValidationError('A port cannot be non-modular and cannot have a type'))
             self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def count_unit(self):
+        if self.cleaned_data['unit'] and self.equipment_tmp:
+            if self.equipment_tmp.number_of_units < len(self.cleaned_data['unit']):
+                self.add_error('unit', ValidationError('The number of units does not match'))
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def lines_presence(self):
+        if self.cleaned_data['lines'] and self.equipment_tmp:
+            if (len(self.cleaned_data['unit']) / self.cleaned_data['lines']) < 0.5:
+                self.add_error('unit', ValidationError('Еhe number of lines per unit should not exceed 2'))
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
