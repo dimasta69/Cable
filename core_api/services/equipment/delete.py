@@ -22,9 +22,10 @@ class DeleteEquipmentService(ServiceWithResult):
 
     @property
     def delete_equipment(self):
+        server_rack = self.equipment.unit.server_rack
         self.port_list.delete()
         self.equipment.delete()
-        return None
+        return server_rack
 
     @property
     @lru_cache()
