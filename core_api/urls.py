@@ -16,6 +16,7 @@ from core_api.views.equipment_template.equipment_template import EquipmentTempla
 from core_api.views.equipment.equipment import EquipmentView
 from core_api.views.equipment.equipment_list import EquipmentListView
 from core_api.views.equipment.add_equipment_for_unit import AddEquipmentForUnitView
+from core_api.views.equipment.create_from_room import CreateEquipmentFromRoomView
 from core_api.views.port.port_list import PortListView
 from core_api.views.port.port import PortView
 from core_api.views.port.connection_pigtail import ConnectionPigtailView
@@ -51,6 +52,7 @@ urlpatterns = [
     path('equipment/', EquipmentListView.as_view()),
     path('equipment/<int:id>/', EquipmentView.as_view()),
     path('equipment/<int:id>/add_equipment_for_unit/', AddEquipmentForUnitView.as_view()),
+    path('equipment/create_from_room/', CreateEquipmentFromRoomView.as_view()),
     path('port/', PortListView.as_view()),
     path('port/<int:id>/', PortView.as_view()),
     path('port/<int:id>/connection_pigtail/', ConnectionPigtailView.as_view()),

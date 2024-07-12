@@ -108,6 +108,9 @@ class UpdatePortService(ServiceWithResult):
                 if not set(self.port_connection.sfp.speed) & set(port_template.speed):
                     self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+                if self.port.sfp.line_type != self.port_connection.sfp.line_type:
+                    self.add_error('connection_id', SuspiciousOperation("The line type on the SFP does not match"))
+                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def port_modular(self):
         if self.port and self.port.port_template.modular and not self.port.sfp:
@@ -147,6 +150,9 @@ class UpdatePortService(ServiceWithResult):
         if self.port.port_template.modular and self.port.sfp:
             if not set(self.port_connection.sfp.speed) & set(self.port.sfp.speed):
                 self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"))
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+            if self.port.sfp.line_type != self.port_connection.sfp.line_type:
+                self.add_error('connection_id', SuspiciousOperation("The line type on the SFP does not match"))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def vlan_presence(self):

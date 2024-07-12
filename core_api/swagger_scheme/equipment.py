@@ -92,6 +92,23 @@ create_equipment = {
     'responses': {201: openapi.Response('Success', ServerRackSerializer)}
 }
 
+create_equipment_from_room = {
+    'operation_description': 'Create equipment from room',
+    'tags': ['core_api/equipment'],
+    'request_body': openapi.Schema(
+        title='core_api_create_equipment_from_room',
+        description='Create equipment from room',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            equipment_template_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+            vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
+            room_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+        ),
+        required=['equipment_template_id', 'room_id']
+    ),
+    'responses': {201: openapi.Response('Success', EquipmentSerializer)}
+}
+
 equipment = {
     'operation_description': 'Get equipment',
     'tags': ['core_api/equipment'],
@@ -112,7 +129,6 @@ update_equipment = {
         type=openapi.TYPE_OBJECT,
         properties=dict(
             vlan_ip=openapi.Schema(type=openapi.TYPE_STRING),
-            room_id=openapi.Schema(type=openapi.TYPE_STRING),
         ),
     ),
     'responses': {200: openapi.Response('Success', EquipmentSerializer)}

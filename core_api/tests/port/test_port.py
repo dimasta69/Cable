@@ -33,6 +33,8 @@ class PortTest(TestCase):
                                                        line_type='Многомодовый', speed=[10000])
         cls.sfp_template_2 = SfpTemplateFactory.create(manufacturer=cls.manufacturer_1, type_port=cls.type_port_1,
                                                        line_type='Многомодовый', speed=[1000])
+        cls.sfp_template_3 = SfpTemplateFactory.create(manufacturer=cls.manufacturer_1, type_port=cls.type_port_1,
+                                                       line_type='Одномодовый', speed=[1000])
 
         cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
                                                          modular=False, type_port=cls.type_port_1)
@@ -82,6 +84,9 @@ class PortTest(TestCase):
         cls.port_9 = PortFactory.create(equipment=cls.equipment_2, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_6, sfp=cls.sfp_template_2)
+        cls.port_10 = PortFactory.create(equipment=cls.equipment_2, connection=None, vlan_type=None,
+                                         line_type=None, ip=None, mac=None,
+                                         port_template=cls.port_template_6, sfp=cls.sfp_template_3)
 
     def test_return_200_update_max_params(self):
         content = {'line_type': 'Одномодовый', 'vlan_type': 'Access',
@@ -227,5 +232,12 @@ class PortTest(TestCase):
         content = {'connection_id': self.port_7.id}
         content_type = 'application/json'
         resp = self.client.put(f'/core_api/port/{self.port_9.id}/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_200_SFP_module_error_type(self):
+        content = {'connection_id': self.port_7.id}
+        content_type = 'application/json'
+        resp = self.client.put(f'/core_api/port/{self.port_10.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
