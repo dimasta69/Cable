@@ -48,7 +48,7 @@ class PortListService(ServiceWithResult):
 
     def order_presence(self):
         if self.cleaned_data.get('order_by'):
-            if not self.cleaned_data.get('order_by') in ['uid', '-uid', 'connection', '-connection']:
+            if not self.cleaned_data.get('order_by') in ['uid', '-uid', 'connection', '-connection', 'unit', '-unit']:
                 self.add_error('order_by', ObjectDoesNotExist(f"Field in model with "
                                                               f"{self.cleaned_data['order_by']} not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND
