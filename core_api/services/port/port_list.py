@@ -28,7 +28,7 @@ class PortListService(ServiceWithResult):
         if self.cleaned_data['filter_vlan']:
             port_list = port_list.filter(vlan=self.cleaned_data['filter_vlan'])
         if self.cleaned_data['order_by']:
-            port_list.order_by(self.cleaned_data['order_by'])
+            port_list = port_list.order_by(self.cleaned_data['order_by'])
         return port_list
 
     @property
