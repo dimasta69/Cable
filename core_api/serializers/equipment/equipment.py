@@ -8,10 +8,18 @@ class EquipmentSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     vlan_ip = serializers.JSONField(required=False)
     template = serializers.SerializerMethodField()
+    count_port_template = serializers.SerializerMethodField()
     count_port = serializers.SerializerMethodField()
     free_ports = serializers.IntegerField()
     number_of_free_ports = serializers.SerializerMethodField()
     room_id = serializers.IntegerField(required=False)
+
+    def get_count_port_template(self, obj):
+        port_template_dict = {}
+        for port in PortTemplate.objects.filter(equipment_tmp=obj.template):
+            port_dict = {'count': port.count, 'unit': port.unit}
+            port_template_dict[port.id] = port_dict
+        return port_template_dict
 
     @classmethod
     def get_template(cls, obj):
@@ -32,5 +40,5 @@ class EquipmentSerializer(serializers.Serializer):
         free_ports = {}
         for port in PortTemplate.objects.filter(equipment_tmp=obj.template):
             free_ports[str(port.speed)] = (Port.objects.filter(equipment=obj, port_template=port, connection=None).
-                                      count())
+                                           count())
         return free_ports

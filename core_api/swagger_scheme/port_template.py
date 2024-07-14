@@ -77,7 +77,7 @@ create_port_template = {
             speed=openapi.Schema(type=openapi.TYPE_ARRAY,
                                  items=openapi.Schema(type=openapi.TYPE_INTEGER)),
             equipment_tmp_id=openapi.Schema(type=openapi.TYPE_INTEGER),
-            port_type_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+            type_port_id=openapi.Schema(type=openapi.TYPE_INTEGER),
             modular=openapi.Schema(type=openapi.TYPE_BOOLEAN),
             unit=openapi.Schema(type=openapi.TYPE_ARRAY,
                                 items=openapi.Schema(type=openapi.TYPE_INTEGER)),

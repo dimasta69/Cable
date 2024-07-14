@@ -71,6 +71,9 @@ class EquipmentListTest(TestCase):
     def test_return_200_get_equipment(self):
         resp = self.client.get(f'/core_api/equipment/{self.equipment_3.id}/',
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        print(123)
+        print(json.loads(resp.content))
+        print(123)
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_not_found(self):
