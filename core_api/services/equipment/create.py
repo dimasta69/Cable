@@ -36,7 +36,7 @@ class CreateEquipmentService(ServiceWithResult):
     def create_equipment(self):
         equipment = Equipment.objects.create(template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'])
         number = 1
-        for port_template in self.port_template_list.order_by('id'):
+        for port_template in self.port_template_list.order_by('unit', 'id'):
             for port in range(port_template.count):
                 Port.objects.create(uid=number, equipment=equipment, port_template=port_template)
                 number += 1
