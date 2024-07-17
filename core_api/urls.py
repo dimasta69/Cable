@@ -28,6 +28,8 @@ from core_api.views.room.room import RoomView
 from core_api.views.server_rack.server_rack_list import ServerRackListView
 from core_api.views.server_rack.server_rack import ServerRackView
 from core_api.views.sfp_template.sfp_template_list import SfpTemplateListView
+from core_api.views.sfp_template.sfp_template import SfpTemplateView
+from core_api.views.sfp_template.adding_to_port import AddingToPortSfpTemplateView
 
 
 schema_view = get_schema_view(
@@ -64,5 +66,7 @@ urlpatterns = [
     path('server_rack/', ServerRackListView.as_view()),
     path('server_rack/<int:id>/', ServerRackView.as_view()),
     path('sfp_template/', SfpTemplateListView.as_view()),
+    path('sfp_template/<int:id>/', SfpTemplateView.as_view()),
+    path('sfp_template/<int:id>/adding_to_port/', AddingToPortSfpTemplateView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
