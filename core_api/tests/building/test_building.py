@@ -1,6 +1,5 @@
 import json
 from django.test import TestCase
-from django.test.client import Client, encode_multipart
 
 from models_app.factories.scheme import SchemeFactory
 from models_app.factories.building import BuildingFactory

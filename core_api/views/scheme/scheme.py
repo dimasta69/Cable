@@ -28,16 +28,15 @@ class SchemeView(APIView):
 
     @swagger_auto_schema(**delete_scheme)
     def delete(self, request, **kwargs):
-        outcome = ServiceOutcome(SchemeDeleteService, {'current_user': request.user, 'id':
-            kwargs['id']})
+        outcome = ServiceOutcome(SchemeDeleteService, {'current_user': request.user,
+                                                       'id': kwargs['id']})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(SchemeSerializer(outcome.result).data, status=outcome.response_status)
 
     @swagger_auto_schema(**update_scheme)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(SchemeUpdateService, {'current_user': request.user, 'id':
-            kwargs['id']} | request.data)
+        outcome = ServiceOutcome(SchemeUpdateService, {'current_user': request.user, 'id': kwargs['id']} | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(SchemeSerializer(outcome.result).data, status=outcome.response_status)

@@ -87,7 +87,8 @@ class SfpTemplateListService(ServiceWithResult):
 
     def line_type_presence(self):
         if self.cleaned_data['filter_line_type']:
-            if not any(type_tuple[1] == self.cleaned_data['filter_line_type'] for type_tuple in SfpTemplate.LINE_CHOICES):
+            if not any(type_tuple[1] == self.cleaned_data['filter_line_type']
+                       for type_tuple in SfpTemplate.LINE_CHOICES):
                 self.add_error('filter_line_type', ObjectDoesNotExist('Line type id='
                                                                       f'{self.cleaned_data["filter_line_type"]} '
                                                                       f'not found'))
@@ -102,9 +103,9 @@ class SfpTemplateListService(ServiceWithResult):
     def manufacturer_presence(self):
         if self.cleaned_data['filter_manufacturer_id']:
             if not self.manufacturer:
-                self.add_error('filter_manufacturer_id', ObjectDoesNotExist('Manufacturer id='
-                                                                         f'{self.cleaned_data["filter_manufacturer_id"]} '
-                                                                         f'not found'))
+                self.add_error('filter_manufacturer_id',
+                               ObjectDoesNotExist(f'Manufacturer id={self.cleaned_data["filter_manufacturer_id"]} '
+                                                  'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def type_port_presence(self):

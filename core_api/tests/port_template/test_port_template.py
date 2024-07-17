@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.test.client import Client, encode_multipart
+from django.test.client import encode_multipart
 import json
 
 from models_app.factories.port_template import PortTemplateFactory

@@ -1,4 +1,3 @@
-import json
 from django.test import TestCase
 from django.test.client import encode_multipart
 
@@ -77,7 +76,7 @@ class RoomTest(TestCase):
 
     def test_return_204_delete(self):
         resp = self.client.delete(f'/core_api/server_rack/{self.server_rack_1.id}/',
-                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 204)
 
     def test_return_404_delete_not_found(self):

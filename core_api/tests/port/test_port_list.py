@@ -1,7 +1,4 @@
-import json
-
 from django.test import TestCase
-from django.test.client import Client
 
 from models_app.factories.port_template import PortTemplateFactory
 from models_app.factories.type_port import TypePortFactory
@@ -37,13 +34,13 @@ class PortListTest(TestCase):
                                               port_template=cls.port_template_2)
 
     def test_return_200(self):
-        resp = self.client.get(f'/core_api/port/', {'filter_equipment': self.equipment_1.id,
-                                                    'order_by': '-uid'},
+        resp = self.client.get('/core_api/port/', {'filter_equipment': self.equipment_1.id,
+                                                   'order_by': '-uid'},
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_equipment_not_found(self):
-        resp = self.client.get(f'/core_api/port/', {'filter_equipment': 99,
-                                                    'order_by': '-uid'},
+        resp = self.client.get('/core_api/port/', {'filter_equipment': 99,
+                                                   'order_by': '-uid'},
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)

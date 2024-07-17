@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.test.client import Client, encode_multipart
+from django.test.client import encode_multipart
 
 from models_app.factories.scheme import SchemeFactory
 from models_app.factories.access import AccessFactory

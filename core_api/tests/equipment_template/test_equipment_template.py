@@ -1,6 +1,6 @@
 import json
 from django.test import TestCase
-from django.test.client import Client, encode_multipart
+from django.test.client import encode_multipart
 
 from models_app.factories.type_port import TypePortFactory
 from models_app.factories.user import UserFactory

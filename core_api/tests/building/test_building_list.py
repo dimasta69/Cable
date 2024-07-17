@@ -1,6 +1,6 @@
 import json
 from django.test import TestCase
-from django.test.client import Client, encode_multipart
+from django.test.client import encode_multipart
 
 from models_app.factories.scheme import SchemeFactory
 from models_app.factories.building import BuildingFactory
@@ -37,7 +37,7 @@ class BuildingListTest(TestCase):
             'number': 'test',
         })
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
-        resp = self.client.post(f'/core_api/building/',
+        resp = self.client.post('/core_api/building/',
                                 content,
                                 content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 201)
@@ -48,7 +48,7 @@ class BuildingListTest(TestCase):
             'number': 'test',
         })
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
-        resp = self.client.post(f'/core_api/building/',
+        resp = self.client.post('/core_api/building/',
                                 content,
                                 content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
@@ -59,7 +59,6 @@ class BuildingListTest(TestCase):
             'number': self.building_1.number.lower(),
         })
         content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
-        resp = self.client.post(f'/core_api/building/',
-                                content,
+        resp = self.client.post('/core_api/building/', content,
                                 content_type=content_type,  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)

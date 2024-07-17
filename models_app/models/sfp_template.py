@@ -6,7 +6,8 @@ from models_app.models.type_port import TypePort
 
 
 class SfpTemplate(models.Model):
-    type_port = models.ForeignKey(TypePort, on_delete=models.CASCADE, related_name='sfp_template', verbose_name='Тип порта')
+    type_port = models.ForeignKey(TypePort, on_delete=models.CASCADE, related_name='sfp_template',
+                                  verbose_name='Тип порта')
     manufacturer = models.ForeignKey(Manufacturer, related_name='sfp_template', on_delete=models.CASCADE,
                                      verbose_name='Произваодитель')
     name = models.CharField(null=True, max_length=150, verbose_name='Наименование', unique=True)

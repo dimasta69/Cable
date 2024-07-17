@@ -6,4 +6,3 @@ class CreateEquipmentSerializer(serializers.Serializer):
     vlan_ip = serializers.JSONField(required=False)
     unit_list_id = serializers.ListField()
     server_rack_id = serializers.IntegerField()
-

@@ -73,7 +73,8 @@ class EquipmentListService(ServiceWithResult):
 
     def type_presence(self):
         if self.cleaned_data['filter_type']:
-            if not any(type_tuple[1] == self.cleaned_data['filter_type'] for type_tuple in EquipmentTemplate.TYPE_CHOICES):
+            if not any(type_tuple[1] == self.cleaned_data['filter_type']
+                       for type_tuple in EquipmentTemplate.TYPE_CHOICES):
                 self.add_error('filter_type', ObjectDoesNotExist('Type id='
                                                                  f'{self.cleaned_data["filter_type"]} '
                                                                  f'not found'))

@@ -1,5 +1,5 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist
 from functools import lru_cache
 
 from rest_framework import status
@@ -87,5 +87,5 @@ class CreateEquipmentFromRoomService(ServiceWithResult):
     def room_type(self):
         if self.room:
             if self.room.type != 'Обычная':
-                self.add_error('room_id', ObjectDoesNotExist(f'Еhe type of room should be ordinary'))
+                self.add_error('room_id', ObjectDoesNotExist('Еhe type of room should be ordinary'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

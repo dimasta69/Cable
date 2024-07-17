@@ -19,4 +19,3 @@ class CustomPagination:
             "total_pages": page.paginator.num_pages,
             "total_count": page.paginator.count,
         }
-

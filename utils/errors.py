@@ -1,3 +1,7 @@
+import sys
+import traceback
+
+
 class InvalidInputsError(Exception):
     """
     Raised during :class:`Service`'s :meth:`service_clean` method.
@@ -9,6 +13,7 @@ class InvalidInputsError(Exception):
     :param dictionary non_field_errors: :class:`Service`'s
         ``non_field_errors`` dictionary
     """
+
     def __init__(self, errors, non_field_errors):
         self.errors = errors
         self.non_field_errors = non_field_errors
@@ -16,10 +21,6 @@ class InvalidInputsError(Exception):
     def __repr__(self):
         return '{}({}, {})'.format(
             type(self).__name__, repr(self.errors), repr(self.non_field_errors))
-
-
-import sys
-import traceback
 
 
 class Error(Exception):
@@ -46,14 +47,14 @@ class Error(Exception):
     """
 
     def __init__(
-        self,
-        translation_key=None,
-        message=None,
-        debug_message=None,
-        details=None,
-        additional_info=None,
-        response_status=None,
-        errors_dict=None,
+            self,
+            translation_key=None,
+            message=None,
+            debug_message=None,
+            details=None,
+            additional_info=None,
+            response_status=None,
+            errors_dict=None,
     ) -> None:
         self.translation_key = translation_key or self._default_translation_key
         self.message = message or self._default_message

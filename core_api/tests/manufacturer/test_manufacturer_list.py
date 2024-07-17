@@ -17,7 +17,8 @@ class ManufacturerListTest(TestCase):
         cls.client = Client()
 
     def test_return_200_min_params(self):
-        resp = self.client.get('/core_api/manufacturer/', content_type='application/json')
+        resp = self.client.get('/core_api/manufacturer/', content_type='application/json',
+                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(resp_json['pagination']['current_page'] == 1)

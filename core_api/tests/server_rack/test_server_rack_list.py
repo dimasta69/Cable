@@ -25,7 +25,7 @@ class RoomTest(TestCase):
         cls.server_rack_list_2 = ServerRackFactory.create_batch(6, room=cls.room_2)
 
     def test_return_200(self):
-        resp = self.client.get(f'/core_api/server_rack/', {'filter_room_id': self.room_1.id},
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': self.room_1.id},
                                content_type={'application/json'},
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
@@ -33,13 +33,12 @@ class RoomTest(TestCase):
         self.assertTrue(len(resp_json) == 5)
 
     def test_return_404_not_found_room(self):
-        resp = self.client.get(f'/core_api/server_rack/', {'filter_room_id': 99},
-                               content_type={'application/json'},
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': 99}, content_type={'application/json'},
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_200_order_by(self):
-        resp = self.client.get(f'/core_api/server_rack/', {'filter_room_id': self.room_1.id, 'order_by': 'title'},
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': self.room_1.id, 'order_by': 'title'},
                                content_type={'application/json'},
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
@@ -47,8 +46,8 @@ class RoomTest(TestCase):
         self.assertTrue(len(resp_json) == 5)
 
     def test_return_200_search_filter(self):
-        resp = self.client.get(f'/core_api/server_rack/', {'filter_room_id': self.room_1.id, 'search_filter':
-            self.server_rack_1.title},
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': self.room_1.id,
+                                                          'search_filter': self.server_rack_1.title},
                                content_type={'application/json'},
                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
@@ -56,25 +55,25 @@ class RoomTest(TestCase):
         self.assertTrue(len(resp_json) == 1)
 
     def test_return_401_not_auth(self):
-        resp = self.client.get(f'/core_api/server_rack/', {'filter_room_id': self.room_1.id, 'search_filter':
-            self.server_rack_1.title},
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': self.room_1.id,
+                                                          'search_filter': self.server_rack_1.title},
                                content_type={'application/json'})
         self.assertEqual(resp.status_code, 401)
 
     def test_return_201_create_stack(self):
-        resp = self.client.post(f'/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
-                                                            'title': 'sfds', 'mac_power': 200},
+        resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
+                                                           'title': 'sfds', 'mac_power': 200},
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 201)
 
     def test_return_404_create_not_found_room(self):
-        resp = self.client.post(f'/core_api/server_rack/', {'number_of_units': 20, 'room_id': 99,
-                                                            'title': 'sfds', 'mac_power': 200},
+        resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': 99,
+                                                           'title': 'sfds', 'mac_power': 200},
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_422_room_not_server(self):
-        resp = self.client.post(f'/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_3.id,
-                                                            'title': 'sfds', 'mac_power': 200},
+        resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_3.id,
+                                                           'title': 'sfds', 'mac_power': 200},
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)

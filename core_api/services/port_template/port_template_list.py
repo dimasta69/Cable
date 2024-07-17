@@ -94,7 +94,7 @@ class PortTemplateListService(ServiceWithResult):
     def manufacturer_presence(self):
         if self.cleaned_data.get('filter_manufacturer'):
             if not self.manufacturer:
-                self.add_error('filter_manufacturer', ObjectDoesNotExist(f"Manufacturer id =  "
-                                                                  f"{self.cleaned_data['filter_manufacturer']} "
-                                                                         "not found"))
+                self.add_error('filter_manufacturer',
+                               ObjectDoesNotExist(f"Manufacturer id={self.cleaned_data['filter_manufacturer']} "
+                                                  "not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND

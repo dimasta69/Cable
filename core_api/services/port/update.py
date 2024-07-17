@@ -14,8 +14,8 @@ class UpdatePortService(ServiceWithResult):
     vlan_type = forms.CharField(required=False)
     vlan = forms.IntegerField(required=False)
     ip = forms.CharField(required=False, validators=[RegexValidator(
-        regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|'
-              '[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
+        regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|'
+              '[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
         message='Введите корректный IP адрес',
         code='invalid_ip'
     )])

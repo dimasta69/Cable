@@ -93,9 +93,11 @@ class SfpTemplateListTest(TestCase):
         self.assertEqual(resp.status_code, 404)
 
     def test_return_200_max_params(self):
-        resp = self.client.get('/core_api/sfp_template/', {'filter_line_type': "Многомодовый", 'filter_manufacturer_id':
-            self.manufacturer_2.id, 'filter_type_port_id': self.type_port_1.id, 'filter_speed': 1, 'search_filter':
-                                                               self.sfp_template_1.name},
+        resp = self.client.get('/core_api/sfp_template/', {'filter_line_type': "Многомодовый",
+                                                           'filter_manufacturer_id': self.manufacturer_2.id,
+                                                           'filter_type_port_id': self.type_port_1.id,
+                                                           'filter_speed': 1,
+                                                           'search_filter': self.sfp_template_1.name},
                                content_type='application/json', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         resp_json = json.loads(resp.content)
         self.assertEqual(resp.status_code, 200)
