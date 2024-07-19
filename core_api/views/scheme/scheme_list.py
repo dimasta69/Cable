@@ -25,7 +25,7 @@ class SchemeListView(APIView):
 
     @swagger_auto_schema(**create_scheme)
     def post(self, request):
-        outcome = ServiceOutcome(CreateScheme, {'current_user': request.user} | request.data)
+        outcome = ServiceOutcome(CreateScheme, {'current_user': request.user} | request.data.dict())
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(SchemeSerializer(outcome.result).data, status=outcome.response_status)

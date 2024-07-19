@@ -20,7 +20,7 @@ class RoomListView(APIView):
 
     @swagger_auto_schema(**room_list)
     def get(self, request):
-        outcome = ServiceOutcome(RoomListService, dict(request.GET.items()))
+        outcome = ServiceOutcome(RoomListService, dict(request.GET.items()) | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({'pagination': CustomPagination(outcome.result,
@@ -31,7 +31,7 @@ class RoomListView(APIView):
 
     @swagger_auto_schema(**create_room)
     def post(self, request):
-        outcome = ServiceOutcome(CreateRoomService, request.data)
+        outcome = ServiceOutcome(CreateRoomService, request.data.dict() | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(CreateRoomSerializer(outcome.result).data, status=outcome.response_status)

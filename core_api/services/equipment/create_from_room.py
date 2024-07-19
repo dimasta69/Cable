@@ -1,11 +1,12 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from functools import lru_cache
 
 from rest_framework import status
 
+from models_app.models import Access, User
 from utils.services import ServiceWithResult
-from utils.fields import JsonIpField
+from utils.fields import JsonIpField, ModelField
 from models_app.models.equipment import Equipment
 from models_app.models.equipment_template import EquipmentTemplate
 from models_app.models.port import Port
@@ -17,9 +18,10 @@ class CreateEquipmentFromRoomService(ServiceWithResult):
     equipment_template_id = forms.IntegerField(required=True)
     vlan_ip = JsonIpField(required=False)
     room_id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
     custom_validations = ['equipment_template_presence', 'port_template_presence', 'room_presence',
-                          'room_type']
+                          'room_type', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -65,6 +67,14 @@ class CreateEquipmentFromRoomService(ServiceWithResult):
         except PortTemplate.DoesNotExist:
             return PortTemplate.objects.none()
 
+    @property
+    def access(self):
+        try:
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.room.building.scheme,
+                                      role__in=['Change', 'Creator'])
+        except Access.DoesNotExist:
+            return None
+
     def equipment_template_presence(self):
         if not self.equipment_template:
             self.add_error('equipment_template_id', ObjectDoesNotExist('Equipment template id='
@@ -89,3 +99,10 @@ class CreateEquipmentFromRoomService(ServiceWithResult):
             if self.room.type != 'Обычная':
                 self.add_error('room_id', ObjectDoesNotExist('Еhe type of room should be ordinary'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def access_presence(self):
+        if self.room:
+            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+                self.add_error('current_user', PermissionDenied('Access to the schema id = '
+                                                                f'{self.room.building.scheme.id} is not granted'))
+                self.response_status = status.HTTP_403_FORBIDDEN

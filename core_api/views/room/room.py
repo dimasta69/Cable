@@ -17,14 +17,14 @@ class RoomView(APIView):
 
     @swagger_auto_schema(**update_room)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdateRoomService, request.data | kwargs)
+        outcome = ServiceOutcome(UpdateRoomService, request.data | kwargs | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(RoomListSerializer(outcome.result).data, status=outcome.response_status)
 
     @swagger_auto_schema(**delete_room)
     def delete(self, request, **kwargs):
-        outcome = ServiceOutcome(DeleteRoomService, kwargs)
+        outcome = ServiceOutcome(DeleteRoomService, kwargs | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(RoomListSerializer(outcome.result).data, status=outcome.response_status)

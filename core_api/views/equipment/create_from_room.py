@@ -16,7 +16,7 @@ class CreateEquipmentFromRoomView(APIView):
 
     @swagger_auto_schema(**create_equipment_from_room)
     def post(self, request):
-        outcome = ServiceOutcome(CreateEquipmentFromRoomService, request.data)
+        outcome = ServiceOutcome(CreateEquipmentFromRoomService, request.data | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)

@@ -1,11 +1,12 @@
 from django import forms
 from functools import lru_cache
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
 
+from models_app.models import Access, User
 from utils.services import ServiceWithResult
-from utils.fields import ListIntegerField
+from utils.fields import ListIntegerField, ModelField
 from models_app.models.equipment import Equipment
 from models_app.models.unit import Unit
 
@@ -13,8 +14,10 @@ from models_app.models.unit import Unit
 class AddEquipmentUnitService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     unit_list_id = ListIntegerField(required=True)
+    current_user = ModelField(User)
 
-    custom_validations = ['unit_list_presence', 'equipment_presence', 'count_unit_presence', 'power_presence']
+    custom_validations = ['unit_list_presence', 'equipment_presence', 'count_unit_presence', 'power_presence',
+                          'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -68,6 +71,15 @@ class AddEquipmentUnitService(ServiceWithResult):
         except Unit.DoesNotExist:
             return Unit.objects.none()
 
+    @property
+    def access(self):
+        try:
+            return Access.objects.get(user=self.cleaned_data['current_user'],
+                                      scheme=self.unit_list_int[0].server_rack.room.building.scheme,
+                                      role__in=['Change', 'Creator'])
+        except Access.DoesNotExist:
+            return None
+
     def unit_list_presence(self):
         if not self.unit_list_int:
             self.add_error('unit_list_id', ObjectDoesNotExist('Unit list id='
@@ -91,3 +103,11 @@ class AddEquipmentUnitService(ServiceWithResult):
                 if self.unit_list_int[0].server_rack.free_power < self.equipment.template.power:
                     self.add_error('unit_list_id', ValidationError('Not enough power'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def access_presence(self):
+        if self.unit_list_int and self.equipment:
+            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+                self.add_error('current_user', PermissionDenied('Access to the schema id = '
+                                                        f'{self.unit_list_int[0].server_rack.room.building.scheme.id} '
+                                                                'is not granted'))
+                self.response_status = status.HTTP_403_FORBIDDEN

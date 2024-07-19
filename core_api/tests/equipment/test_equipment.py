@@ -3,6 +3,7 @@ import json
 from django.test import TestCase
 from django.test.client import encode_multipart
 
+from models_app.factories.access import AccessFactory
 from models_app.factories.building import BuildingFactory
 from models_app.factories.port_template import PortTemplateFactory
 from models_app.factories.room import RoomFactory
@@ -17,10 +18,13 @@ from models_app.factories.type_port import TypePortFactory
 from models_app.factories.port import PortFactory
 
 
-class EquipmentListTest(TestCase):
+class EquipmentTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_1 = UserFactory.create(create_token=True)
+        cls.user_2 = UserFactory.create(create_token=True)
+        cls.user_3 = UserFactory.create(create_token=True)
+        cls.user_4 = UserFactory.create(create_token=True)
 
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.manufacturer_2 = ManufacturerFactory.create()
@@ -56,6 +60,12 @@ class EquipmentListTest(TestCase):
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
         cls.scheme_2 = SchemeFactory.create(creator=cls.user_1)
+
+        cls.access_1 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_1, role='Creator')
+        cls.access_2 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_2, role='Change')
+        cls.access_3 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_3, role='Read')
+        cls.access_4 = AccessFactory.create(scheme=cls.scheme_2, user=cls.user_1, role='Creator')
+
         cls.building_1 = BuildingFactory.create(scheme=cls.scheme_1)
         cls.building_2 = BuildingFactory.create(scheme=cls.scheme_2)
 
@@ -165,3 +175,33 @@ class EquipmentListTest(TestCase):
                                content,
                                content_type=content_type)
         self.assertEqual(resp.status_code, 401)
+
+    def test_return_200_add_equipment_for_unit_role_change(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {
+            'unit_list_id': [self.unit_1.id, self.unit_2.id, self.unit_3.id],
+        })
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/equipment/{self.equipment_2.id}/add_equipment_for_unit/',
+                               content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_403_add_equipment_for_unit_role_read(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {
+            'unit_list_id': [self.unit_1.id, self.unit_2.id, self.unit_3.id],
+        })
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/equipment/{self.equipment_2.id}/add_equipment_for_unit/',
+                               content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_403_add_equipment_for_unit_no_role(self):
+        content = encode_multipart('BoUnDaRyStRiNg', {
+            'unit_list_id': [self.unit_1.id, self.unit_2.id, self.unit_3.id],
+        })
+        content_type = 'multipart/form-data; boundary=BoUnDaRyStRiNg'
+        resp = self.client.put(f'/core_api/equipment/{self.equipment_2.id}/add_equipment_for_unit/',
+                               content,
+                               content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+        self.assertEqual(resp.status_code, 403)

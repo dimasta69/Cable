@@ -17,14 +17,14 @@ class ServerRackListView(APIView):
 
     @swagger_auto_schema(**server_rack_list)
     def get(self, request):
-        outcome = ServiceOutcome(ServerRackListService, dict(request.GET.items()))
+        outcome = ServiceOutcome(ServerRackListService, dict(request.GET.items()) | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors)
         return Response(ServerRackListSerializer(outcome.result, many=True).data, status=outcome.response_status)
 
     @swagger_auto_schema(**create_server_rack)
     def post(self, request):
-        outcome = ServiceOutcome(CreateServerRackService, request.data)
+        outcome = ServiceOutcome(CreateServerRackService, request.data.dict() | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ServerRackListSerializer(outcome.result).data, status=outcome.response_status)

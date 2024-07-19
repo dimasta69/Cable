@@ -1,9 +1,11 @@
 from django import forms
 from functools import lru_cache
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
 
+from models_app.models import User, Access
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.room import Room
 from models_app.models.server_rack import ServerRack
@@ -13,8 +15,9 @@ class ServerRackListService(ServiceWithResult):
     filter_room_id = forms.IntegerField(required=True)
     order_by = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
+    current_user = ModelField(User)
 
-    custom_validations = ['room_presence', 'order_presence']
+    custom_validations = ['room_presence', 'order_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -47,6 +50,13 @@ class ServerRackListService(ServiceWithResult):
         except Room.DoesNotExist:
             return None
 
+    @property
+    def access(self):
+        try:
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.room.building.scheme)
+        except Access.DoesNotExist:
+            return None
+
     def room_presence(self):
         if self.cleaned_data['filter_room_id']:
             if not self.room:
@@ -61,3 +71,10 @@ class ServerRackListService(ServiceWithResult):
                                                      '-free_power', 'free_units', '-free_units']:
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
+
+    def access_presence(self):
+        if self.room:
+            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+                self.add_error('current_user', PermissionDenied('Access to the schema id = '
+                                                                f'{self.room.building.scheme.id} is not granted'))
+                self.response_status = status.HTTP_403_FORBIDDEN

@@ -19,21 +19,21 @@ class ServerRackView(APIView):
 
     @swagger_auto_schema(**server_rack)
     def get(self, request, **kwargs):
-        outcome = ServiceOutcome(ServerRackService, kwargs)
+        outcome = ServiceOutcome(ServerRackService, kwargs | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ServerRackSerializer(outcome.result).data, status=outcome.response_status)
 
     @swagger_auto_schema(**delete_server_rack)
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdateServerRackService, request.data | kwargs)
+        outcome = ServiceOutcome(UpdateServerRackService, request.data | kwargs | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ServerRackListSerializer(outcome.result).data, status=outcome.response_status)
 
     @swagger_auto_schema(**update_server_rack)
     def delete(self, request, **kwargs):
-        outcome = ServiceOutcome(DeleteServerRackService, kwargs)
+        outcome = ServiceOutcome(DeleteServerRackService, kwargs | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ServerRackListSerializer(outcome.result).data, status=outcome.response_status)

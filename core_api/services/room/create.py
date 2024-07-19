@@ -1,8 +1,10 @@
 from functools import lru_cache
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
 
+from models_app.models import Access, User
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.room import Room
 from models_app.models.building import Building
@@ -12,8 +14,9 @@ class CreateRoomService(ServiceWithResult):
     building_id = forms.IntegerField(required=True)
     number = forms.CharField(required=True)
     type = forms.CharField(required=True)
+    current_user = ModelField(User)
 
-    custom_validations = ['building_presence', 'type_presence', 'number_presence']
+    custom_validations = ['building_presence', 'type_presence', 'number_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -42,6 +45,14 @@ class CreateRoomService(ServiceWithResult):
         except Building.DoesNotExist:
             return None
 
+    @property
+    def access(self):
+        try:
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.building.scheme,
+                                      role__in=['Change', 'Creator'])
+        except Access.DoesNotExist:
+            return None
+
     def type_presence(self):
         if self.cleaned_data['type']:
             if not any(type_tuple[1] == self.cleaned_data['type'] for type_tuple in Room.TYPE_ROOM_CHOICES):
@@ -64,3 +75,10 @@ class CreateRoomService(ServiceWithResult):
                 self.add_error('model', ValidationError(f'Field with number={self.cleaned_data["number"]}'
                                                         ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def access_presence(self):
+        if self.building:
+            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+                self.add_error('current_user', PermissionDenied('Access to the schema id = '
+                                                                f'{self.building.scheme.id} is not granted'))
+                self.response_status = status.HTTP_403_FORBIDDEN

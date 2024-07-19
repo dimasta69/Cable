@@ -1,8 +1,10 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation
+from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation, PermissionDenied
 from rest_framework import status
 from functools import lru_cache
 
+from models_app.models import User, Access, Unit
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.sfp_template import SfpTemplate
 from models_app.models.port import Port
@@ -11,6 +13,7 @@ from models_app.models.port import Port
 class AddSfpService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     sfp_template_id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
     custom_validations = ['port_presence', 'sfp_presence', 'speed_matching', 'modular']
 
@@ -58,6 +61,22 @@ class AddSfpService(ServiceWithResult):
             return Port.objects.filter(equipment=self.port.equipment)
         except Port.DoesNotExist:
             return Port.objects.none()
+
+    @property
+    def unit(self):
+        try:
+            return Unit.objects.get(equipment=self.port.equipment)
+        except Unit.DoesNotExist:
+            return None
+
+    @property
+    def access(self):
+        try:
+            return Access.objects.get(user=self.cleaned_data['current_user'],
+                                      scheme=self.unit.server_rack.room.building.scheme,
+                                      role__in=['Change', 'Creator'])
+        except Access.DoesNotExist:
+            return None
 
     def port_presence(self):
         if not self.port:

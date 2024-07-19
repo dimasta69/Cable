@@ -44,7 +44,7 @@ class SchemeService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_presence(self):
-        if not self.access:
+        if not self.access and not self.cleaned_data['current_user'].is_superuser:
             self.add_error('current_user', PermissionDenied(f'Access to the schema id = {self.cleaned_data["id"]} '
                                                             'is not granted'))
             self.response_status = status.HTTP_403_FORBIDDEN

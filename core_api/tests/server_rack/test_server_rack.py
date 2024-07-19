@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.test.client import encode_multipart
 
+from models_app.factories.access import AccessFactory
 from models_app.factories.equipment import EquipmentFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
 from models_app.factories.manufacturer import ManufacturerFactory
@@ -14,10 +15,13 @@ from models_app.factories.server_rack import ServerRackFactory
 from models_app.factories.unit import UnitFactory
 
 
-class RoomTest(TestCase):
+class ServerRackTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_1 = UserFactory.create(create_token=True)
+        cls.user_2 = UserFactory.create(create_token=True)
+        cls.user_3 = UserFactory.create(create_token=True)
+        cls.user_4 = UserFactory.create(create_token=True)
 
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.type_port_1 = TypePortFactory.create()
@@ -28,6 +32,10 @@ class RoomTest(TestCase):
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
         cls.building_1 = BuildingFactory.create(scheme=cls.scheme_1)
+
+        cls.access_1 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_1, role='Creator')
+        cls.access_2 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_2, role='Change')
+        cls.access_3 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_3, role='Read')
 
         cls.room_1 = RoomFactory.create(building=cls.building_1, type='Серверная')
         cls.room_2 = RoomFactory.create(building=cls.building_1, type='Серверная')
@@ -89,3 +97,60 @@ class RoomTest(TestCase):
         resp = self.client.delete(f'/core_api/server_rack/{self.server_rack_1.id}/',
                                   content_type='application/json')
         self.assertEqual(resp.status_code, 401)
+
+    def test_return_200_get_role_change(self):
+        resp = self.client.get(f'/core_api/server_rack/{self.server_rack_1.id}/',
+                               content_type='application/json',
+                               HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_200_get_role_read(self):
+        resp = self.client.get(f'/core_api/server_rack/{self.server_rack_1.id}/',
+                               content_type='application/json',
+                               HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_403_get_no_role(self):
+        resp = self.client.get(f'/core_api/server_rack/{self.server_rack_1.id}/',
+                               content_type='application/json',
+                               HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_200_update_role_change(self):
+        content = {'title': 'test_1', 'max_power': 100}
+        content_type = 'application/json'
+        resp = self.client.put(f'/core_api/server_rack/{self.server_rack_1.id}/', content,
+                               content_type=content_type,
+                               HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_403_update_role_read(self):
+        content = {'title': 'test_1', 'max_power': 100}
+        content_type = 'application/json'
+        resp = self.client.put(f'/core_api/server_rack/{self.server_rack_1.id}/', content,
+                               content_type=content_type,
+                               HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_403_update_no_role(self):
+        content = {'title': 'test_1', 'max_power': 100}
+        content_type = 'application/json'
+        resp = self.client.put(f'/core_api/server_rack/{self.server_rack_1.id}/', content,
+                               content_type=content_type,
+                               HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_204_delete_role_change(self):
+        resp = self.client.delete(f'/core_api/server_rack/{self.server_rack_1.id}/',
+                                  HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+        self.assertEqual(resp.status_code, 204)
+
+    def test_return_403_delete_role_read(self):
+        resp = self.client.delete(f'/core_api/server_rack/{self.server_rack_1.id}/',
+                                  HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_403_delete_no_role(self):
+        resp = self.client.delete(f'/core_api/server_rack/{self.server_rack_1.id}/',
+                                  HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+        self.assertEqual(resp.status_code, 403)

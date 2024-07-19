@@ -1,6 +1,7 @@
 import json
 from django.test import TestCase
 
+from models_app.factories.access import AccessFactory
 from models_app.factories.room import RoomFactory
 from models_app.factories.building import BuildingFactory
 from models_app.factories.scheme import SchemeFactory
@@ -8,13 +9,20 @@ from models_app.factories.user import UserFactory
 from models_app.factories.server_rack import ServerRackFactory
 
 
-class RoomTest(TestCase):
+class ServerRackListTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_1 = UserFactory.create(create_token=True)
+        cls.user_2 = UserFactory.create(create_token=True)
+        cls.user_3 = UserFactory.create(create_token=True)
+        cls.user_4 = UserFactory.create(create_token=True)
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
         cls.building_1 = BuildingFactory.create(scheme=cls.scheme_1)
+
+        cls.access_1 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_1, role='Creator')
+        cls.access_2 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_2, role='Change')
+        cls.access_3 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_3, role='Read')
 
         cls.room_1 = RoomFactory.create(building=cls.building_1, type='Серверная')
         cls.room_2 = RoomFactory.create(building=cls.building_1, type='Серверная')
@@ -77,3 +85,43 @@ class RoomTest(TestCase):
                                                            'title': 'sfds', 'mac_power': 200},
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
+
+    def test_return_200_role_change(self):
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': self.room_1.id},
+                               content_type={'application/json'},
+                               HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(len(resp_json) == 5)
+
+    def test_return_200_role_read(self):
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': self.room_1.id},
+                               content_type={'application/json'},
+                               HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+        resp_json = json.loads(resp.content)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(len(resp_json) == 5)
+
+    def test_return_200_no_role(self):
+        resp = self.client.get('/core_api/server_rack/', {'filter_room_id': self.room_1.id},
+                               content_type={'application/json'},
+                               HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_201_create_role_change(self):
+        resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
+                                                           'title': 'sfds', 'mac_power': 200},
+                                HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+        self.assertEqual(resp.status_code, 201)
+
+    def test_return_403_create_role_read(self):
+        resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
+                                                           'title': 'sfds', 'mac_power': 200},
+                                HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_403_create_no_role(self):
+        resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
+                                                           'title': 'sfds', 'mac_power': 200},
+                                HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+        self.assertEqual(resp.status_code, 403)

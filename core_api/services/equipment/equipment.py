@@ -4,6 +4,8 @@ from functools import lru_cache
 
 from rest_framework import status
 
+from models_app.models import User
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.equipment import Equipment
 

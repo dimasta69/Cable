@@ -42,7 +42,8 @@ class SchemeDeleteService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_presence(self):
-        if self.scheme and (self.scheme.creator != self.cleaned_data['current_user']):
+        if (self.scheme and (self.scheme.creator != self.cleaned_data['current_user']) and not
+                self.cleaned_data['current_user'].is_superuser):
             self.add_error('current_user', PermissionDenied(f'User {self.cleaned_data["current_user"]}access not '
                                                             f'allowed. Only the creator or administrator has access to '
                                                             f'delete'))

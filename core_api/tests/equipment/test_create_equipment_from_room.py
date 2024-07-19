@@ -1,5 +1,6 @@
 from django.test import TestCase
 
+from models_app.factories.access import AccessFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.port_template import PortTemplateFactory
@@ -14,6 +15,9 @@ class CreateEquipmentFromRoomTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_1 = UserFactory.create(create_token=True)
+        cls.user_2 = UserFactory.create(create_token=True)
+        cls.user_3 = UserFactory.create(create_token=True)
+        cls.user_4 = UserFactory.create(create_token=True)
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
         cls.scheme_2 = SchemeFactory.create(creator=cls.user_1)
@@ -22,6 +26,11 @@ class CreateEquipmentFromRoomTest(TestCase):
 
         cls.room_1 = RoomFactory.create(building=cls.building_2, type='Обычная')
         cls.room_2 = RoomFactory.create(building=cls.building_2, type='Серверная')
+
+        cls.access_1 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_1, role='Creator')
+        cls.access_2 = AccessFactory.create(scheme=cls.scheme_2, user=cls.user_2, role='Change')
+        cls.access_3 = AccessFactory.create(scheme=cls.scheme_2, user=cls.user_3, role='Read')
+        cls.access_4 = AccessFactory.create(scheme=cls.scheme_2, user=cls.user_1, role='Creator')
 
         cls.manufacturer_1 = ManufacturerFactory.create()
 
@@ -61,3 +70,21 @@ class CreateEquipmentFromRoomTest(TestCase):
         resp = self.client.post('/core_api/equipment/create_from_room/', data, content_type='application/json',
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
+
+    def test_return_200_create_equipment_role_change(self):
+        data = {'equipment_template_id': self.equipment_template_1.id, 'room_id': self.room_1.id}
+        resp = self.client.post('/core_api/equipment/create_from_room/', data, content_type='application/json',
+                                HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+        self.assertEqual(resp.status_code, 201)
+
+    def test_return_403_create_equipment_role_read(self):
+        data = {'equipment_template_id': self.equipment_template_1.id, 'room_id': self.room_1.id}
+        resp = self.client.post('/core_api/equipment/create_from_room/', data, content_type='application/json',
+                                HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+        self.assertEqual(resp.status_code, 403)
+
+    def test_return_403_create_equipment_no_role(self):
+        data = {'equipment_template_id': self.equipment_template_1.id, 'room_id': self.room_1.id}
+        resp = self.client.post('/core_api/equipment/create_from_room/', data, content_type='application/json',
+                                HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+        self.assertEqual(resp.status_code, 403)

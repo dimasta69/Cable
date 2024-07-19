@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 from django.test.client import encode_multipart
 
@@ -100,14 +102,14 @@ class PortTest(TestCase):
                    'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
                    'connection_id': self.port_2.id}
         content_type = 'application/json'
-        resp = self.client.put('/core_api/port/99/',
+        resp = self.client.put('/core_api/port/1199/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_404_not_found_connection(self):
         content = {'line_type': 'Одномодовый', 'vlan_type': 'Access',
                    'vlan': 1, 'ip': '10.16.7.79', 'mac': 'EE:F8:54:C6:47:E3',
-                   'connection_id': 99}
+                   'connection_id': 1199}
         content_type = 'application/json'
         resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
@@ -143,7 +145,7 @@ class PortTest(TestCase):
         self.assertEqual(resp.status_code, 422)
 
     def test_return_404_connection_pigtail_not_found(self):
-        content = {'connection_pigtail_id': 99}
+        content = {'connection_pigtail_id': 1199}
         content_type = 'application/json'
         resp = self.client.put(f'/core_api/port/{self.port_4.id}/connection_pigtail/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
@@ -151,7 +153,7 @@ class PortTest(TestCase):
 
         content = {'connection_pigtail_id': self.port_4.id}
         content_type = 'application/json'
-        resp = self.client.put('/core_api/port/99/connection_pigtail/',
+        resp = self.client.put('/core_api/port/1199/connection_pigtail/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
@@ -179,7 +181,7 @@ class PortTest(TestCase):
     def test_return_404_add_sfp_not_found_port(self):
         content = {'sfp_template_id': self.sfp_template_1.id}
         content_type = 'application/json'
-        resp = self.client.put('/core_api/port/99/add_sfp/', content,
+        resp = self.client.put('/core_api/port/199/add_sfp/', content,
                                content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
