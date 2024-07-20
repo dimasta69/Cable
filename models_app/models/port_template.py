@@ -20,3 +20,7 @@ class PortTemplate(models.Model):
     class Meta:
         verbose_name = 'Шаблон порта'
         verbose_name_plural = 'Шаблоны портов'
+
+    def __str__(self):
+        return self.name
+    

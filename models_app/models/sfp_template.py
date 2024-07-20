@@ -21,3 +21,6 @@ class SfpTemplate(models.Model):
     }
 
     line_type = models.CharField(choices=LINE_CHOICES, verbose_name='Тип линии', null=False)
+
+    def __str__(self):
+        return self.manufacturer.name + " " + self.name

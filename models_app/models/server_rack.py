@@ -18,6 +18,9 @@ class ServerRack(models.Model):
         if self.number_of_units:
             self.free_units = self.number_of_units
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = 'Стойка'
         verbose_name_plural = 'Стойки'

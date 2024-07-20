@@ -49,6 +49,7 @@ class EquipmentListTest(TestCase):
         cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_4)
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
+        cls.scheme_2 = SchemeFactory.create(creator=cls.user_1)
         cls.building_1 = BuildingFactory.create(scheme=cls.scheme_1)
 
         cls.room_1 = RoomFactory.create(building=cls.building_1, type='Серверная')

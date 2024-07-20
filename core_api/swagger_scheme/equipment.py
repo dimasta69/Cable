@@ -70,6 +70,10 @@ equipment_list = {
                           in_=openapi.IN_QUERY,
                           description='Search by manufacturer',
                           type=openapi.TYPE_STRING),
+        openapi.Parameter(name='filter_scheme_id',
+                          in_=openapi.IN_QUERY,
+                          description='Search by scheme',
+                          type=openapi.TYPE_INTEGER),
     ]
 }
 

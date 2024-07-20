@@ -10,3 +10,6 @@ class Scheme(models.Model):
     class Meta:
         verbose_name = 'Схема'
         verbose_name_plural = 'Схемы'
+
+    def __str__(self):
+        return self.title

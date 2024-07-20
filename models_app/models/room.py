@@ -20,3 +20,6 @@ class Room(models.Model):
     def set_count_free_socket(self):
         if self.type == 'Regular':
             self.count_free_socket = self.equipment.free_ports
+
+    def __str__(self):
+        return self.number

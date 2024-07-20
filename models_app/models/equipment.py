@@ -16,6 +16,9 @@ class Equipment(models.Model):
         verbose_name = 'Оборудование'
         verbose_name_plural = 'Оборудования'
 
+    def __str__(self):
+        return str(self.id) + " " + self.template.manufacturer.name + ' ' + self.template.model
+
     def set_free_ports(self):
         self.free_ports = self.port.filter(connection=None).count()
         self.save()

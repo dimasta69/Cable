@@ -16,3 +16,6 @@ class Access(models.Model):
     class Meta:
         verbose_name = 'Доступ'
         verbose_name_plural = 'Доступы'
+
+    def __str__(self):
+        return self.scheme.title + " " + self.user.username + " " + self.role

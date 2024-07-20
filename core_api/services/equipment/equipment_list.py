@@ -7,7 +7,7 @@ from rest_framework import status
 
 from cabel.settings import REST_FRAMEWORK
 from utils.services import ServiceWithResult
-from models_app.models import EquipmentTemplate
+from models_app.models import EquipmentTemplate, Scheme
 from models_app.models.equipment import Equipment
 from models_app.models.manufacturer import Manufacturer
 
@@ -19,6 +19,7 @@ class EquipmentListService(ServiceWithResult):
     filter_manufacturer = forms.IntegerField(required=False)
     filter_type = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
+    filter_scheme_id = forms.CharField(required=False)
 
     custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence']
 
@@ -46,6 +47,8 @@ class EquipmentListService(ServiceWithResult):
             equipment_list = equipment_list.filter(template__manufacturer=self.manufacturer)
         if self.cleaned_data['filter_type']:
             equipment_list = equipment_list.filter(template__type=self.cleaned_data['filter_type'])
+        if self.cleaned_data['filter_scheme_id']:
+            equipment_list = equipment_list.filter(unit__server_rack__room__building__scheme=self.scheme)
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
@@ -69,6 +72,14 @@ class EquipmentListService(ServiceWithResult):
         try:
             return Manufacturer.objects.get(id=self.cleaned_data['filter_manufacturer'])
         except Manufacturer.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def scheme(self):
+        try:
+            return Scheme.objects.get(id=self.cleaned_data['filter_scheme_id'])
+        except Scheme.DoesNotExist:
             return None
 
     def type_presence(self):

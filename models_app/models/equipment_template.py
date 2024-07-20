@@ -18,3 +18,6 @@ class EquipmentTemplate(models.Model):
     class Meta:
         verbose_name = 'Шаблон оборудования'
         verbose_name_plural = 'Шаблоны оборудований'
+
+    def __str__(self):
+        return self.manufacturer.name + " " + self.model

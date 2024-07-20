@@ -13,8 +13,6 @@ class TypePortListView(APIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(**type_port_list)
-    def post(self, request):
-        outcome = ServiceOutcome(TypePortListService)
-        if bool(outcome.errors):
-            return Response(outcome.errors, status=outcome.response_status)
-        return Response(TypePortListSerializer(outcome.result).data, status=outcome.response_status)
+    def get(self, request):
+        outcome = ServiceOutcome(TypePortListService, request)
+        return Response(TypePortListSerializer(outcome.result, many=True).data, status=outcome.response_status)
