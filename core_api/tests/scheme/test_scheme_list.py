@@ -39,15 +39,16 @@ class SchemeListViewTest(TestCase):
 
     def test_create_scheme_return_201(self):
         params = {'title': 'test_1'}
-        resp = self.client.post('/core_api/scheme/', params, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        resp = self.client.post('/core_api/scheme/', params, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 201)
 
     def test_no_create_warning_title_return_403(self):
         params = {'title': 'test_1'}
         resp_1 = self.client.post('/core_api/scheme/', params,
-                                  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}', content_type='application/json')
         self.assertEqual(resp_1.status_code, 201)
         params = {'title': 'Test_1'}
         resp_2 = self.client.post('/core_api/scheme/', params,
-                                  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}', content_type='application/json')
         self.assertEqual(resp_2.status_code, 422)
