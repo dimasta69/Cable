@@ -1,6 +1,7 @@
 from rest_framework import status
 from functools import lru_cache
 
+from models_app.models import Access
 from utils.services import ServiceWithResult
 from django import forms
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
@@ -43,7 +44,7 @@ class SchemeDeleteService(ServiceWithResult):
 
     def access_presence(self):
         if (self.scheme and (self.scheme.creator != self.cleaned_data['current_user']) and not
-                self.cleaned_data['current_user'].is_superuser):
+        self.cleaned_data['current_user'].is_superuser):
             self.add_error('current_user', PermissionDenied(f'User {self.cleaned_data["current_user"]}access not '
                                                             f'allowed. Only the creator or administrator has access to '
                                                             f'delete'))

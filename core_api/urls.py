@@ -3,6 +3,7 @@ from django.urls import path
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
+from core_api.views.access.access import AccessView
 from core_api.views.auth.login import TokenCreateView
 from core_api.views.auth.logout import TokenDestroyView
 from core_api.views.scheme.scheme_list import SchemeListView
@@ -30,6 +31,7 @@ from core_api.views.server_rack.server_rack import ServerRackView
 from core_api.views.sfp_template.sfp_template_list import SfpTemplateListView
 from core_api.views.sfp_template.sfp_template import SfpTemplateView
 from core_api.views.sfp_template.adding_to_port import AddingToPortSfpTemplateView
+from core_api.views.access.access_list import AccessListView
 
 
 schema_view = get_schema_view(
@@ -68,5 +70,7 @@ urlpatterns = [
     path('sfp_template/', SfpTemplateListView.as_view()),
     path('sfp_template/<int:id>/', SfpTemplateView.as_view()),
     path('sfp_template/<int:id>/adding_to_port/', AddingToPortSfpTemplateView.as_view()),
+    path('access/', AccessListView.as_view()),
+    path('access/<int:id>', AccessView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
