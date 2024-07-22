@@ -66,8 +66,10 @@ class PortTest(TestCase):
         cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_2, room=cls.room_1)
         cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_3, room=cls.room_1)
         cls.equipment_4 = EquipmentFactory.create(template=cls.equipment_template_4, room=cls.room_1)
+        cls.equipment_5 = EquipmentFactory.create(template=cls.equipment_template_3, room=None)
 
         cls.unit_1 = UnitFactory.create(server_rack=cls.server_rack_1, side='Лицевая', equipment=cls.equipment_1)
+        cls.unit_1 = UnitFactory.create(server_rack=cls.server_rack_1, side='Лицевая', equipment=cls.equipment_5)
 
         cls.port_1 = PortFactory.create(equipment=cls.equipment_1, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
@@ -81,10 +83,10 @@ class PortTest(TestCase):
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_2)
 
-        cls.port_4 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
+        cls.port_4 = PortFactory.create(equipment=cls.equipment_5, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_3)
-        cls.port_5 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
+        cls.port_5 = PortFactory.create(equipment=cls.equipment_5, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_4)
         cls.port_6 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
@@ -145,6 +147,7 @@ class PortTest(TestCase):
         content_type = 'application/json'
         resp = self.client.put(f'/core_api/port/{self.port_4.id}/connection_pigtail/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 200)
 
     def test_return_422_connection_no_type(self):

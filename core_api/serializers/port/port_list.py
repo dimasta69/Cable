@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from functools import lru_cache
 
 from models_app.models.unit import Unit
 
@@ -95,16 +96,46 @@ class PortListSerializer(serializers.Serializer):
 
     @classmethod
     def get_connection_pigtail(cls, obj):
+        connection = {}
         if obj.connection_pigtail:
-            return {
-                'id': obj.connection_pigtail.id,
-                'uid': obj.connection_pigtail.uid,
-                'ip': obj.connection_pigtail.ip,
-                'manufacturer': obj.connection_pigtail.equipment.template.manufacturer.name,
-                'type': obj.connection_pigtail.equipment.template.type,
-                'model': obj.connection_pigtail.equipment.template.model,
+            unit = Unit.objects.get(equipment=obj.connection_pigtail.equipment)
+            connection = {
+                'port':
+                    {
+                        'id': obj.connection_pigtail.id,
+                        'uid': obj.connection_pigtail.uid,
+                        'ip': obj.connection_pigtail.ip,
+                    },
+                'equipment':
+                    {
+                        'id': obj.connection_pigtail.equipment.template.manufacturer.id,
+                        'manufacturer': obj.connection_pigtail.equipment.template.manufacturer.name or None,
+                        'type': obj.connection_pigtail.equipment.template.type,
+                        'model': obj.connection_pigtail.equipment.template.model,
+                    },
+                'unit':
+                    {
+                        'id': unit.id,
+                        'uid': unit.uid,
+                        'side': unit.side,
+                    },
+                'server_rack':
+                    {
+                        'id': unit.server_rack.id,
+                        'title': unit.server_rack.title,
+                    },
+                'room':
+                    {
+                        'id': unit.server_rack.room.id,
+                        'number': unit.server_rack.room.number,
+                    },
+                'building':
+                    {
+                        'id': unit.server_rack.room.building.id,
+                        'number': unit.server_rack.room.building.number,
+                    },
             }
-        return None
+        return connection
 
     @classmethod
     def get_type(cls, obj):
@@ -127,3 +158,7 @@ class PortListSerializer(serializers.Serializer):
                 'speed': obj.sfp.speed,
                 'line_type': obj.sfp.line_type
             }
+
+    @lru_cache()
+    def unit(self):
+        return Unit.objects.filter(equipment=(self.connection.equipment or self.connection_pigtail.equipment))

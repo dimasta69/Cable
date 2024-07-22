@@ -34,4 +34,4 @@ class RoomListView(APIView):
         outcome = ServiceOutcome(CreateRoomService, request.data.dict() | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(CreateRoomSerializer(outcome.result).data, status=outcome.response_status)
+        return Response(RoomListSerializer(outcome.result).data, status=outcome.response_status)

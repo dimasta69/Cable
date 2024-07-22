@@ -1,6 +1,6 @@
 from rest_framework import serializers
+from functools import lru_cache
 
-from models_app.models.port_template import PortTemplate
 from models_app.models.port import Port
 
 
@@ -8,18 +8,11 @@ class EquipmentSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     vlan_ip = serializers.JSONField(required=False)
     template = serializers.SerializerMethodField()
-    count_port_template = serializers.SerializerMethodField()
-    count_port = serializers.SerializerMethodField()
+    count_port = serializers.IntegerField()
     free_ports = serializers.IntegerField()
     number_of_free_ports = serializers.SerializerMethodField()
+    count_port_template_dict = serializers.JSONField()
     room_id = serializers.IntegerField(required=False)
-
-    def get_count_port_template(self, obj):
-        port_template_dict = {}
-        for port in PortTemplate.objects.filter(equipment_tmp=obj.template):
-            port_dict = {'count': port.count, 'unit': port.unit}
-            port_template_dict[port.id] = port_dict
-        return port_template_dict
 
     @classmethod
     def get_template(cls, obj):
@@ -32,13 +25,9 @@ class EquipmentSerializer(serializers.Serializer):
         }
 
     @classmethod
-    def get_count_port(cls, obj):
-        return sum(PortTemplate.objects.filter(equipment_tmp=obj.template).values_list('count', flat=True))
-
-    @classmethod
     def get_number_of_free_ports(cls, obj):
         free_ports = {}
-        for port in PortTemplate.objects.filter(equipment_tmp=obj.template):
+        for port in obj.template.port_template.all():
             free_ports[str(port.speed)] = (Port.objects.filter(equipment=obj, port_template=port, connection=None).
                                            count())
         return free_ports

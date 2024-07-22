@@ -18,6 +18,7 @@ class ServerRackSerializer(serializers.Serializer):
             if unit.equipment:
                 equipment_data = {
                     'id': unit.equipment.id,
+                    'equipment_id': unit.equipment.template.id,
                     'manufacturer': unit.equipment.template.manufacturer.name,
                     'type': unit.equipment.template.type,
                     'model': unit.equipment.template.model

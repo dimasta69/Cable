@@ -24,7 +24,7 @@ class PortListTest(TestCase):
         cls.port_template_2 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=4,
                                                          modular=False, type_port=cls.type_port_1)
 
-        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
+        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1, room=None)
 
         cls.port_1 = PortFactory.create_batch(20, equipment=cls.equipment_1, connection=None, vlan_type=None,
                                               line_type=None, ip=None, mac=None,

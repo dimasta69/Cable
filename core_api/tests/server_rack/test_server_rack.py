@@ -28,7 +28,7 @@ class ServerRackTest(TestCase):
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1)
         cls.port_template_1 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_1, count=20,
                                                          type_port=cls.type_port_1)
-        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
+        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1, room=None)
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
         cls.building_1 = BuildingFactory.create(scheme=cls.scheme_1)

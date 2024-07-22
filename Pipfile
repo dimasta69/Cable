@@ -28,6 +28,7 @@ psycopg = "*"
 django-cors-headers = "*"
 djoser = "*"
 psycopg2-binary = "*"
+django-querycount = "*"
 
 [requires]
 python_version = "3.11"

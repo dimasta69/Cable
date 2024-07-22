@@ -44,9 +44,9 @@ class EquipmentListTest(TestCase):
         cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=14,
                                                          type_port=cls.type_port_1)
 
-        cls.equipment = EquipmentFactory.create_batch(17, template=cls.equipment_template_1)
-        cls.equipment_2 = EquipmentFactory.create_batch(2, template=cls.equipment_template_2)
-        cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_4)
+        cls.equipment = EquipmentFactory.create_batch(17, template=cls.equipment_template_1, room=None)
+        cls.equipment_2 = EquipmentFactory.create_batch(2, template=cls.equipment_template_2, room=None)
+        cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_4, room=None)
 
         cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
         cls.scheme_2 = SchemeFactory.create(creator=cls.user_1)

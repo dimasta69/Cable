@@ -50,9 +50,9 @@ class EquipmentTest(TestCase):
         cls.port_template_5 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=14,
                                                          modular=False, type_port=cls.type_port_1, lines=2, unit=[1])
 
-        cls.equipment = EquipmentFactory.create_batch(17, template=cls.equipment_template_1)
-        cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_3)
-        cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_4)
+        cls.equipment = EquipmentFactory.create_batch(17, template=cls.equipment_template_1, room=None)
+        cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_3, room=None)
+        cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_4, room=None)
 
         cls.port_1 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,

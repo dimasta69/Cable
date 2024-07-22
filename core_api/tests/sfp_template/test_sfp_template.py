@@ -31,8 +31,8 @@ class SfpTemplateTest(TestCase):
         cls.sfp_template_1 = SfpTemplateFactory.create(manufacturer=cls.manufacturer_2, type_port=cls.type_port_1,
                                                        line_type='Многомодовый', speed=[1000])
 
-        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
-        cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_1)
+        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1, room=None)
+        cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_1, room=None)
 
         cls.port_1 = PortFactory.create(equipment=cls.equipment_1, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
