@@ -3,8 +3,14 @@ import json
 from django.test import TestCase
 from django.test.client import encode_multipart
 
+from models_app.factories.access import AccessFactory
+from models_app.factories.building import BuildingFactory
 from models_app.factories.port_template import PortTemplateFactory
+from models_app.factories.room import RoomFactory
+from models_app.factories.scheme import SchemeFactory
+from models_app.factories.server_rack import ServerRackFactory
 from models_app.factories.type_port import TypePortFactory
+from models_app.factories.unit import UnitFactory
 from models_app.factories.user import UserFactory
 from models_app.factories.manufacturer import ManufacturerFactory
 from models_app.factories.equipment_template import EquipmentTemplateFactory
@@ -17,6 +23,13 @@ class PortTest(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_1 = UserFactory.create(create_token=True)
+
+        cls.scheme_1 = SchemeFactory.create(creator=cls.user_1)
+        cls.access_1 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_1, role='Creator')
+        cls.building_1 = BuildingFactory.create(scheme=cls.scheme_1)
+        cls.room_1 = RoomFactory.create(building=cls.building_1, type='Обычная')
+        cls.room_2 = RoomFactory.create(building=cls.building_1, type='Серверная')
+        cls.server_rack_1 = ServerRackFactory.create(room=cls.room_1, number_of_units=20)
 
         cls.manufacturer_1 = ManufacturerFactory.create()
         cls.equipment_template_1 = EquipmentTemplateFactory.create(manufacturer=cls.manufacturer_1,
@@ -49,10 +62,12 @@ class PortTest(TestCase):
         cls.port_template_6 = PortTemplateFactory.create(equipment_tmp=cls.equipment_template_4, count=7, speed=[1000],
                                                          modular=True, type_port=cls.type_port_1)
 
-        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1)
-        cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_2)
-        cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_3)
-        cls.equipment_4 = EquipmentFactory.create(template=cls.equipment_template_4)
+        cls.equipment_1 = EquipmentFactory.create(template=cls.equipment_template_1, room=None)
+        cls.equipment_2 = EquipmentFactory.create(template=cls.equipment_template_2, room=cls.room_1)
+        cls.equipment_3 = EquipmentFactory.create(template=cls.equipment_template_3, room=cls.room_1)
+        cls.equipment_4 = EquipmentFactory.create(template=cls.equipment_template_4, room=cls.room_1)
+
+        cls.unit_1 = UnitFactory.create(server_rack=cls.server_rack_1, side='Лицевая', equipment=cls.equipment_1)
 
         cls.port_1 = PortFactory.create(equipment=cls.equipment_1, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
@@ -95,6 +110,7 @@ class PortTest(TestCase):
         content_type = 'application/json'
         resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_not_found_port(self):

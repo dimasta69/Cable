@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from models_app.models.unit import Unit
+
 
 class PortListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
@@ -21,16 +23,75 @@ class PortListSerializer(serializers.Serializer):
 
     @classmethod
     def get_connection(cls, obj):
+        connection = {}
         if obj.connection:
-            return {
-                'id': obj.connection.id,
-                'uid': obj.connection.uid,
-                'ip': obj.connection.ip,
-                'manufacturer': obj.connection.equipment.template.manufacturer.name,
-                'type': obj.connection.equipment.template.type,
-                'model': obj.connection.equipment.template.model,
-            }
-        return None
+            if obj.connection.equipment.room:
+                connection = {
+                    'port':
+                        {
+                            'id': obj.connection.id,
+                            'uid': obj.connection.uid,
+                            'ip': obj.connection.ip,
+                        },
+                    'equipment':
+                        {
+                            'id': obj.connection.equipment.template.manufacturer.id,
+                            'manufacturer': obj.connection.equipment.template.manufacturer.name or None,
+                            'type': obj.connection.equipment.template.type,
+                            'model': obj.connection.equipment.template.model,
+                        },
+                    'room':
+                        {
+                            'id': obj.connection.equipment.room.id,
+                            'number': obj.connection.equipment.room.number
+                        },
+                    'building':
+                        {
+                            'id': obj.connection.equipment.room.building.id,
+                            'number': obj.connection.equipment.room.building.number,
+                        },
+                }
+
+            else:
+                unit = Unit.objects.get(equipment=obj.connection.equipment)
+                connection = {
+                    'port':
+                        {
+                            'id': obj.connection.id,
+                            'uid': obj.connection.uid,
+                            'ip': obj.connection.ip,
+                        },
+                    'equipment':
+                        {
+                            'id': obj.connection.equipment.template.manufacturer.id,
+                            'manufacturer': obj.connection.equipment.template.manufacturer.name or None,
+                            'type': obj.connection.equipment.template.type,
+                            'model': obj.connection.equipment.template.model,
+                        },
+                    'unit':
+                        {
+                            'id': unit.id,
+                            'uid': unit.uid,
+                            'side': unit.side,
+                        },
+                    'server_rack':
+                        {
+                            'id': unit.server_rack.id,
+                            'title': unit.server_rack.title,
+                        },
+                    'room':
+                        {
+                            'id': unit.server_rack.room.id,
+                            'number': unit.server_rack.room.number,
+                        },
+                    'building':
+                        {
+                            'id': unit.server_rack.room.building.id,
+                            'number': unit.server_rack.room.building.number,
+                        },
+                }
+
+        return connection
 
     @classmethod
     def get_connection_pigtail(cls, obj):
@@ -53,9 +114,9 @@ class PortListSerializer(serializers.Serializer):
                 'modular': obj.port_template.modular,
             }
         return {
-                'name': None,
-                'modular': obj.port_template.modular
-            }
+            'name': None,
+            'modular': obj.port_template.modular
+        }
 
     def get_sfp(self, obj):
         if obj.sfp:
