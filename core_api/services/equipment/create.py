@@ -36,19 +36,18 @@ class CreateEquipmentService(ServiceWithResult):
     def create_equipment(self):
         equipment = Equipment.objects.create(template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'])
         number = 1
-        for port_template in self.port_template_list.order_by('unit', 'id'):
-            for port in range(port_template.count):
-                Port.objects.create(uid=number, equipment=equipment, port_template=port_template)
-                number += 1
+        objects_to_create = []
 
-        equipment.set_free_ports()
+        for port_template in self.port_template_list:
+            for i in range(port_template.count):
+                objects_to_create.append(Port(uid=number + i, equipment=equipment, port_template=port_template))
+        Port.objects.bulk_create(objects_to_create)
+        equipment.free_ports = equipment.count_port
         self.add_equipment(equipment)
         return self.server_rack
 
     def add_equipment(self, equipment):
-        for unit in self.unit_list_int:
-            unit.equipment = equipment
-            unit.save()
+        self.unit_list_int.all().update(equipment=equipment)
         self.server_rack.check_free_power()
         self.server_rack.check_free_units()
 
@@ -64,7 +63,8 @@ class CreateEquipmentService(ServiceWithResult):
     @lru_cache()
     def port_template_list(self):
         try:
-            return PortTemplate.objects.filter(equipment_tmp=self.equipment_template)
+            return (PortTemplate.objects.filter(equipment_tmp=self.equipment_template).order_by('unit', 'id')
+                    .select_related('equipment_tmp'))
         except PortTemplate.DoesNotExist:
             return PortTemplate.objects.none()
 
@@ -79,20 +79,10 @@ class CreateEquipmentService(ServiceWithResult):
     @property
     @lru_cache()
     def unit_list_int(self):
-        unit_list = []
-        for uid in self.cleaned_data['unit_list_id']:
-            try:
-                unit_list.append(self.unit_list.get(id=uid))
-            except Unit.DoesNotExist:
-                return None
-        return unit_list
-
-    @property
-    def unit_list(self):
-        try:
-            return Unit.objects.all()
-        except Unit.DoesNotExist:
+        unit_list = Unit.objects.filter(id__in=self.cleaned_data['unit_list_id']).select_related('server_rack')
+        if unit_list.count() < len(self.cleaned_data['unit_list_id']):
             return Unit.objects.none()
+        return unit_list
 
     def equipment_template_presence(self):
         if not self.equipment_template:
@@ -125,10 +115,9 @@ class CreateEquipmentService(ServiceWithResult):
     def unit_free_presence(self):
         if self.cleaned_data['unit_list_id']:
             if self.unit_list_int and self.equipment_template:
-                for unit in self.unit_list_int:
-                    if unit.equipment:
-                        self.add_error('unit_list_id', ValidationError('Not all units are free'))
-                        self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+                if self.unit_list_int.filter(equipment__isnull=False):
+                    self.add_error('unit_list_id', ValidationError('Not all units are free'))
+                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def server_rack_presence(self):
         if not self.server_rack:

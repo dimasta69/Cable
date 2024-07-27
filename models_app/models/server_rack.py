@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum, Q
 from models_app.models.room import Room
 
 
@@ -27,15 +28,16 @@ class ServerRack(models.Model):
 
     def check_free_power(self):
         if self.max_power:
-            power_list = []
-            for unit in self.unit.all():
-                if unit.equipment and unit.equipment.template.power is not None:
-                    power_list.append(unit.equipment.template.power)
-            self.free_power = self.max_power - sum(power_list)
+            total_power = self.unit.filter(
+                Q(equipment__isnull=False) & Q(equipment__template__power__isnull=False)
+            ).aggregate(total_power=Sum('equipment__template__power'))['total_power'] or 0
+
+            self.free_power = self.max_power - total_power
 
     def check_free_units(self):
-        unit_list = []
-        for unit in self.unit.all():
-            if unit.equipment:
-                unit_list.append(unit.equipment.template.number_of_units)
-        self.free_units = self.number_of_units - sum(unit_list)
+        if self.number_of_units:
+            total_units = self.unit.filter(
+                Q(equipment__isnull=False) & Q(equipment__template__number_of_units__isnull=False)
+            ).aggregate(total_units=Sum('equipment__template__number_of_units'))['total_units'] or 0
+
+            self.free_units = self.number_of_units - total_units

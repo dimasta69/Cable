@@ -54,7 +54,8 @@ class PortListSerializer(serializers.Serializer):
                 }
 
             else:
-                unit = Unit.objects.get(equipment=obj.connection.equipment)
+                unit = (Unit.objects.filter(equipment=obj.connection.equipment)
+                        .select_related('server_rack', 'server_rack__room', 'server_rack__room__building').first())
                 connection = {
                     'port':
                         {
@@ -98,7 +99,8 @@ class PortListSerializer(serializers.Serializer):
     def get_connection_pigtail(cls, obj):
         connection = {}
         if obj.connection_pigtail:
-            unit = Unit.objects.get(equipment=obj.connection_pigtail.equipment)
+            unit = (Unit.objects.filter(equipment=obj.connection_pigtail.equipment)
+                    .select_related('server_rack', 'server_rack__room', 'server_rack__room__building').first())
             connection = {
                 'port':
                     {
@@ -158,7 +160,3 @@ class PortListSerializer(serializers.Serializer):
                 'speed': obj.sfp.speed,
                 'line_type': obj.sfp.line_type
             }
-
-    @lru_cache()
-    def unit(self):
-        return Unit.objects.filter(equipment=(self.connection.equipment or self.connection_pigtail.equipment))

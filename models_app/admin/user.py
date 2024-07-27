@@ -14,7 +14,7 @@ class CustomChangePasswordForm(PasswordChangeForm):
 
 @receiver(pre_save, sender=User)
 def hash_user_password(sender, instance, **kwargs):
-    if instance._state:
+    if instance._state and not instance._state.adding:
         instance.password = make_password(instance.password)
 
 
@@ -27,6 +27,6 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ['username']
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
+        if not self._state.adding:
             self.password = make_password(self.password)
         super().save(*args, **kwargs)
