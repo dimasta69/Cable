@@ -154,6 +154,7 @@ class PortListSerializer(serializers.Serializer):
     def get_sfp(self, obj):
         if obj.sfp:
             return {
+                'id': obj.sfp.id,
                 'manufacturer': obj.sfp.manufacturer.name,
                 'name': obj.sfp.name,
                 'type_port': obj.sfp.type_port.name,

@@ -11,7 +11,7 @@ class EquipmentTemplate(models.Model):
     type = models.CharField(choices=TYPE_CHOICES, verbose_name='Тип оборудования', null=False, max_length=100)
     manufacturer = models.ForeignKey(Manufacturer, related_name='equipment_template', null=True,
                                      on_delete=models.CASCADE, verbose_name='Производитель')
-    model = models.CharField(null=False, verbose_name='Модель', max_length=100)
+    model = models.CharField(null=False, verbose_name='Модель', max_length=100, unique=True)
     power = models.IntegerField(null=True, verbose_name='Мощность')
     number_of_units = models.IntegerField(null=False, verbose_name='Количество занимаемых юнитов')
 

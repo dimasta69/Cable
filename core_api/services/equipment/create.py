@@ -35,12 +35,13 @@ class CreateEquipmentService(ServiceWithResult):
     @property
     def create_equipment(self):
         equipment = Equipment.objects.create(template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'])
-        number = 1
+        number = 0
         objects_to_create = []
 
         for port_template in self.port_template_list:
             for i in range(port_template.count):
-                objects_to_create.append(Port(uid=number + i, equipment=equipment, port_template=port_template))
+                number = number + 1
+                objects_to_create.append(Port(uid=number, equipment=equipment, port_template=port_template))
         Port.objects.bulk_create(objects_to_create)
         equipment.free_ports = equipment.count_port
         self.add_equipment(equipment)

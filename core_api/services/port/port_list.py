@@ -34,7 +34,7 @@ class PortListService(ServiceWithResult):
     @property
     def port_list(self):
         try:
-            return Port.objects.filter(equipment=self.equipment)
+            return Port.objects.filter(equipment=self.equipment).select_related('port_template')
         except Port.DoesNotExist:
             return Port.objects.none()
 

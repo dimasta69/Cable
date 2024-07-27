@@ -1,6 +1,7 @@
 from django import forms
 from rest_framework import status
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from models_app.models.equipment_template import EquipmentTemplate
@@ -32,6 +33,7 @@ class CreateEquipmentTemplateService(ServiceWithResult):
                                                 power=self.cleaned_data['power'])
 
     @property
+    @lru_cache()
     def manufacturer(self):
         try:
             return Manufacturer.objects.get(id=self.cleaned_data['manufacturer_id'])
@@ -53,7 +55,7 @@ class CreateEquipmentTemplateService(ServiceWithResult):
 
     def model_presence(self):
         for equipment in self.equipment_template_list:
-            if self.cleaned_data['model'] == equipment.model:
+            if self.cleaned_data['model'].lower() == equipment.model.lower():
                 self.add_error('model', ValidationError(f'Field with model={self.cleaned_data["model"]}'
                                                         ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

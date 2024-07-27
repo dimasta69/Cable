@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from functools import lru_cache
 
 from models_app.models.port import Port
 
@@ -26,8 +25,10 @@ class EquipmentSerializer(serializers.Serializer):
 
     @classmethod
     def get_number_of_free_ports(cls, obj):
-        free_ports = {}
         for port in obj.template.port_template.all():
-            free_ports[str(port.speed)] = (Port.objects.filter(equipment=obj, port_template=port, connection=None).
-                                           count())
-        return free_ports
+            return {str(port.id): {
+                str(port.speed): (Port.objects.filter(equipment=obj, port_template=port, connection=None).
+                                  count()),
+                'lines': port.lines,
+                'unit': port.unit,
+            }}
