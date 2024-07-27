@@ -29,6 +29,4 @@ class EquipmentSerializer(serializers.Serializer):
             return {str(port.id): {
                 str(port.speed): (Port.objects.filter(equipment=obj, port_template=port, connection=None).
                                   count()),
-                'lines': port.lines,
-                'unit': port.unit,
             }}

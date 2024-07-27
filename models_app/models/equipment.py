@@ -38,6 +38,6 @@ def set_count_port(sender, instance, **kwargs):
 def set_count_port_template(sender, instance, **kwargs):
     port_template_dict = {}
     for port in instance.template.port_template.all():
-        port_dict = {'count': port.count, 'unit': port.unit}
+        port_dict = {'count': port.count, 'unit': port.unit, 'lines': port.lines}
         port_template_dict[port.id] = port_dict
     instance.count_port_template_dict = port_template_dict
