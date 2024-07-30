@@ -28,5 +28,4 @@ class EquipmentSerializer(serializers.Serializer):
         for port in obj.template.port_template.all():
             return {str(port.id): {
                 str(port.speed): (Port.objects.filter(equipment=obj, port_template=port, connection=None).
-                                  count()),
-            }}
+                                  count()),}}

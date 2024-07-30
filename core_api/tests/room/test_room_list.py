@@ -72,20 +72,22 @@ class RoomListTest(TestCase):
 
     def test_return_201_create_room(self):
         data = {'building_id': self.building_2.id, 'number': 'wed', 'type': 'Серверная'}
-        resp = self.client.post('/core_api/room/', data,
+        resp = self.client.post('/core_api/room/', data, content_type='application/json',
                                 HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 201)
 
     def test_return_404_create_not_found_building(self):
         data = {'building_id': 99, 'number': 'wed', 'type': 'Серверная'}
         resp = self.client.post('/core_api/room/', data,
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_422_number_retry(self):
         data = {'building_id': self.building_2.id, 'number': self.room_1.number, 'type': 'Серверная'}
         resp = self.client.post('/core_api/room/', data,
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 422)
 
     def test_return_200_role_change(self):
@@ -108,18 +110,18 @@ class RoomListTest(TestCase):
 
     def test_return_201_role_change(self):
         data = {'building_id': self.building_1.id, 'number': 'wed', 'type': 'Серверная'}
-        resp = self.client.post('/core_api/room/', data,
+        resp = self.client.post('/core_api/room/', data, content_type='application/json',
                                 HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
         self.assertEqual(resp.status_code, 201)
 
     def test_return_403_role_read(self):
         data = {'building_id': self.building_1.id, 'number': 'wed', 'type': 'Серверная'}
-        resp = self.client.post('/core_api/room/', data,
+        resp = self.client.post('/core_api/room/', data, content_type='application/json',
                                 HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
         self.assertEqual(resp.status_code, 403)
 
     def test_return_403_no_role_create(self):
         data = {'building_id': self.building_1.id, 'number': 'wed', 'type': 'Серверная'}
-        resp = self.client.post('/core_api/room/', data,
+        resp = self.client.post('/core_api/room/', data, content_type='application/json',
                                 HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
         self.assertEqual(resp.status_code, 403)

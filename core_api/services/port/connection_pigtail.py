@@ -4,12 +4,13 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
+from utils.fields import ListIntegerField
 from models_app.models.port import Port
 
 
 class ConnectionPigtailService(ServiceWithResult):
     id = forms.IntegerField(required=True)
-    connection_pigtail_id = forms.IntegerField(required=True)
+    connection_pigtail_id = forms.IntegerField()
 
     custom_validations = ['port_presence', 'port_connection_presence', 'equipment_type_presence']
 

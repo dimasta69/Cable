@@ -21,7 +21,7 @@ class CreatePortTemplateService(ServiceWithResult):
     lines = forms.IntegerField(required=True)
 
     custom_validations = ['name_presence', 'equipment_template_presence', 'type_port_presence',
-                          'type_and_modular_presence', 'count_unit', 'lines_presence']
+                          'type_and_modular_presence', 'count_unit', 'lines_presence', 'unit_max']
 
     def process(self):
         self.run_custom_validations()
@@ -99,4 +99,10 @@ class CreatePortTemplateService(ServiceWithResult):
         if self.cleaned_data['lines'] and self.equipment_tmp:
             if (len(self.cleaned_data['unit']) / self.cleaned_data['lines']) < 0.5:
                 self.add_error('unit', ValidationError('Еhe number of lines per unit should not exceed 2'))
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def unit_max(self):
+        if self.cleaned_data['unit'] and self.equipment_tmp:
+            if max(self.cleaned_data['unit']) > self.equipment_tmp.number_of_units:
+                self.add_error('unit', ValidationError('The number of units is less than the available unit'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
