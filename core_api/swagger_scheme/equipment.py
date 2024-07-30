@@ -74,6 +74,10 @@ equipment_list = {
                           in_=openapi.IN_QUERY,
                           description='Search by scheme',
                           type=openapi.TYPE_INTEGER),
+        openapi.Parameter(name='filter_server_rack_id',
+                          in_=openapi.IN_QUERY,
+                          description='Search by scheme',
+                          type=openapi.TYPE_INTEGER),
     ]
 }
 

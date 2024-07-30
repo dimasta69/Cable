@@ -51,9 +51,9 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_type']:
             equipment_list = equipment_list.filter(template__type=self.cleaned_data['filter_type'])
         if self.cleaned_data['filter_scheme_id']:
-            equipment_list = equipment_list.filter(unit__server_rack__room__building__scheme=self.scheme)
+            equipment_list = equipment_list.filter(unit__server_rack__room__building__scheme=self.scheme).distinct()
         if self.cleaned_data['filter_server_rack_id']:
-            equipment_list = equipment_list.filter(unit__server_rack=self.server_rack)
+            equipment_list = equipment_list.filter(unit__server_rack=self.server_rack).distinct()
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
