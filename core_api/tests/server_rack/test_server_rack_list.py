@@ -71,19 +71,22 @@ class ServerRackListTest(TestCase):
     def test_return_201_create_stack(self):
         resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
                                                            'title': 'sfds', 'mac_power': 200},
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 201)
 
     def test_return_404_create_not_found_room(self):
         resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': 99,
                                                            'title': 'sfds', 'mac_power': 200},
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 404)
 
     def test_return_422_room_not_server(self):
         resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_3.id,
                                                            'title': 'sfds', 'mac_power': 200},
-                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 422)
 
     def test_return_200_role_change(self):
@@ -111,17 +114,20 @@ class ServerRackListTest(TestCase):
     def test_return_201_create_role_change(self):
         resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
                                                            'title': 'sfds', 'mac_power': 200},
-                                HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_2.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 201)
 
     def test_return_403_create_role_read(self):
         resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
                                                            'title': 'sfds', 'mac_power': 200},
-                                HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_3.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 403)
 
     def test_return_403_create_no_role(self):
         resp = self.client.post('/core_api/server_rack/', {'number_of_units': 20, 'room_id': self.room_1.id,
                                                            'title': 'sfds', 'mac_power': 200},
-                                HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}')
+                                HTTP_AUTHORIZATION=f'Token {self.user_4.auth_token}',
+                                content_type='application/json')
         self.assertEqual(resp.status_code, 403)

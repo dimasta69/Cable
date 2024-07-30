@@ -10,6 +10,7 @@ from utils.services import ServiceWithResult
 from models_app.models import EquipmentTemplate, Scheme
 from models_app.models.equipment import Equipment
 from models_app.models.manufacturer import Manufacturer
+from models_app.models.server_rack import ServerRack
 
 
 class EquipmentListService(ServiceWithResult):
@@ -19,9 +20,11 @@ class EquipmentListService(ServiceWithResult):
     filter_manufacturer = forms.IntegerField(required=False)
     filter_type = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
-    filter_scheme_id = forms.CharField(required=False)
+    filter_scheme_id = forms.IntegerField(required=False)
+    filter_server_rack_id = forms.IntegerField(required=False)
 
-    custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence']
+    custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence', 'server_rack_presence',
+                          'scheme_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -49,6 +52,8 @@ class EquipmentListService(ServiceWithResult):
             equipment_list = equipment_list.filter(template__type=self.cleaned_data['filter_type'])
         if self.cleaned_data['filter_scheme_id']:
             equipment_list = equipment_list.filter(unit__server_rack__room__building__scheme=self.scheme)
+        if self.cleaned_data['filter_server_rack_id']:
+            equipment_list = equipment_list.filter(unit__server_rack=self.server_rack)
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
@@ -82,6 +87,14 @@ class EquipmentListService(ServiceWithResult):
         except Scheme.DoesNotExist:
             return None
 
+    @property
+    @lru_cache()
+    def server_rack(self):
+        try:
+            return ServerRack.objects.get(id=self.cleaned_data['filter_server_rack_id'])
+        except ServerRack.DoesNotExist:
+            return None
+
     def type_presence(self):
         if self.cleaned_data['filter_type']:
             if not any(type_tuple[1] == self.cleaned_data['filter_type']
@@ -105,5 +118,19 @@ class EquipmentListService(ServiceWithResult):
             if not self.manufacturer:
                 self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
                                                                          f'{self.cleaned_data["filter_manufacturer"]} '
-                                                                         f'not found'))
+                                                                         'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def server_rack_presence(self):
+        if self.cleaned_data['filter_server_rack_id']:
+            if not self.server_rack:
+                self.add_error('filter_server_rack_id', ObjectDoesNotExist(
+                    f'Server rack id={self.cleaned_data["filter_server_rack_id"]} not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def scheme_presence(self):
+        if self.cleaned_data['filter_scheme_id']:
+            if not self.scheme:
+                self.add_error('filter_scheme_id', ObjectDoesNotExist(
+                    f'Server rack id={self.cleaned_data["filter_scheme_id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
