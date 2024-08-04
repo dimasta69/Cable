@@ -106,3 +106,18 @@ add_sfp = {
     ),
     'responses': {200: openapi.Response('Success', PortListSerializer)}
 }
+
+disconnect_sfp = {
+    'operation_description': 'Disconnect sfp',
+    'tags': ['core_api/port'],
+    'request_body': openapi.Schema(
+        title='core_api_port_disconnect_sfp',
+        description='Update port',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            port_list=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                     items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+        ),
+    ),
+    'responses': {200: openapi.Response('Success', PortListSerializer)}
+}
