@@ -4,7 +4,6 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
-from utils.fields import ListIntegerField
 from models_app.models.port import Port
 
 

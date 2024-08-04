@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 from core_api.serializers.port.port_list import PortListSerializer
-
+from core_api.serializers.equipment.equipment import EquipmentSerializer
 
 port_list = {
     'operation_description': 'Get port list',
@@ -72,6 +72,25 @@ port_connection_pigtail = {
         ),
     ),
     'responses': {200: openapi.Response('Success', PortListSerializer)}
+}
+
+port_connection_pigtail_list = {
+    'operation_description': 'Port connection pigtail list',
+    'tags': ['core_api/port'],
+    'request_body': openapi.Schema(
+        title='core_api_port_connection_pigtail_list',
+        description='Update port',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            pigtail_list=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                        items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            connection_pigtail_list=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                                   items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            equipment_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+            connection_equipment_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+        ),
+    ),
+    'responses': {200: openapi.Response('Success', EquipmentSerializer)}
 }
 
 add_sfp = {

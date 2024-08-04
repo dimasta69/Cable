@@ -89,6 +89,15 @@ class PortTest(TestCase):
         cls.port_5 = PortFactory.create(equipment=cls.equipment_5, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_4)
+        cls.port_11 = PortFactory.create(equipment=cls.equipment_5, connection=None, vlan_type=None,
+                                         line_type=None, ip=None, mac=None,
+                                         port_template=cls.port_template_4)
+        cls.port_12 = PortFactory.create(equipment=cls.equipment_5, connection=None, vlan_type=None,
+                                         line_type=None, ip=None, mac=None,
+                                         port_template=cls.port_template_4)
+        cls.port_13 = PortFactory.create(equipment=cls.equipment_5, connection=None, vlan_type=None,
+                                         line_type=None, ip=None, mac=None,
+                                         port_template=cls.port_template_4, )
         cls.port_6 = PortFactory.create(equipment=cls.equipment_3, connection=None, vlan_type=None,
                                         line_type=None, ip=None, mac=None,
                                         port_template=cls.port_template_5)
@@ -112,7 +121,6 @@ class PortTest(TestCase):
         content_type = 'application/json'
         resp = self.client.put(f'/core_api/port/{self.port_1.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        print(json.loads(resp.content))
         self.assertEqual(resp.status_code, 200)
 
     def test_return_404_not_found_port(self):
@@ -259,3 +267,47 @@ class PortTest(TestCase):
         resp = self.client.put(f'/core_api/port/{self.port_10.id}/',
                                content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 422)
+
+    def test_return_200_connection_to_pigtail_list(self):
+        content = {'connection_pigtail_list': [self.port_5.id], 'pigtail_list': [self.port_4.id],
+                   'equipment_id': self.equipment_5.id, 'connection_equipment_id': self.equipment_5.id}
+        content_type = 'application/json'
+        resp = self.client.put('/core_api/port/connection_pigtail_list/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 200)
+
+    def test_return_422_connection_to_pigtail_list_sum_error(self):
+        content = {'connection_pigtail_list': [self.port_5.id, self.port_12.id],
+                   'pigtail_list': [self.port_4.id], 'equipment_id':
+                       self.equipment_5.id, 'connection_equipment_id': self.equipment_5.id}
+        content_type = 'application/json'
+        resp = self.client.put('/core_api/port/connection_pigtail_list/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_422_connection_to_pigtail_list(self):
+        content = {'connection_pigtail_list': [self.port_5.id, self.port_12.id],
+                   'pigtail_list': [self.port_4.id, self.port_11.id], 'equipment_id':
+                       self.equipment_5.id, 'connection_equipment_id': self.equipment_4.id}
+        content_type = 'application/json'
+        resp = self.client.put('/core_api/port/connection_pigtail_list/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 422)
+
+    def test_return_422_connection_to_pigtail_list_already(self):
+        content = {'connection_pigtail_list': [self.port_5.id],
+                   'pigtail_list': [999], 'equipment_id':
+                       self.equipment_5.id, 'connection_equipment_id': self.equipment_5.id}
+        content_type = 'application/json'
+        resp = self.client.put('/core_api/port/connection_pigtail_list/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)
+
+    def test_return_422_connection_to_pigtail_list_already_2(self):
+        content = {'connection_pigtail_list': [999],
+                   'pigtail_list': [self.port_5.id], 'equipment_id':
+                       self.equipment_5.id, 'connection_equipment_id': self.equipment_5.id}
+        content_type = 'application/json'
+        resp = self.client.put('/core_api/port/connection_pigtail_list/',
+                               content, content_type=content_type, HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+        self.assertEqual(resp.status_code, 404)

@@ -141,13 +141,11 @@ class PortListSerializer(serializers.Serializer):
 
     @classmethod
     def get_type(cls, obj):
-        if obj.port_template.type_port:
-            return {
-                'name': obj.port_template.type_port.name,
-                'modular': obj.port_template.modular,
-            }
+        name = None
+        if obj.port_template:
+            name = obj.port_template.type_port.name
         return {
-            'name': None,
+            'name': name,
             'modular': obj.port_template.modular
         }
 

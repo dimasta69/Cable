@@ -21,6 +21,7 @@ from core_api.views.equipment.create_from_room import CreateEquipmentFromRoomVie
 from core_api.views.port.port_list import PortListView
 from core_api.views.port.port import PortView
 from core_api.views.port.connection_pigtail import ConnectionPigtailView
+from core_api.views.port.connection_pigtail_list import ConnectionPigtailListView
 from core_api.views.port.add_sfp import AddSfpView
 from core_api.views.building.building_list import BuildingListView
 from core_api.views.building.building import BuildingView
@@ -33,7 +34,6 @@ from core_api.views.sfp_template.sfp_template import SfpTemplateView
 from core_api.views.sfp_template.adding_to_port import AddingToPortSfpTemplateView
 from core_api.views.access.access_list import AccessListView
 from core_api.views.type_port.type_port_list import TypePortListView
-
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -61,6 +61,7 @@ urlpatterns = [
     path('port/', PortListView.as_view()),
     path('port/<int:id>/', PortView.as_view()),
     path('port/<int:id>/connection_pigtail/', ConnectionPigtailView.as_view()),
+    path('port/connection_pigtail_list/', ConnectionPigtailListView.as_view()),
     path('port/<int:id>/add_sfp/', AddSfpView.as_view()),
     path('building/', BuildingListView.as_view()),
     path('building/<int:id>/', BuildingView.as_view()),

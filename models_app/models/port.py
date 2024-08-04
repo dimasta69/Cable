@@ -42,11 +42,13 @@ class Port(models.Model):
         self.connection = port
         if port or (self.connection and not port):
             self.connection.set_pre_connection(self)
+        self.save()
 
     def set_pre_connection(self, parent_port):
         self.connection = parent_port
         if parent_port:
             self.line_type = parent_port.line_type
+        self.save()
 
     def set_connection_pigtail(self, port):
         if self.connection_pigtail and self.connection_pigtail != self:
@@ -54,3 +56,4 @@ class Port(models.Model):
         self.connection_pigtail = port
         if port or (self.connection_pigtail and not port):
             self.connection_pigtail = self
+        self.save()
