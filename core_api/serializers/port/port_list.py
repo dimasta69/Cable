@@ -142,7 +142,7 @@ class PortListSerializer(serializers.Serializer):
     @classmethod
     def get_type(cls, obj):
         name = None
-        if obj.port_template:
+        if obj.port_template.type_port:
             name = obj.port_template.type_port.name
         return {
             'name': name,

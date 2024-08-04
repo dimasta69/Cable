@@ -117,6 +117,7 @@ disconnect_sfp = {
         properties=dict(
             port_list=openapi.Schema(type=openapi.TYPE_ARRAY,
                                      items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            equipment_id=openapi.Schema(type=openapi.TYPE_INTEGER),
         ),
     ),
     'responses': {200: openapi.Response('Success', PortListSerializer)}
