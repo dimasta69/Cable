@@ -122,3 +122,35 @@ disconnect_sfp = {
     ),
     'responses': {200: openapi.Response('Success', PortListSerializer)}
 }
+
+disconnect_pigtail = {
+    'operation_description': 'Disconnect pigtail',
+    'tags': ['core_api/port'],
+    'request_body': openapi.Schema(
+        title='core_api_port_disconnect_pigtail',
+        description='Update port',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            pigtail_list=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                     items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            equipment_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+        ),
+    ),
+    'responses': {200: openapi.Response('Success', PortListSerializer)}
+}
+
+disconnect_port_list = {
+    'operation_description': 'Disconnect port list',
+    'tags': ['core_api/port'],
+    'request_body': openapi.Schema(
+        title='core_api_port_disconnect_port_list',
+        description='Update port',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            port_list=openapi.Schema(type=openapi.TYPE_ARRAY,
+                                     items=openapi.Schema(type=openapi.TYPE_INTEGER)),
+            equipment_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+        ),
+    ),
+    'responses': {200: openapi.Response('Success', PortListSerializer)}
+}

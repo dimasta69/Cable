@@ -23,6 +23,8 @@ from core_api.views.port.port import PortView
 from core_api.views.port.connection_pigtail import ConnectionPigtailView
 from core_api.views.port.connection_pigtail_list import ConnectionPigtailListView
 from core_api.views.port.disconnect_sfp import DisconnectSfpView
+from core_api.views.port.disconnect_pigtail import DisconnectPigtailView
+from core_api.views.port.disconnect_port_list import DisconnectPortListView
 from core_api.views.port.add_sfp import AddSfpView
 from core_api.views.building.building_list import BuildingListView
 from core_api.views.building.building import BuildingView
@@ -65,6 +67,8 @@ urlpatterns = [
     path('port/connection_pigtail_list/', ConnectionPigtailListView.as_view()),
     path('port/<int:id>/add_sfp/', AddSfpView.as_view()),
     path('port/disconnect_sfp/', DisconnectSfpView.as_view()),
+    path('port/disconnect_pigtail/', DisconnectPigtailView.as_view()),
+    path('port/disconnect_port_list/', DisconnectPortListView.as_view()),
     path('building/', BuildingListView.as_view()),
     path('building/<int:id>/', BuildingView.as_view()),
     path('room/', RoomListView.as_view()),

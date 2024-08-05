@@ -3,20 +3,20 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from core_api.serializers.port.disconnect_sfp import DisconnectSfpSerializer
-from core_api.services.port.disconnect_sfp import DisconnectSfpService
+from core_api.serializers.port.disconnect_pigtail import DisconnectPigtail
+from core_api.services.port.disconnect_pigtail import DisconnectPigtailService
 from core_api.serializers.port.port_list import PortListSerializer
-from core_api.swagger_scheme.port import disconnect_sfp
+from core_api.swagger_scheme.port import disconnect_pigtail
 from utils.services import ServiceOutcome
 
 
-class DisconnectSfpView(APIView):
+class DisconnectPigtailView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = DisconnectSfpSerializer
+    serializer_class = DisconnectPigtail
 
-    @swagger_auto_schema(**disconnect_sfp)
+    @swagger_auto_schema(**disconnect_pigtail)
     def put(self, request):
-        outcome = ServiceOutcome(DisconnectSfpService, request.data)
+        outcome = ServiceOutcome(DisconnectPigtailService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortListSerializer(outcome.result, many=True).data, status=outcome.response_status)
