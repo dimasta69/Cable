@@ -28,7 +28,7 @@ class BuildingListService(ServiceWithResult):
     @property
     def building(self):
         try:
-            return Building.objects.filter(scheme=self.scheme)
+            return Building.objects.filter(scheme=self.scheme).select_related('scheme')
         except Building.DoesNotExist:
             return None
 

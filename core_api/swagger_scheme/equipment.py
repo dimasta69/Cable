@@ -126,6 +126,14 @@ equipment = {
 delete_equipment = {
     'operation_description': 'Delete equipment template',
     'tags': ['core_api/equipment'],
+    'request_body': openapi.Schema(
+        title='core_api_equipment_update',
+        description='Update equipment',
+        type=openapi.TYPE_OBJECT,
+        properties=dict(
+            server_rack_id=openapi.Schema(type=openapi.TYPE_INTEGER),
+        ),
+    ),
 }
 
 update_equipment = {

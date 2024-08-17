@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from models_app.models.equipment_template import EquipmentTemplate
 from models_app.models.type_port import TypePort
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 
 class PortTemplate(models.Model):
@@ -23,4 +25,9 @@ class PortTemplate(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
+@receiver(pre_save, sender=PortTemplate)
+def check_count_port_template(sender, instance, **kwargs):
+    if instance.pk is None:
+        instance.equipment_tmp.check_count_port(instance.count)

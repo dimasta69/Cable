@@ -8,7 +8,7 @@ class EquipmentTemplateListSerializer(serializers.Serializer):
     manufacturer = serializers.SerializerMethodField(required=False)
     type = serializers.CharField(required=True)
     model = serializers.CharField(required=False)
-    count_port = serializers.SerializerMethodField()
+    count_port = serializers.IntegerField(required=True)
     number_of_units = serializers.IntegerField(required=False)
     power = serializers.IntegerField(required=False)
 
@@ -21,7 +21,3 @@ class EquipmentTemplateListSerializer(serializers.Serializer):
             'id': obj.manufacturer.id,
             'name': obj.manufacturer.name,
         }
-
-    @classmethod
-    def get_count_port(cls, obj):
-        return sum(PortTemplate.objects.filter(equipment_tmp=obj.id).values_list('count', flat=True))

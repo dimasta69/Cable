@@ -57,7 +57,7 @@ class EquipmentTemplateListService(ServiceWithResult):
     @property
     def equipment_template_list(self):
         try:
-            return EquipmentTemplate.objects.all()
+            return EquipmentTemplate.objects.all().select_related('manufacturer')
         except EquipmentTemplate.DoesNotExist:
             return EquipmentTemplate.objects.none()
 

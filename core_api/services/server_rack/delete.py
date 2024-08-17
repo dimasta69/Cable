@@ -3,11 +3,10 @@ from functools import lru_cache
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
 
-from models_app.models import Access, User
+from models_app.models import Access, User, Equipment
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.server_rack import ServerRack
-from models_app.models.unit import Unit
 
 
 class DeleteServerRackService(ServiceWithResult):
@@ -25,7 +24,6 @@ class DeleteServerRackService(ServiceWithResult):
 
     @property
     def delete_server_rack(self):
-        Unit.objects.filter(server_rack=self.server_rack).delete()
         self.server_rack.delete()
         return None
 

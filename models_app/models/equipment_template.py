@@ -14,6 +14,7 @@ class EquipmentTemplate(models.Model):
     model = models.CharField(null=False, verbose_name='Модель', max_length=100, unique=True)
     power = models.IntegerField(null=True, verbose_name='Мощность')
     number_of_units = models.IntegerField(null=False, verbose_name='Количество занимаемых юнитов')
+    count_port = models.IntegerField(null=True, verbose_name='Количество портов', default=0)
 
     class Meta:
         verbose_name = 'Шаблон оборудования'
@@ -21,3 +22,7 @@ class EquipmentTemplate(models.Model):
 
     def __str__(self):
         return self.manufacturer.name + " " + self.model
+
+    def check_count_port(self, count):
+        self.count_port += count
+        self.save()

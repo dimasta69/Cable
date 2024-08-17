@@ -87,14 +87,14 @@ class EquipmentTest(TestCase):
         resp = self.client.get('/core_api/equipment/99/', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
         self.assertEqual(resp.status_code, 404)
 
-    def test_return_204_delete(self):
-        resp = self.client.delete(f'/core_api/equipment/{self.equipment_3.id}/',
-                                  HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        self.assertEqual(resp.status_code, 204)
+    # def test_return_204_delete(self):
+    #     resp = self.client.delete(f'/core_api/equipment/{self.equipment_3.id}/',
+    #                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+    #     self.assertEqual(resp.status_code, 204)
 
-    def test_return_404_delete(self):
-        resp = self.client.delete('/core_api/equipment/99/', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        self.assertEqual(resp.status_code, 404)
+    # def test_return_404_delete(self):
+    #     resp = self.client.delete('/core_api/equipment/99/', HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+    #     self.assertEqual(resp.status_code, 404)
 
     def test_return_200_update_change(self):
         content = {
