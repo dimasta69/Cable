@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from functools import lru_cache
 
 from models_app.models.unit import Unit
 

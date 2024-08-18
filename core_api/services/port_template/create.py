@@ -11,12 +11,12 @@ from models_app.models.type_port import TypePort
 
 
 class CreatePortTemplateService(ServiceWithResult):
-    name = forms.CharField(required=True)
+    name = forms.CharField(required=False)
     equipment_tmp_id = forms.IntegerField(required=False)
     type_port_id = forms.IntegerField(required=False)
     count = forms.IntegerField(required=True)
     modular = forms.BooleanField(required=False)
-    speed = ListIntegerField()
+    speed = ListIntegerField(required=False)
     unit = ListIntegerField()
     lines = forms.IntegerField(required=True)
 

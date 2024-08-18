@@ -19,4 +19,4 @@ class ConnectionPigtailListView(APIView):
         outcome = ServiceOutcome(ConnectionPigtailListService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(PortListSerializer(outcome.result).data, status=outcome.response_status)
+        return Response(PortListSerializer(outcome.result, many=True).data, status=outcome.response_status)

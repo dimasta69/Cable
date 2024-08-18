@@ -51,9 +51,10 @@ class Port(models.Model):
         self.save()
 
     def set_connection_pigtail(self, port):
-        if self.connection_pigtail and self.connection_pigtail != self:
+        if self.connection_pigtail and not self.connection_pigtail == self:
             self.connection_pigtail.connection_pigtail = None
         self.connection_pigtail = port
         if port or (self.connection_pigtail and not port):
-            self.connection_pigtail = self
+            port.connection_pigtail = self
+            port.save()
         self.save()
