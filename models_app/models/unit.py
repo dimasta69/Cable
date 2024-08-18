@@ -24,6 +24,8 @@ class Unit(models.Model):
 
 @receiver(models.signals.pre_delete, sender=Unit)
 def delete_equipment(sender, instance, **kwargs):
-    print(7877)
-    if instance.equipment:
-        instance.equipment.delete()
+    try:
+        if instance.equipment and instance.equipment is not None:
+            instance.equipment.delete()
+    except Exception as a:
+        pass

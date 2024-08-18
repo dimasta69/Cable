@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from core_api.serializers.port.connection_pigtail_list import ConnectionPigtailListSerializer
 from core_api.services.port.connection_pigtail_list import ConnectionPigtailListService
-from core_api.serializers.equipment.equipment import EquipmentSerializer
+from core_api.serializers.port.port_list import PortListSerializer
 from core_api.swagger_scheme.port import port_connection_pigtail_list
 from utils.services import ServiceOutcome
 
@@ -19,4 +19,4 @@ class ConnectionPigtailListView(APIView):
         outcome = ServiceOutcome(ConnectionPigtailListService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)
+        return Response(PortListSerializer(outcome.result).data, status=outcome.response_status)

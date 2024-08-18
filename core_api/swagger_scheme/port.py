@@ -90,7 +90,7 @@ port_connection_pigtail_list = {
             connection_equipment_id=openapi.Schema(type=openapi.TYPE_INTEGER),
         ),
     ),
-    'responses': {200: openapi.Response('Success', EquipmentSerializer)}
+    'responses': {200: openapi.Response('Success', PortListSerializer)}
 }
 
 add_sfp = {
