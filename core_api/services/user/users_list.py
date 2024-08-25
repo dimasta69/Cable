@@ -50,14 +50,14 @@ class UsersListServices(ServiceWithResult):
     @lru_cache()
     def _scheme(self):
         try:
-            return Scheme.objects.get(id=self.cleaned_data['id'])
+            return Scheme.objects.get(id=self.cleaned_data['scheme_id'])
         except Scheme.DoesNotExist:
             return None
 
     @property
     def _users(self):
         try:
-            return User.objects.exclude(id__not_in=self._access)
+            return User.objects.exclude(id__in=self._access)
         except User.DoesNotExist:
             return User.objects.none()
 
@@ -70,13 +70,13 @@ class UsersListServices(ServiceWithResult):
 
     def scheme_presence(self):
         if not self._scheme:
-            self.add_error('filter_type_port_id', ObjectDoesNotExist('Scheme id='
-                                                                     f'{self.cleaned_data["scheme_id"]} '
-                                                                     'not found'))
+            self.add_error('scheme_id', ObjectDoesNotExist('Scheme id='
+                                                           f'{self.cleaned_data["scheme_id"]} '
+                                                           'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def order_presence(self):
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['username', '-username']:
-                self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
+                self.add_error('order_by', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND

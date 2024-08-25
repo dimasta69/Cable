@@ -13,5 +13,5 @@ class UsersListView(APIView):
 
     @swagger_auto_schema(**users_list)
     def get(self, request):
-        outcome = ServiceOutcome(UsersListServices, request.data | {'current_user': request.user})
+        outcome = ServiceOutcome(UsersListServices, dict(request.GET.items()) | {'current_user': request.user})
         return Response(UsersListSerializers(outcome.result, many=True).data, status=outcome.response_status)
