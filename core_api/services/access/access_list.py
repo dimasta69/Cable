@@ -40,7 +40,8 @@ class AccessListService(ServiceWithResult):
 
     @property
     def access_filter_list(self):
-        access_list = self.access
+        access_list = self.access if self.cleaned_data['current_user'].is_superuser \
+            else self.access.exclude(user=self.cleaned_data['current_user'])
         if self.cleaned_data['filter_role']:
             access_list = access_list.filter(role=self.cleaned_data['filter_role'])
         if self.cleaned_data['search_filter']:
