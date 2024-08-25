@@ -7,6 +7,7 @@ from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
 from models_app.models.port import Port
 from models_app.models.equipment import Equipment
+from django.core.paginator import Paginator, EmptyPage
 
 
 class ConnectionPigtailListService(ServiceWithResult):

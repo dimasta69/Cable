@@ -37,6 +37,7 @@ from core_api.views.sfp_template.sfp_template import SfpTemplateView
 from core_api.views.sfp_template.adding_to_port import AddingToPortSfpTemplateView
 from core_api.views.access.access_list import AccessListView
 from core_api.views.type_port.type_port_list import TypePortListView
+from core_api.views.users.users_list import UsersListView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -81,5 +82,6 @@ urlpatterns = [
     path('access/', AccessListView.as_view()),
     path('access/<int:id>/', AccessView.as_view()),
     path('type_port/', TypePortListView.as_view()),
+    path('users_list/', UsersListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
