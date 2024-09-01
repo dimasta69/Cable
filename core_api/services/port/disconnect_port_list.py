@@ -25,8 +25,11 @@ class DisconnectPortListService(ServiceWithResult):
     @property
     def disconnect_port(self):
         for port in self.port_list_dict:
-            port.connection = None
-            port.connection.connection = None
+            if port.connection:
+                if port.connection.connection:
+                    port.connection.connection = None
+                    port.connection.save()
+                port.connection = None
             port.save()
         return self.port_list_int.order_by('uid')
 

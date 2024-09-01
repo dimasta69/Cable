@@ -14,8 +14,7 @@ class CustomChangePasswordForm(PasswordChangeForm):
 
 @receiver(pre_save, sender=User)
 def hash_user_password(sender, instance, **kwargs):
-    if instance._state and not instance._state.adding:
-        instance.password = make_password(instance.password)
+    instance.password = make_password(instance.password)
 
 
 @admin.register(User)
