@@ -1,8 +1,10 @@
+from django.conf.urls.static import static
 from django.urls import path
 
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
+from cabel import settings
 from core_api.views.access.access import AccessView
 from core_api.views.auth.login import TokenCreateView
 from core_api.views.auth.logout import TokenDestroyView
