@@ -12,11 +12,6 @@ class CustomChangePasswordForm(PasswordChangeForm):
         model = User
 
 
-@receiver(pre_save, sender=User)
-def hash_user_password(sender, instance, **kwargs):
-    instance.password = make_password(instance.password)
-
-
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ['username', 'is_superuser']
@@ -25,7 +20,7 @@ class UserAdmin(admin.ModelAdmin):
     change_password_form = CustomChangePasswordForm
     search_fields = ['username']
 
-    def save(self, *args, **kwargs):
-        if not self._state.adding:
-            self.password = make_password(self.password)
-        super().save(*args, **kwargs)
+    def save_model(self, request, obj, form, change):
+        if form.cleaned_data['password']:
+            obj.set_password(form.cleaned_data['password'])  # Хешируем пароль
+        super().save_model(request, obj, form, change)

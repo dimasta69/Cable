@@ -6,6 +6,6 @@
 <h3>Найстрока базы данных Postgres</h3>
 <p>DB_NAME=Cabel</p>
 <p>DB_USER=postgres</p>
-<p>DB_PASSWORD=admin</p>
+<p>DB_PASSWORD=12345678</p>
 <p>DB_HOST=localhost</p>
 <p>DB_PORT=5432</p>
