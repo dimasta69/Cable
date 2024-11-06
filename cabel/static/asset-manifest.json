@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/static/css/main.ad0b633b.css",
-    "main.js": "/static/js/main.7cd85b13.js",
+    "main.css": "/static/css/main.8bd62ef9.css",
+    "main.js": "/static/js/main.6411783f.js",
     "static/js/453.0f937872.chunk.js": "/static/js/453.0f937872.chunk.js",
     "static/media/GTEestiProDisplay-Medium.ttf": "/static/media/GTEestiProDisplay-Medium.9e30390db0911e15f5b5.ttf",
     "index.html": "/index.html",
-    "main.ad0b633b.css.map": "/static/css/main.ad0b633b.css.map",
-    "main.7cd85b13.js.map": "/static/js/main.7cd85b13.js.map",
+    "main.8bd62ef9.css.map": "/static/css/main.8bd62ef9.css.map",
+    "main.6411783f.js.map": "/static/js/main.6411783f.js.map",
     "453.0f937872.chunk.js.map": "/static/js/453.0f937872.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.ad0b633b.css",
-    "static/js/main.7cd85b13.js"
+    "static/css/main.8bd62ef9.css",
+    "static/js/main.6411783f.js"
   ]
 }
