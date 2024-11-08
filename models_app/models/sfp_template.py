@@ -13,12 +13,12 @@ class SfpTemplate(models.Model):
     name = models.CharField(null=True, max_length=150, verbose_name='Наименование', unique=True)
     speed = ArrayField(models.IntegerField(), blank=True, default=list, verbose_name='Поддерживаемые скорости')
 
-    LINE_CHOICES = {
+    LINE_CHOICES = [
         ('single-mode', 'Одномодовый'),
         ('multi_mode', 'Многомодовый'),
         ('Ethernet', 'Медный провод'),
         ('None', 'None'),
-    }
+    ]
 
     line_type = models.CharField(choices=LINE_CHOICES, verbose_name='Тип линии', null=False)
 

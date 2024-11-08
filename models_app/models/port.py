@@ -10,18 +10,18 @@ class Port(models.Model):
                                   null=False)
     sfp = models.ForeignKey(SfpTemplate, related_name='port', on_delete=models.SET_NULL, verbose_name='Sfp', null=True)
 
-    LINE_CHOICES = {
+    LINE_CHOICES = [
         ('single-mode', 'Одномодовый'),
         ('multi_mode', 'Многомодовый'),
         ('Ethernet', 'Медный провод'),
         ('None', 'None'),
-    }
+    ]
     line_type = models.CharField(choices=LINE_CHOICES, max_length=100, verbose_name='Тип линии', null=True)
-    VLAN_CHOICES = {
+    VLAN_CHOICES = [
         ('Access', 'Access'),
         ('Trunk', 'Trunk'),
         ('None', 'None'),
-    }
+    ]
     vlan_type = models.CharField(choices=VLAN_CHOICES, max_length=100, verbose_name='Тип vlan', null=True)
     vlan = models.IntegerField(verbose_name='Vlan на котором работает порт', null=True)
     ip = models.CharField(max_length=150, verbose_name='IP адрес', null=True)

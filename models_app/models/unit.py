@@ -11,10 +11,10 @@ class Unit(models.Model):
     equipment = models.ForeignKey(Equipment, related_name='unit', on_delete=models.SET_NULL,
                                   verbose_name='Оборудование',
                                   null=True, blank=True)
-    SIDE_CHOICES = {
+    SIDE_CHOICES = [
         ("Front", "Лицевая"),
         ("Back", "Тыльная"),
-    }
+    ]
     side = models.CharField(choices=SIDE_CHOICES, max_length=100)
 
     class Meta:
