@@ -22,7 +22,7 @@ jobs:
 
       - name: Build and run Docker Compose
         run: |
-          docker-compose -f docker-compose.yml up --build --no-cache -d
+          docker-compose -f docker-compose.yml up --build -d
           sleep 10
           docker-compose -f docker-compose.yml logs
           docker-compose -f docker-compose.yml exec -T web pipenv run python manage.py test
