@@ -21,6 +21,11 @@ services:
       - postgres
     environment:
       DEBUG: "True"
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_PORT: ${DB_PORT}
+      DB_HOST: ${DB_HOST}
     volumes:
       - static_volume:/app/static
 volumes:
