@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+print(os.getenv('DB_NAME'))
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
