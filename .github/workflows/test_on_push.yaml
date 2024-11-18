@@ -25,7 +25,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
-
+      - name: .env
+        run: |
+          - cp ./.env-example ./.env
+          - cat ./.env
       - name: Build and run Docker Compose
         run: |
           docker-compose -f docker-compose.yml up --build -d
