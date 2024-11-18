@@ -25,14 +25,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y docker-compose
-      - name: .env
-        run: |
-          cp ./.env-example ./.env
-          cat ./.env
       - name: Build and run Docker Compose
         run: |
           docker-compose -f docker-compose.yml up --build -d
           sleep 30
           docker-compose -f docker-compose.yml logs
+          docker-compose -f docker-compose.yml exec -T web cp ./.env-example ./.env | cat ./.env
           docker-compose -f docker-compose.yml exec -T web pipenv run python manage.py test
           docker-compose -f docker-compose.yml down
