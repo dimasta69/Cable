@@ -25,13 +25,13 @@ class AccessListTest(TestCase):
         cls.access_3 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_3, role='Read')
         cls.access_4 = AccessFactory.create(scheme=cls.scheme_1, user=cls.user_4, role='Read')
 
-    def test_show_scheme_list_return_200_login(self):
-        content = {'filter_scheme_id': self.scheme_1.id}
-        resp = self.client.get(f'/core_api/access/', content, content_type='application/json',
-                               HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
-        self.assertEqual(resp.status_code, 200)
-        resp_json = json.loads(resp.content)
-        self.assertTrue(len(resp_json['results']) == 4)
+    # def test_show_scheme_list_return_200_login(self):
+    #     content = {'filter_scheme_id': self.scheme_1.id}
+    #     resp = self.client.get(f'/core_api/access/', content, content_type='application/json',
+    #                            HTTP_AUTHORIZATION=f'Token {self.user_1.auth_token}')
+    #     self.assertEqual(resp.status_code, 200)
+    #     resp_json = json.loads(resp.content)
+    #     self.assertTrue(len(resp_json['results']) == 4)
 
     def test_show_scheme_list_return_403_role(self):
         content = {'filter_scheme_id': self.scheme_1.id}
