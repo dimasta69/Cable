@@ -30,6 +30,6 @@ jobs:
           docker-compose -f docker-compose.yml up --build -d
           sleep 30
           docker-compose -f docker-compose.yml logs
-          docker-compose -f docker-compose.yml exec -T web cp ./app/.env-example ./app/.env | cat ./app/.env
+          docker-compose -f docker-compose.yml exec -T web cp ./app/.env-example /app/.env | cat /app/.env
           docker-compose -f docker-compose.yml exec -T web pipenv run python manage.py test
           docker-compose -f docker-compose.yml down
