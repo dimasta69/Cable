@@ -3,7 +3,7 @@ name: Run Django Tests with Docker Compose
 on:
   push:
     branches:
-      - main  # Замените на вашу основную ветку
+      - testing
 
 jobs:
   build:
