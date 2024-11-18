@@ -9,9 +9,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
+      DB_USER: myuser
+      DB_PASSWORD: mypassword
+      DB_NAME: mydatabase
+      DB_PORT: 5432
+      DB_HOST: postgres
     steps:
       - name: Check out code
         uses: actions/checkout@v2
