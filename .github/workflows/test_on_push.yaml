@@ -12,7 +12,7 @@ jobs:
       DB_USER: myuser
       DB_PASSWORD: mypassword
       DB_NAME: mydatabase
-      DB_PORT: 5432
+      DB_PORT: 5435
       DB_HOST: postgres
     steps:
       - name: Check out code
