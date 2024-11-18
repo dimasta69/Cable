@@ -1,37 +1,33 @@
-name: Run tests on any Push event
+name: Run Django Tests with Docker Compose
 
 on:
   push:
-    tags:
-      - '!refs/tags/*' 
     branches:
-      - 'testing'  
+      - main  # Замените на вашу основную ветку
 
 jobs:
-  run_tests:
+  build:
     runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2  
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres        
+          POSTGRES_PASSWORD: 123  
+          POSTGRES_DB: postgres          
+        ports:
+          - "5435:5432"
+        options: --health-cmd="pg_isready -U postgres" --health-interval=5s --health-timeout=5s --health-retries=5
 
-      - name: Set up Python
-        uses: actions/setup-python@v2  
-        with:
-          python-version: '3.11'
-          architecture: 'x64'
-      
-      - name: Install pipenv
-        run: pip install pipenv
-      
-      - name: Install requirements
-        run: pipenv install --dev
-      
-      - name: Install coverage
-        run: pipenv run pip install coverage  
-      
-      - name: Run tests
-        run: pipenv run python manage.py test
-      
-      - name: Generate coverage report
-        run: pipenv run coverage report  
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and run Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml up -d
+          docker-compose -f docker-compose.yml exec web python manage.py test
+          docker-compose -f docker-compose.yml down
