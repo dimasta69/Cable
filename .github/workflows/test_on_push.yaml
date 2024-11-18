@@ -9,9 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env: 
-      DB_USER: myuser
-      DB_PASSWORD: mypassword
-      DB_NAME: mydatabase
+      DB_USER: postgres
+      DB_PASSWORD: 123
+      DB_NAME: postgres
       DB_PORT: 5435
       DB_HOST: postgres
     steps:
