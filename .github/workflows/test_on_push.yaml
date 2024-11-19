@@ -51,8 +51,8 @@ jobs:
             ls -al;
             git checkout testing;
             git pull;
-            docker-compose down;
+            docker compose down;
             echo '--- LIST OF DOCKER CONTAINERS AFTER STOPING DOCKER CONTAINERS ---';
-            docker-compose up -d;
+            docker compose up -d;
             echo '--- LIST OF DOCKER CONTAINERS AFTER STARTING DOCKER CONTAINERS ---';
             docker ps;
