@@ -6,9 +6,9 @@ on:
       - testing
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
-    env: 
+    env:
       DB_USER: postgres
       DB_PASSWORD: 123
       DB_NAME: postgres
@@ -20,7 +20,7 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
-      
+
       - name: Install Docker Compose
         run: |
           sudo apt-get update
@@ -34,3 +34,25 @@ jobs:
           docker-compose exec -T web sh -c "cp /app/.env-example /app/.env && cat /app/.env"
           docker-compose -f docker-compose.yml exec -T web pipenv run python manage.py test
           docker-compose -f docker-compose.yml down
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Run command and remote server
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          host: ${{secrets.SSH_HOST}}
+          user: ${{secrets.SSH_USER}}
+          private_key: ${{secrets.SSH_PRIVATE_KEY}}
+          command: |
+            echo '--- START WORK ON REMOTE SERVER ---';
+            cd ${{ secrets.PROJECT_FOLDER }};
+            echo '--- LIST OF FILES ---';
+            ls -al;
+            git checkout testing;
+            git pull;
+            docker-compose down;
+            echo '--- LIST OF DOCKER CONTAINERS AFTER STOPING DOCKER CONTAINERS ---';
+            docker-compose up -d;
+            echo '--- LIST OF DOCKER CONTAINERS AFTER STARTING DOCKER CONTAINERS ---';
+            docker ps;
