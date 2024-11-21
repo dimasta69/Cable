@@ -8,7 +8,8 @@ class Port(models.Model):
     uid = models.IntegerField(verbose_name='Номер порта в оборудовании', null=False)
     equipment = models.ForeignKey(Equipment, related_name='port', on_delete=models.CASCADE, verbose_name='Оборудование',
                                   null=False)
-    sfp = models.ForeignKey(SfpTemplate, related_name='port', on_delete=models.SET_NULL, verbose_name='Sfp', null=True)
+    sfp = models.ForeignKey(SfpTemplate, related_name='port', on_delete=models.SET_NULL, verbose_name='Sfp', null=True,
+                            blank=True)
 
     LINE_CHOICES = [
         ('single-mode', 'Одномодовый'),
@@ -16,21 +17,22 @@ class Port(models.Model):
         ('Ethernet', 'Медный провод'),
         ('None', 'None'),
     ]
-    line_type = models.CharField(choices=LINE_CHOICES, max_length=100, verbose_name='Тип линии', null=True)
+    line_type = models.CharField(choices=LINE_CHOICES, max_length=100, verbose_name='Тип линии', null=True, blank=True)
     VLAN_CHOICES = [
         ('Access', 'Access'),
         ('Trunk', 'Trunk'),
         ('None', 'None'),
     ]
-    vlan_type = models.CharField(choices=VLAN_CHOICES, max_length=100, verbose_name='Тип vlan', null=True)
-    vlan = models.IntegerField(verbose_name='Vlan на котором работает порт', null=True)
-    ip = models.CharField(max_length=150, verbose_name='IP адрес', null=True)
-    mac = models.CharField(max_length=150, verbose_name='Mac адрес', null=True)
+    vlan_type = models.CharField(choices=VLAN_CHOICES, max_length=100, verbose_name='Тип vlan', null=True, blank=True)
+    vlan = models.IntegerField(verbose_name='Vlan на котором работает порт', null=True, blank=True)
+    ip = models.CharField(max_length=150, verbose_name='IP адрес', null=True, blank=True)
+    mac = models.CharField(max_length=150, verbose_name='Mac адрес', null=True, blank=True)
     port_template = models.ForeignKey(PortTemplate, related_name='port', verbose_name='Шаблон порта', null=False,
-                                      on_delete=models.CASCADE)
-    connection = models.OneToOneField('self', related_name='connection_port', on_delete=models.CASCADE, null=True)
+                                      blank=False, on_delete=models.CASCADE)
+    connection = models.OneToOneField('self', related_name='connection_port', on_delete=models.CASCADE, null=True,
+                                      blank=True)
     connection_pigtail = models.OneToOneField('self', related_name='connection_pig', on_delete=models.CASCADE,
-                                              null=True)
+                                              null=True, blank=True)
 
     class Meta:
         verbose_name = 'Порт'
