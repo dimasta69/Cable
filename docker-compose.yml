@@ -28,6 +28,17 @@ services:
       DB_HOST: ${DB_HOST}
     volumes:
       - static_volume:/app/static
+    networks:
+      - app-network
+
+  front:
+    build: /var/www/cs/current/startup/
+    volumes:
+      - ".:/front"
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
 
   nginx:
     image: nginx:latest
@@ -40,6 +51,13 @@ services:
       - static_volume:/app/static
     ports:
       - "80:80"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
 volumes:
   static_volume:
   pg_dump:
