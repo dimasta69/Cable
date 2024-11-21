@@ -32,9 +32,12 @@ services:
       - app-network
 
   front:
-    build: /var/www/cs/current/startup/
+    build:
+      context: /var/www/cs/current/startup/
+    depends_on:
+      - web
     volumes:
-      - ".:/front"
+      - build_static:/front/build
     ports:
       - "3000:3000"
     networks:
@@ -49,6 +52,7 @@ services:
       - ./conf/nginx.conf:/etc/nginx/nginx.conf
       - ./conf/cabel.conf:/etc/nginx/conf.d/cabel.conf
       - static_volume:/app/static
+      - build_static:/front/build
     ports:
       - "80:80"
     networks:
@@ -61,3 +65,4 @@ networks:
 volumes:
   static_volume:
   pg_dump:
+  build_static:
