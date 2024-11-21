@@ -10,7 +10,8 @@ services:
       - pg_dump:/var/lib/postgresql/data
     ports:
       - "5435:5432"
-
+    networks:
+      - app-network
 
   web:
     build:
