@@ -37,8 +37,6 @@ services:
       context: /var/www/cs/current/startup/
     depends_on:
       - web
-    volumes:
-      - build_static:/front/
     ports:
       - "3000:3000"
     networks:
