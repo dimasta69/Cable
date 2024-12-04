@@ -12,9 +12,9 @@ jobs:
       - name: Run command and remote server
         uses: D3rHase/ssh-command-action@v0.2.2
         with:
-          host: ${{secrets.SSH_HOST}}
-          user: ${{secrets.SSH_USER}}
-          private_key: ${{secrets.SSH_PRIVATE_KEY}}
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
           command: |
             echo '--- START WORK ON REMOTE SERVER ---';
             cd ${{ secrets.PROJECT_FOLDER }};
@@ -23,8 +23,7 @@ jobs:
             git pull;
             cp .env-example .env;
             ls -a;
-            docker compose down;
-            echo '--- LIST OF DOCKER CONTAINERS AFTER STOPING DOCKER CONTAINERS ---';
-            docker compose up -d;
-            echo '--- LIST OF DOCKER CONTAINERS AFTER STARTING DOCKER CONTAINERS ---';
+            echo '--- RESTARTING AND REBUILDING CONTAINER web ---';
+            docker-compose up -d --build web; 
+            echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---';
             docker ps;
