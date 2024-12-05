@@ -34,6 +34,8 @@ class Port(models.Model):
     connection_pigtail = models.OneToOneField('self', related_name='connection_pig', on_delete=models.CASCADE,
                                               null=True, blank=True)
 
+    line = models.ForeignKey("LineModel", related_name="ports", null=True, blank=True, on_delete=models.SET_NULL)
+
     class Meta:
         verbose_name = 'Порт'
         verbose_name_plural = 'Порты'

@@ -12,3 +12,5 @@ from .equipment_template import EquipmentTemplateAdmin
 from .port_template import PortTemplateAdmin
 from .equipment import EquipmentAdmin
 from .port import PortAdmin
+from .line_type import LineTypeAdmin
+from .line import LineAdmin

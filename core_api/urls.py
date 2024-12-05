@@ -1,3 +1,5 @@
+import os.path
+
 from django.conf.urls.static import static
 from django.urls import path
 
@@ -5,6 +7,7 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
 from cabel import settings
+from cabel.settings import MEDIA_URL, MEDIA_ROOT, STATIC_URL, STATIC_ROOT
 from core_api.views.access.access import AccessView
 from core_api.views.auth.login import TokenCreateView
 from core_api.views.auth.logout import TokenDestroyView
@@ -87,3 +90,6 @@ urlpatterns = [
     path('users_list/', UsersListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
+urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
+urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)
+
