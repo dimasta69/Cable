@@ -30,7 +30,7 @@ class ConnectionPigtailListService(ServiceWithResult):
     @property
     def connection_pigtail_port(self):
         for pigtail, connection_pigtail in zip(self.pigtail_list_dict, self.connection_pigtail_list_dict):
-            pigtail.set_connection_pigtail(connection_pigtail)
+            pigtail.set_connection(connection_pigtail)
         return self.port_list_int.filter(equipment=self.equipment).order_by('uid')
 
     @property

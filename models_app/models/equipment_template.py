@@ -15,6 +15,7 @@ class EquipmentTemplate(models.Model):
     power = models.IntegerField(null=True, verbose_name='Мощность')
     number_of_units = models.IntegerField(null=False, verbose_name='Количество занимаемых юнитов')
     count_port = models.IntegerField(null=True, verbose_name='Количество портов', default=0)
+    is_active = models.BooleanField(null=False, blank=False)
 
     class Meta:
         verbose_name = 'Шаблон оборудования'

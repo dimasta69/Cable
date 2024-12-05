@@ -2,6 +2,10 @@ from django.db import models
 from models_app.models.equipment import Equipment
 from models_app.models.port_template import PortTemplate
 from models_app.models.sfp_template import SfpTemplate
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+from models_app.models.line.models import LineModel
+from django.db import transaction
 
 
 class Port(models.Model):
@@ -40,13 +44,33 @@ class Port(models.Model):
         verbose_name = 'Порт'
         verbose_name_plural = 'Порты'
 
-    def set_connection(self, port):
-        if self.connection and not self.connection == self:
-            self.connection.connection = None
-        self.connection = port
-        if port or (self.connection and not port):
-            self.connection.set_pre_connection(self)
-        self.save()
+    def set_connection(self, port, line_type=None):
+        with transaction.atomic():
+            line_1 = self.line
+            line_2 = port.line
+
+            if line_1 is None and line_2 is None:
+                line = LineModel.objects.create(line_type=line_type)
+                port.line = line
+                self.line = line
+
+            elif line_1 and port.line:
+                if line_2.filled_line and line_1.filled_line:
+                    line = LineModel.objects.create(line_type=line_type)
+                    line.ports = line_1.ports.union(port.line.ports)
+                    line.save()
+                    self.line = line
+                    port.line = line
+
+            elif line_2:
+                if line_2.filled_line:
+                    self.line = line_2
+            elif line_1:
+                if line_1.filled_line:
+                    port.line = line_1
+
+            port.save()
+            self.save()
 
     def set_pre_connection(self, parent_port):
         self.connection = parent_port
@@ -62,3 +86,16 @@ class Port(models.Model):
             port.connection_pigtail = self
             port.save()
         self.save()
+
+
+@receiver(pre_save, sender=Port)
+def check_filled_line(sender, instance, **kwargs):
+    try:
+        line = instance.line
+        count_line = line.ports.filter(equipment__equipment_template__is_active=True)
+        if count_line == 2:
+            line.filled_line = True
+        elif count_line > 2:
+            raise ValueError("Количество активных оборудований на данной линии больше двух")
+    except ValueError as a:
+        pass

@@ -39,8 +39,6 @@ class UpdatePortService(ServiceWithResult):
     @property
     def update_port(self):
         port = self.port
-        if self.cleaned_data['line_type']:
-            port.line_type = self.cleaned_data['line_type']
         if self.cleaned_data['vlan_type']:
             port.vlan_type = self.cleaned_data['vlan_type']
         if self.cleaned_data['vlan']:
@@ -50,7 +48,7 @@ class UpdatePortService(ServiceWithResult):
         if self.cleaned_data['mac']:
             port.mac_address = self.cleaned_data['mac']
         if self.cleaned_data['connection_id']:
-            port.set_connection(self.port_connection)
+            port.set_connection(self.port_connection, self.cleaned_data.get('line_type'))
         port.save()
         return port
 

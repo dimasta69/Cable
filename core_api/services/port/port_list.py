@@ -1,7 +1,6 @@
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
-from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from models_app.models.port import Port
@@ -39,7 +38,6 @@ class PortListService(ServiceWithResult):
             return Port.objects.none()
 
     @property
-    @lru_cache()
     def equipment(self):
         try:
             return Equipment.objects.get(id=self.cleaned_data['filter_equipment'])

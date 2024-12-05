@@ -23,7 +23,7 @@ class ConnectionPigtailService(ServiceWithResult):
     @property
     def connection_port(self):
         port = self.port
-        port.set_connection_pigtail(self.port_connection_pigtail)
+        port.set_connection(self.port_connection_pigtail)
         return port
 
     @property
