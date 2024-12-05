@@ -10,7 +10,6 @@ class LineModel(models.Model):
         related_query_name="line",
     )
     filled_line = models.BooleanField(default=False, blank=True)
-    line
 
     def __str__(self):
         return f'{self.line_type.name} + {self.pk}' if self.line_type else str(self.pk)
