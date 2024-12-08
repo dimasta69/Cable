@@ -6,9 +6,9 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
-from models_app.models.port_template import PortTemplate
-from models_app.models.manufacturer import Manufacturer
-from models_app.models.equipment_template import EquipmentTemplate
+from models_app.models.port.port_template.models import PortTemplate
+from models_app.models import Manufacturer
+from models_app.models import EquipmentTemplate
 from cabel.settings.rest_framework import REST_FRAMEWORK
 
 

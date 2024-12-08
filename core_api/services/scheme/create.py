@@ -2,11 +2,12 @@ from django import forms
 from django.core.exceptions import ValidationError
 from rest_framework import status
 from service_objects.fields import ModelField
+from django.db import transaction
 
 from utils.services import ServiceWithResult
-from models_app.models.user import User
-from models_app.models.scheme import Scheme
-from models_app.models.access import Access
+from models_app.models import User
+from models_app.models import Scheme
+from models_app.models import Access
 
 
 class CreateScheme(ServiceWithResult):
@@ -24,9 +25,10 @@ class CreateScheme(ServiceWithResult):
 
     @property
     def _create_scheme(self):
-        scheme = Scheme.objects.create(creator=self.cleaned_data['current_user'],
-                                       title=self.cleaned_data['title'])
-        self.create_access(scheme)
+        with transaction.atomic():
+            scheme = Scheme.objects.create(creator=self.cleaned_data['current_user'],
+                                           title=self.cleaned_data['title'])
+            self.create_access(scheme)
         return scheme
 
     def create_access(self, scheme):

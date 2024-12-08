@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
-from models_app.models.building import Building
+from models_app.models import Building
 from core_api.serializers.building.update_building import UpdateBuildingSerializer
 from core_api.serializers.building.building_list import BuildingListSerializer
 from core_api.services.building.update import UpdateBuildingService

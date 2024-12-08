@@ -5,7 +5,7 @@ from django.db.models import Q
 from rest_framework import status
 
 from utils.services import ServiceWithResult
-from models_app.models.manufacturer import Manufacturer
+from models_app.models import Manufacturer
 from cabel.settings.rest_framework import REST_FRAMEWORK
 
 

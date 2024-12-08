@@ -7,7 +7,7 @@ from rest_framework.exceptions import NotFound
 from utils.errors import ValidationError
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
-from models_app.models.port_template import PortTemplate
+from models_app.models.port.port_template.models import PortTemplate
 
 
 class UpdatePortTemplateService(ServiceWithResult):

@@ -1,13 +1,13 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation
 from rest_framework import status
 from functools import lru_cache
 
 from models_app.models import User, Access, Unit
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.sfp_template import SfpTemplate
-from models_app.models.port import Port
+from models_app.models import SfpTemplate
+from models_app.models import Port
 
 
 class AddSfpService(ServiceWithResult):

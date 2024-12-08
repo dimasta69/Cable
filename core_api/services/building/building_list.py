@@ -7,9 +7,9 @@ from rest_framework import status
 from models_app.models import Access
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.building import Building
-from models_app.models.user import User
-from models_app.models.scheme import Scheme
+from models_app.models import Building
+from models_app.models import User
+from models_app.models import Scheme
 
 
 class BuildingListService(ServiceWithResult):

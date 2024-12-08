@@ -5,9 +5,8 @@ from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
-from models_app.models.port import Port
-from models_app.models.equipment import Equipment
-from django.core.paginator import Paginator, EmptyPage
+from models_app.models import Port
+from models_app.models import Equipment
 
 
 class ConnectionPigtailListService(ServiceWithResult):

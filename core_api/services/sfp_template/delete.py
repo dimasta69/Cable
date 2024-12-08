@@ -4,8 +4,8 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
-from models_app.models.sfp_template import SfpTemplate
-from models_app.models.port import Port
+from models_app.models import SfpTemplate
+from models_app.models import Port
 
 
 class DeleteSfpTemplateService(ServiceWithResult):

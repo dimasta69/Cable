@@ -5,8 +5,8 @@ from django import forms
 
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
-from models_app.models.port import Port
-from models_app.models.equipment import Equipment
+from models_app.models import Port
+from models_app.models import Equipment
 
 
 class DisconnectSfpService(ServiceWithResult):

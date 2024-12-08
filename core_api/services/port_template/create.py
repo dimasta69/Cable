@@ -5,9 +5,9 @@ from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
-from models_app.models.port_template import PortTemplate
-from models_app.models.equipment_template import EquipmentTemplate
-from models_app.models.type_port import TypePort
+from models_app.models.port.port_template.models import PortTemplate
+from models_app.models.equipment.equipment_template.models import EquipmentTemplate
+from models_app.models import TypePort
 
 
 class CreatePortTemplateService(ServiceWithResult):

@@ -8,9 +8,9 @@ from rest_framework import status
 from cabel.settings import REST_FRAMEWORK
 from utils.services import ServiceWithResult
 from models_app.models import EquipmentTemplate, Scheme
-from models_app.models.equipment import Equipment
-from models_app.models.manufacturer import Manufacturer
-from models_app.models.server_rack import ServerRack
+from models_app.models import Equipment
+from models_app.models import Manufacturer
+from models_app.models import ServerRack
 
 
 class EquipmentListService(ServiceWithResult):

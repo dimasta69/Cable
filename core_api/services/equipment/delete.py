@@ -4,9 +4,9 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 
 from utils.services import ServiceWithResult
-from models_app.models.equipment import Equipment
-from models_app.models.server_rack import ServerRack
-from models_app.models.port import Port
+from models_app.models import Equipment
+from models_app.models import ServerRack
+from models_app.models import Port
 
 
 class DeleteEquipmentService(ServiceWithResult):

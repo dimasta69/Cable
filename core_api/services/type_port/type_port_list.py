@@ -1,6 +1,6 @@
 from rest_framework import status
 
-from models_app.models.type_port import TypePort
+from models_app.models import TypePort
 from utils.services import ServiceWithResult
 
 

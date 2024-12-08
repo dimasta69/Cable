@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from models_app.models.unit import Unit
+from models_app.models import Unit
 
 
 class ServerRackSerializer(serializers.Serializer):

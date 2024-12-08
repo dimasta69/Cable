@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models.room import Room
+from models_app.models import Room
 from core_api.serializers.room.room_list import RoomListSerializer
 from core_api.serializers.room.create import CreateRoomSerializer
 from core_api.services.room.room_list import RoomListService

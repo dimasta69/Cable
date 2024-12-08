@@ -4,8 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import status
 
 from utils.services import ServiceWithResult
-from models_app.models.equipment_template import EquipmentTemplate
-from models_app.models.manufacturer import Manufacturer
+from models_app.models.equipment.equipment_template.models import EquipmentTemplate
+from models_app.models import Manufacturer
 
 
 class UpdateEquipmentTemplate(ServiceWithResult):

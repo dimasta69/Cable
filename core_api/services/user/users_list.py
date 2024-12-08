@@ -6,10 +6,10 @@ from cabel.settings import REST_FRAMEWORK
 from utils.services import ServiceWithResult
 from django import forms
 from functools import lru_cache
-from models_app.models.user import User
+from models_app.models import User
 from utils.fields import ModelField
-from models_app.models.scheme import Scheme
-from models_app.models.access import Access
+from models_app.models import Scheme
+from models_app.models import Access
 from django.db.models import Q
 
 

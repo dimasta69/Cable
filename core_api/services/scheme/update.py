@@ -7,8 +7,8 @@ from django import forms
 from service_objects.fields import ModelField
 from functools import lru_cache
 
-from models_app.models.scheme import Scheme
-from models_app.models.user import User
+from models_app.models import Scheme
+from models_app.models import User
 
 
 class SchemeUpdateService(ServiceWithResult):

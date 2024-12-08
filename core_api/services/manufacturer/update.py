@@ -6,7 +6,7 @@ from utils.services import ServiceWithResult
 from django import forms
 from functools import lru_cache
 
-from models_app.models.manufacturer import Manufacturer
+from models_app.models import Manufacturer
 
 
 class ManufacturerUpdateService(ServiceWithResult):

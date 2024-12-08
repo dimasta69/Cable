@@ -5,7 +5,7 @@ from functools import lru_cache
 from rest_framework import status
 
 from utils.services import ServiceWithResult
-from models_app.models.equipment import Equipment
+from models_app.models import Equipment
 
 
 class EquipmentService(ServiceWithResult):

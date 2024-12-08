@@ -82,13 +82,6 @@ create_equipment_template = {
         required=['type', 'model']
     ),
     'responses': {201: openapi.Response('Success', EquipmentTemplateSerializer)},
-    'manual_parameters': [
-            openapi.Parameter(name='type',
-                              in_=openapi.IN_QUERY,
-                              description='Type equipment template',
-                              type=openapi.TYPE_STRING,
-                              enum=['Сервер', 'Коммутатор', 'Пассивное оборудование']),
-        ]
 }
 
 equipment_template = {

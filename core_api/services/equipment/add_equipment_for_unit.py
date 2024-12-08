@@ -7,8 +7,8 @@ from rest_framework import status
 from models_app.models import Access, User
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField, ModelField
-from models_app.models.equipment import Equipment
-from models_app.models.unit import Unit
+from models_app.models import Equipment
+from models_app.models import Unit
 
 
 class AddEquipmentUnitService(ServiceWithResult):

@@ -7,7 +7,7 @@ from rest_framework import status
 from models_app.models import User, Access
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.server_rack import ServerRack
+from models_app.models import ServerRack
 
 
 class UpdateServerRackService(ServiceWithResult):

@@ -6,8 +6,8 @@ from rest_framework import status
 from models_app.models import Access, User
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.room import Room
-from models_app.models.building import Building
+from models_app.models import Room
+from models_app.models import Building
 
 
 class UpdateRoomService(ServiceWithResult):

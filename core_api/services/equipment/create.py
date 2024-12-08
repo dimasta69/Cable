@@ -8,11 +8,11 @@ from models_app.models import Unit
 from utils.services import ServiceWithResult
 from utils.fields import JsonIpField
 from utils.fields import ListIntegerField
-from models_app.models.equipment import Equipment
-from models_app.models.equipment_template import EquipmentTemplate
-from models_app.models.port import Port
-from models_app.models.port_template import PortTemplate
-from models_app.models.server_rack import ServerRack
+from models_app.models import Equipment
+from models_app.models import EquipmentTemplate
+from models_app.models import Port
+from models_app.models import PortTemplate
+from models_app.models import ServerRack
 
 
 class CreateEquipmentService(ServiceWithResult):

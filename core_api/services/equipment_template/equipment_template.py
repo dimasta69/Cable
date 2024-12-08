@@ -3,7 +3,7 @@ from functools import lru_cache
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 
-from models_app.models.equipment_template import EquipmentTemplate
+from models_app.models.equipment.equipment_template.models import EquipmentTemplate
 from utils.services import ServiceWithResult
 
 

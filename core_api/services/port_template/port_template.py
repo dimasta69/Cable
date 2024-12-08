@@ -4,7 +4,7 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
-from models_app.models.port_template import PortTemplate
+from models_app.models.port.port_template.models import PortTemplate
 
 
 class PortTemplateService(ServiceWithResult):

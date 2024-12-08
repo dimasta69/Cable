@@ -1,9 +1,10 @@
 from django.db import models
+from models_app.models.base_model import BaseModel
 
 
-class LineModel(models.Model):
+class Line(BaseModel):
     line_type = models.ForeignKey(
-        "LineTypeModel",
+        "LineType",
         blank=True, null=True,
         on_delete=models.SET_NULL,
         related_name="lines",
@@ -12,9 +13,9 @@ class LineModel(models.Model):
     filled_line = models.BooleanField(default=False, blank=True)
 
     def __str__(self):
-        return f'{self.line_type.name} + {self.pk}' if self.line_type else str(self.pk)
+        return str(f'{self.line_type.name} + {self.pk}' if self.line_type else str(self.pk))
 
     class Meta:
         db_table = "lines"
-        verbose_name = "Line"
-        verbose_name_plural = "Lines"
+        verbose_name = "Линия"
+        verbose_name_plural = "Линии"

@@ -7,8 +7,8 @@ from django import forms
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
 from service_objects.fields import ModelField
 
-from models_app.models.scheme import Scheme
-from models_app.models.user import User
+from models_app.models import Scheme
+from models_app.models import User
 
 
 class SchemeDeleteService(ServiceWithResult):

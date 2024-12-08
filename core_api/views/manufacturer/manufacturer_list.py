@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models.manufacturer import Manufacturer
+from models_app.models import Manufacturer
 from core_api.services.manufacturer.manufacturer_list import ManufacturerListService
 from core_api.services.manufacturer.create import CreateManufactureService
 from core_api.swagger_scheme.manufacturer import manufacturer_list, create_manufacturer

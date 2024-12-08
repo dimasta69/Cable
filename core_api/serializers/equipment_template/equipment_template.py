@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from models_app.models.port_template import PortTemplate
+from models_app.models.port.port_template.models import PortTemplate
 
 
 class EquipmentTemplateSerializer(serializers.Serializer):

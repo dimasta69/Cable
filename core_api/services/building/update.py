@@ -7,13 +7,13 @@ from rest_framework import status
 from models_app.models import User, Access
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.building import Building
+from models_app.models import Building
 
 
 class UpdateBuildingService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
-    number = forms.CharField(required=False)
+    name = forms.CharField(required=False)
     coord_x = forms.FloatField(required=False)
     coord_y = forms.FloatField(required=False)
 
@@ -30,7 +30,7 @@ class UpdateBuildingService(ServiceWithResult):
     def update_building(self):
         building = self.building
         if self.cleaned_data['number']:
-            building.number = self.cleaned_data['number']
+            building.number = self.cleaned_data['name']
         if self.cleaned_data['coord_x']:
             building.coord_x = self.cleaned_data['coord_x']
         if self.cleaned_data['coord_y']:
@@ -71,8 +71,8 @@ class UpdateBuildingService(ServiceWithResult):
     def number_presence(self):
         if self.building:
             for building in self.building_list:
-                if building.number.lower() == self.cleaned_data['number'].lower():
-                    self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["number"]}'
+                if building.number.lower() == self.cleaned_data['name'].lower():
+                    self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["name"]}'
                                                              ' already exists'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 

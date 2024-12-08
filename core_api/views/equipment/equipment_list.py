@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models.equipment import Equipment
+from models_app.models import Equipment
 from core_api.serializers.equipment.create import CreateEquipmentSerializer
 from core_api.services.equipment.create import CreateEquipmentService
 from core_api.services.equipment.equipment_list import EquipmentListService

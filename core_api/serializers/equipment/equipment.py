@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from models_app.models.port import Port
+from models_app.models import Port
 
 
 class EquipmentSerializer(serializers.Serializer):

@@ -6,9 +6,9 @@ from rest_framework import status
 
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
-from models_app.models.port import Port
-from models_app.models.sfp_template import SfpTemplate
-from models_app.models.equipment import Equipment
+from models_app.models import Port
+from models_app.models import SfpTemplate
+from models_app.models import Equipment
 
 
 class AddToPortSfpService(ServiceWithResult):

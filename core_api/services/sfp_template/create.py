@@ -6,9 +6,9 @@ from rest_framework import status
 
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
-from models_app.models.manufacturer import Manufacturer
-from models_app.models.type_port import TypePort
-from models_app.models.sfp_template import SfpTemplate
+from models_app.models import Manufacturer
+from models_app.models import TypePort
+from models_app.models import SfpTemplate
 
 
 class CreateSfpTemplateService(ServiceWithResult):

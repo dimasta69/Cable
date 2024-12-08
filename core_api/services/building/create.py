@@ -7,13 +7,13 @@ from rest_framework import status
 from models_app.models import Access, User
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.building import Building
-from models_app.models.scheme import Scheme
+from models_app.models import Building
+from models_app.models import Scheme
 
 
 class CreateBuildingService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
-    number = forms.CharField(required=True)
+    name = forms.CharField(required=True)
     current_user = ModelField(User)
 
     custom_validations = ['scheme_presence', 'number_presence', 'access_presence']
@@ -27,7 +27,7 @@ class CreateBuildingService(ServiceWithResult):
 
     @property
     def create_building(self):
-        return Building.objects.create(scheme=self.scheme, number=self.cleaned_data['number'])
+        return Building.objects.create(scheme=self.scheme, name=self.cleaned_data['name'])
 
     @property
     @lru_cache()

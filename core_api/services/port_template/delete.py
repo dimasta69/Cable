@@ -5,7 +5,7 @@ from functools import lru_cache
 from utils.services import ServiceWithResult
 from django import forms
 
-from models_app.models.port_template import PortTemplate
+from models_app.models.port.port_template.models import PortTemplate
 
 
 class PortTemplateDeleteService(ServiceWithResult):

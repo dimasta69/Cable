@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models.equipment_template import EquipmentTemplate
+from models_app.models.equipment.equipment_template.models import EquipmentTemplate
 from core_api.serializers.equipment_template.equipment_template_list import EquipmentTemplateListSerializer
 from core_api.serializers.equipment_template.equipment_template import EquipmentTemplateSerializer
 from core_api.serializers.equipment_template.create_equipment_template import CreateEquipmentTemplateSerializer
