@@ -7,7 +7,7 @@ class Scheme(BaseModel):
         "User", related_name='schemes', on_delete=models.CASCADE, verbose_name='Создатель схемы', null=False,
         related_query_name='scheme'
     )
-    title = models.CharField(null=False, blank=False, verbose_name='Назавние', max_length=100, unique=True)
+    title = models.CharField(null=False, blank=False, verbose_name='Название', max_length=100, unique=True)
 
     class Meta:
         db_table = "scheme"
