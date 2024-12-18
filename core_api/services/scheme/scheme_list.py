@@ -23,7 +23,7 @@ class SchemeListService(ServiceWithResult):
     def _filter_list(self):
         scheme_list = self.scheme_list
         if self.cleaned_data.get('search_filter'):
-            scheme_list = scheme_list.filter(itle__icontains=self.cleaned_data["search_filter"])
+            scheme_list = scheme_list.filter(title__icontains=self.cleaned_data["search_filter"])
         return scheme_list
 
     @property
