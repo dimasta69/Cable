@@ -24,19 +24,9 @@ class AccessListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.room_pagination
+            self.result = self.access_filter_list
             self.response_status = status.HTTP_200_OK
         return self
-
-    @property
-    def room_pagination(self):
-        try:
-            return (Paginator(self.access_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                 REST_FRAMEWORK['PAGE_SIZE'])).
-                    page(self.cleaned_data['page'] or 1))
-        except EmptyPage:
-            return (Paginator(self.access_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                 REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def access_filter_list(self):

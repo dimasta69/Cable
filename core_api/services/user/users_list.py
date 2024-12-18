@@ -38,13 +38,7 @@ class UsersListServices(ServiceWithResult):
             user_list = user_list.filter(
                 Q(username_icontains=self.cleaned_data['search_filter'])
             )
-        try:
-            return (Paginator(user_list, per_page=(self.cleaned_data['per_page'] or
-                                                   REST_FRAMEWORK['PAGE_SIZE'])).
-                    page(self.cleaned_data['page'] or 1))
-        except EmptyPage:
-            return (Paginator(user_list, per_page=(self.cleaned_data['per_page'] or
-                                                   REST_FRAMEWORK['PAGE_SIZE'])).page(1))
+        return user_list
 
     @property
     @lru_cache()
