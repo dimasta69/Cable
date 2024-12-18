@@ -8,8 +8,8 @@ class Scheme(BaseModel):
         related_query_name='scheme'
     )
     title = models.CharField(null=False, blank=False, verbose_name='Название', max_length=100, unique=True)
-    count_user = models.PositiveIntegerField(default=0)
-    count_build = models.PositiveIntegerField(default=0)
+    count_user = models.PositiveIntegerField(default=0, blank=True, verbose_name="Количество пользователей")
+    count_build = models.PositiveIntegerField(default=0, blank=True, verbose_name="Количество строений")
 
     class Meta:
         db_table = "scheme"

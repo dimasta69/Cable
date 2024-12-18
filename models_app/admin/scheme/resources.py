@@ -18,6 +18,7 @@ class SegmentTabularInline(admin.TabularInline):
 class SchemeAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'creator', 'title',)
     list_display = ('id', 'creator', 'title', 'created_at')
+    readonly_fields = ('count_user', 'count_build',)
     search_fields = ('id', 'title', 'creator__username')
     ordering = ('-created_at',)
     inlines = (

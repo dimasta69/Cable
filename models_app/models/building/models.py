@@ -32,6 +32,5 @@ def refresh_count_plus(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Building)
 def refresh_count_minus(sender, instance, created, **kwargs):
-    if created:
-        instance.scheme.count_build -= 1
-        instance.scheme.save()
+    instance.scheme.count_build -= 1
+    instance.scheme.save()
