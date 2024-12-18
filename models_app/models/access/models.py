@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
+
 from models_app.models.base_model import BaseModel
 
 
@@ -25,3 +28,17 @@ class Access(BaseModel):
 
     def __str__(self):
         return str(self.scheme.title + " " + self.user.username + " " + self.role)
+
+
+@receiver(post_save, sender=Access)
+def refresh_count_plus(sender, instance, created, **kwargs):
+    if created:
+        instance.scheme.count_user += 1
+        instance.scheme.save()
+
+
+@receiver(post_delete, sender=Access)
+def refresh_count_minus(sender, instance, created, **kwargs):
+    if created:
+        instance.scheme.count_user -= 1
+        instance.scheme.save()

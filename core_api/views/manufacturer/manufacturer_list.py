@@ -5,7 +5,6 @@ from drf_yasg.utils import swagger_auto_schema
 from models_app.models import Manufacturer
 from core_api.services.manufacturer.manufacturer_list import ManufacturerListService
 from core_api.services.manufacturer.create import CreateManufactureService
-from core_api.swagger_scheme.manufacturer import manufacturer_list, create_manufacturer
 from core_api.serializers.manufacturer.manufacturer_list import ManufacturerListSerializer
 
 from rest_framework.permissions import IsAuthenticated
@@ -18,7 +17,6 @@ class ManufacturerListView(APIView):
     queryset = Manufacturer.objects.all()
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(**manufacturer_list)
     def get(self, request):
         outcome = ServiceOutcome(ManufacturerListService, dict(request.GET.items()))
         if bool(outcome.errors):
@@ -29,7 +27,6 @@ class ManufacturerListView(APIView):
                          'results': ManufacturerListSerializer(outcome.result, many=True).data},
                         status=outcome.response_status)
 
-    @swagger_auto_schema(**create_manufacturer)
     def post(self, request):
         outcome = ServiceOutcome(CreateManufactureService, request.data)
         if bool(outcome.errors):
