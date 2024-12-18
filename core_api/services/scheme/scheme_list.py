@@ -18,6 +18,7 @@ class SchemeListService(ServiceWithResult):
             self.response_status = status.HTTP_200_OK
         return self
 
+    @property
     def _filter_list(self):
         scheme_list = self.scheme_list
         if self.cleaned_data.get('search_filter'):
