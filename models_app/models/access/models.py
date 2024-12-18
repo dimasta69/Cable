@@ -38,6 +38,6 @@ def refresh_count_plus(sender, instance, created, **kwargs):
 
 
 @receiver(post_delete, sender=Access)
-def refresh_count_minus(sender, instance, created, **kwargs):
+def refresh_count_minus(sender, instance, **kwargs):
     instance.scheme.count_user -= 1
     instance.scheme.save()
