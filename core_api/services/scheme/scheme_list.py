@@ -24,7 +24,7 @@ class SchemeListService(ServiceWithResult):
         scheme_list = self.scheme_list
         if self.cleaned_data.get('search_filter'):
             scheme_list = scheme_list.filter(title__icontains=self.cleaned_data["search_filter"])
-        return scheme_list
+        return scheme_list.order_by("created_at")
 
     @property
     @lru_cache()
