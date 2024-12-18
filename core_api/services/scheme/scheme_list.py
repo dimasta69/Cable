@@ -1,6 +1,7 @@
 from service_objects.fields import ModelField
 from rest_framework import status
 from django import forms
+from functools import lru_cache
 
 from models_app.models import User
 from models_app.models import Scheme
@@ -22,10 +23,11 @@ class SchemeListService(ServiceWithResult):
     def _filter_list(self):
         scheme_list = self.scheme_list
         if self.cleaned_data.get('search_filter'):
-            scheme_list = scheme_list.filter(scheme__title__icontains=self.cleaned_data["search_filter"])
+            scheme_list = scheme_list.filter(itle__icontains=self.cleaned_data["search_filter"])
         return scheme_list
 
     @property
+    @lru_cache()
     def scheme_list(self):
         try:
             return Scheme.objects.filter(id__in=self.scheme_to_access).select_related('creator')
