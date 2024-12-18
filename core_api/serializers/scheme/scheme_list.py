@@ -4,7 +4,7 @@ from rest_framework import serializers
 from models_app.models import Scheme
 
 
-class SchemeSerializer(serializers.Serializer):
+class SchemeSerializer(serializers.ModelSerializer):
     creator = serializers.SerializerMethodField()
 
     def get_creator(self, obj: Scheme) -> json:
