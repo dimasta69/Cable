@@ -18,7 +18,7 @@ class SchemeSerializer(serializers.ModelSerializer):
         model = Scheme
         fields = (
             'id',
-            'creator'
+            'creator',
             "title",
             "count_user",
             "count_build",
