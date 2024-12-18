@@ -24,12 +24,12 @@ class CreateServerRackService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.create_room
+            self.result = self.create_server_rack
             self.response_status = status.HTTP_201_CREATED
         return self
 
     @property
-    def create_room(self):
+    def create_server_rack(self):
         server_rack = ServerRack.objects.create(number_of_units=self.cleaned_data['number_of_units'],
                                                 room=self.room,
                                                 title=self.cleaned_data['title'],
