@@ -18,7 +18,7 @@ class SchemeListView(APIView):
 
     @swagger_auto_schema(**scheme_list)
     def get(self, request):
-        outcome = ServiceOutcome(SchemeListService, {'current_user': request.user})
+        outcome = ServiceOutcome(SchemeListService, {'current_user': request.user} | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors)
         return Response(SchemeSerializer(outcome.result, many=True).data, status=outcome.response_status)
