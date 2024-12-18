@@ -28,4 +28,4 @@ class SchemeListView(APIView):
         outcome = ServiceOutcome(CreateScheme, {'current_user': request.user} | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(SchemeSerializer(outcome.result).data, status=outcome.response_status)
+        return Response(SchemeListService(outcome.result).data, status=outcome.response_status)
