@@ -1,12 +1,17 @@
 from rest_framework import serializers
 
 
+class SpeedSerializer(serializers.Serializer):
+    id = serializers.IntegerField(required=True)
+    value = serializers.IntegerField(required=True)
+    unit = serializers.CharField()
+
+
 class PortTemplateListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     name = serializers.CharField(required=True)
-    equipment_tmp = serializers.SerializerMethodField(required=False)
     type_port = serializers.SerializerMethodField()
-    speed = serializers.ListField(child=serializers.IntegerField())
+    speed = SpeedSerializer()
     count = serializers.IntegerField(required=True)
     modular = serializers.BooleanField(required=False)
     unit = serializers.ListField(child=serializers.IntegerField())

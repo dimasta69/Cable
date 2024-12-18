@@ -7,7 +7,8 @@ from rest_framework.exceptions import NotFound
 from utils.errors import ValidationError
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
-from models_app.models.port.port_template.models import PortTemplate
+from models_app.models import PortTemplate
+from models_app.models import Speed
 
 
 class UpdatePortTemplateService(ServiceWithResult):
@@ -15,6 +16,7 @@ class UpdatePortTemplateService(ServiceWithResult):
     name = forms.CharField(required=False)
     unit = ListIntegerField(required=False)
     lines = forms.IntegerField(required=False)
+    speed_list = ListIntegerField(required=False)
 
     custom_validations = ['name_presence', 'port_template_presence', 'count_unit',
                           'lines_presence']
@@ -52,6 +54,14 @@ class UpdatePortTemplateService(ServiceWithResult):
         try:
             return self.port_template_list.get(id=self.cleaned_data['id'])
         except PortTemplate.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def speeds(self):
+        try:
+            return Speed.objects.filter(id__in=self.cleaned_data['speed_list']).only('id')
+        except Speed.DoesNotExist:
             return None
 
     def name_presence(self):

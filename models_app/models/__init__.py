@@ -19,6 +19,7 @@ from models_app.models.port.port_template.models import PortTemplate
 from models_app.models.equipment.equipment_template.equipment_template_type.models import EquipmentTemplateType
 from models_app.models.speed.models import Speed
 from models_app.models.vlan.models import Vlan
+from models_app.models.port.port_template.models import PortShip
 
 
 __all__ = [
@@ -43,4 +44,5 @@ __all__ = [
     'Speed',
     'TypePort',
     'Vlan',
+    'PortShip',
 ]

@@ -34,10 +34,6 @@ class CreateServerRackService(ServiceWithResult):
                                                 room=self.room,
                                                 title=self.cleaned_data['title'],
                                                 max_power=self.cleaned_data['max_power'])
-
-        for side in Unit.SIDE_CHOICES:
-            for number in range(server_rack.number_of_units):
-                Unit.objects.create(uid=number + 1, server_rack=server_rack, side=side[1])
         return server_rack
 
     @property

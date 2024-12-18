@@ -24,4 +24,4 @@ class Unit(BaseModel):
         verbose_name_plural = 'Юниты'
 
     def __str__(self):
-        return f'{self.uid}_side'
+        return f'{self.uid}_{self.side}'

@@ -4,7 +4,7 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
-from models_app.models.port.port_template.models import PortTemplate
+from models_app.models import PortTemplate
 
 
 class PortTemplateService(ServiceWithResult):
@@ -23,7 +23,7 @@ class PortTemplateService(ServiceWithResult):
     @lru_cache()
     def port_template(self):
         try:
-            return PortTemplate.objects.get(id=self.cleaned_data['id'])
+            return PortTemplate.objects.get(id=self.cleaned_data['id']).select_related('type_port')
         except PortTemplate.DoesNotExist:
             return None
 

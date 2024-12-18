@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from models_app.models.base_model import BaseModel
 
 
@@ -7,11 +10,7 @@ class Equipment(BaseModel):
         "EquipmentTemplate", related_name='equipments', on_delete=models.CASCADE, verbose_name='Шаблон',
         null=False, blank=False, related_query_name='equipment',
     )
-    free_ports = models.IntegerField(default=0, verbose_name='Количество свободных портов')
-    room = models.ForeignKey(
-        "Room", related_name='equipments', on_delete=models.CASCADE, verbose_name='Комната', null=True, blank=True,
-        related_query_name='equipment',
-    )
+    free_ports = models.PositiveIntegerField(default=0, verbose_name='Количество свободных портов')
 
     class Meta:
         db_table = 'equipment'
@@ -20,3 +19,19 @@ class Equipment(BaseModel):
 
     def __str__(self):
         return str(str(self.id) + " " + self.template.manufacturer.name + ' ' + self.template.model)
+
+
+@receiver(post_save, sender=Equipment)
+def create_ports(sender, instance, created, **kwargs):
+    if created:
+        from models_app.models import PortShip, Port
+        number = 0
+        objects_to_create = []
+
+        for port_ship in PortShip.objects.filter(equipment_template=instance.template):
+            for i in range(port_ship.count):
+                number = number + 1
+                objects_to_create.append(Port(uid=number, equipment=instance, port_template=port_ship.port_template))
+        Port.objects.bulk_create(objects_to_create)
+        instance.free_ports = number
+        instance.save()

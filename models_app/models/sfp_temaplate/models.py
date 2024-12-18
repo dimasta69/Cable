@@ -16,9 +16,9 @@ class SfpTemplate(BaseModel):
         "Speed", related_name="sfp_templates", related_query_name="sfp_template", db_table="sfp_speed",
     )
 
-    line_type = models.ForeignKey(
-        'LineType', blank=False, null=False, on_delete=models.CASCADE, related_name='sfp_templates',
-        related_query_name='sfp_template',
+    line_type = models.ManyToManyField(
+        "LineType", related_name='sfp_templates', related_query_name="sfp_template",
+        verbose_name="Потдерживаемы типы лииний"
     )
 
     def __str__(self):

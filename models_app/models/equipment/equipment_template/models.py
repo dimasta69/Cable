@@ -15,6 +15,7 @@ class EquipmentTemplate(BaseModel):
     power = models.PositiveIntegerField(null=True, blank=True, verbose_name='Мощность')
     number_of_units = models.PositiveIntegerField(null=False, blank=False, verbose_name='Количество занимаемых юнитов')
     count_port = models.IntegerField(default=0, verbose_name='Количество портов')
+    port = models.ManyToManyField("PortTemplate", through="PortShip")
 
     class Meta:
         db_table = 'equipment_template'
