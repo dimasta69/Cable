@@ -13,10 +13,10 @@ from models_app.models import Building
 class CreateRoomService(ServiceWithResult):
     building_id = forms.IntegerField(required=True)
     number = forms.CharField(required=True)
-    type = forms.CharField(required=True)
+    is_server_room = forms.BooleanField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['building_presence', 'type_presence', 'number_presence', 'access_presence']
+    custom_validations = ['building_presence', 'number_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -28,7 +28,7 @@ class CreateRoomService(ServiceWithResult):
     @property
     def create_room(self):
         return Room.objects.create(building=self.building, number=self.cleaned_data['number'],
-                                   type=self.cleaned_data['type'])
+                                   is_server_room=self.cleaned_data['is_server_room'])
 
     @property
     def room_list(self):
@@ -52,14 +52,6 @@ class CreateRoomService(ServiceWithResult):
                                       role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None
-
-    def type_presence(self):
-        if self.cleaned_data['type']:
-            if not any(type_tuple[1] == self.cleaned_data['type'] for type_tuple in Room.TYPE_ROOM_CHOICES):
-                self.add_error('filter_type', ObjectDoesNotExist('Type ='
-                                                                 f'{self.cleaned_data["type"]} '
-                                                                 f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def building_presence(self):
         if self.cleaned_data['building_id']:

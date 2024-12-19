@@ -10,8 +10,8 @@
 #
 #
 # class ConnectionPortService(ServiceWithResult):
-#     front_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=True)
-#     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=True)
+#     front_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
+#     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
 #
 #     def _connection(self):
 #         port_1 = Port.objects.get(id=self.cleaned_data['front_port_list'][0])
@@ -35,3 +35,8 @@
 #         line_2 = line_2 if line_2 else [port_2.id]
 #
 #         line_1.extend(line_2)
+#
+#     @property
+#     def _ports(self):
+#         try:
+#             return Port.objects.filter(id__in=self.cleaned_data.get('front_port_list') if self.cleaned_data.get('front_port_list') else self.cleaned_data.get('back_port_list'))

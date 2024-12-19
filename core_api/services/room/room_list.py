@@ -19,10 +19,10 @@ class RoomListService(ServiceWithResult):
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
     filter_building_id = forms.IntegerField(required=True)
-    filter_type = forms.CharField(required=False)
+    filter_is_server_room = forms.BooleanField(required=False)
     search_filter = forms.CharField(required=False)
 
-    custom_validations = ['building_presence', 'type_presence', 'order_presence', 'access_presence']
+    custom_validations = ['building_presence', 'order_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -44,8 +44,8 @@ class RoomListService(ServiceWithResult):
     @property
     def room_filter_list(self):
         room_list = self.room_list
-        if self.cleaned_data['filter_type']:
-            room_list = room_list.filter(type=self.cleaned_data['filter_type'])
+        if self.cleaned_data['filter_is_server_room']:
+            room_list = room_list.filter(is_server_room=self.cleaned_data['filter_is_server_room'])
         if self.cleaned_data['search_filter']:
             room_list = room_list.filter(
                 Q(number__icontains=self.cleaned_data['search_filter']))
@@ -74,14 +74,6 @@ class RoomListService(ServiceWithResult):
             return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.building.scheme)
         except Access.DoesNotExist:
             return None
-
-    def type_presence(self):
-        if self.cleaned_data['filter_type']:
-            if not any(type_tuple[1] == self.cleaned_data['filter_type'] for type_tuple in Room.TYPE_ROOM_CHOICES):
-                self.add_error('filter_type', ObjectDoesNotExist('Type id='
-                                                                 f'{self.cleaned_data["filter_type"]} '
-                                                                 f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def order_presence(self):
         if self.cleaned_data['order_by']:

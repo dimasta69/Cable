@@ -13,6 +13,7 @@ from models_app.models import Building
 class UpdateRoomService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     number = forms.CharField(required=False)
+    is_server_room = forms.BooleanField(required=False)
     current_user = ModelField(User)
 
     custom_validations = ['room_presence', 'number_presence', 'access_presence']
@@ -29,6 +30,8 @@ class UpdateRoomService(ServiceWithResult):
         room = self.room
         if self.cleaned_data['number']:
             room.number = self.cleaned_data['number']
+        if self.cleaned_data['is_server_room']:
+            room.is_server_room = self.cleaned_data['is_server_room']
         room.save()
         return room
 
