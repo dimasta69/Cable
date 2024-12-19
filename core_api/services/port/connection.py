@@ -34,4 +34,4 @@
 #         line_1 = line_1 if line_1 else [port_1.id]
 #         line_2 = line_2 if line_2 else [port_2.id]
 #
-#         line_1
+#         line_1.extend(line_2)
