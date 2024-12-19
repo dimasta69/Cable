@@ -1,8 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.paginator import Paginator, EmptyPage
 from rest_framework import status
 
-from cabel.settings import REST_FRAMEWORK
 from utils.services import ServiceWithResult
 from django import forms
 from functools import lru_cache
@@ -36,7 +34,7 @@ class UsersListServices(ServiceWithResult):
             user_list = user_list.order_by(self.cleaned_data['order_by'])
         if self.cleaned_data['search_filter']:
             user_list = user_list.filter(
-                Q(username_icontains=self.cleaned_data['search_filter'])
+                Q(username__icontains=self.cleaned_data['search_filter'])
             )
         return user_list
 

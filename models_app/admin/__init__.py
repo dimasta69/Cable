@@ -13,6 +13,8 @@ from models_app.admin.speed.resources import SpeedAdmin
 from models_app.admin.line_type.resources import LineTypeAdmin
 from models_app.admin.sfp_template.resources import SfpTemplateAdmin
 from models_app.admin.user.resources import UserAdmin
+from models_app.admin.vlan.resources import VlanAdmin
+from models_app.admin.segment.resources import SegmentAdmin
 
 from django.contrib import admin
 from django.contrib.auth.models import Group

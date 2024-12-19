@@ -11,6 +11,7 @@ class Equipment(BaseModel):
         null=False, blank=False, related_query_name='equipment',
     )
     free_ports = models.PositiveIntegerField(default=0, verbose_name='Количество свободных портов')
+    connections = models.ManyToManyField('self', null=True, blank=True)
 
     class Meta:
         db_table = 'equipment'
