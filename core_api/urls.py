@@ -1,12 +1,9 @@
-import os.path
-
 from django.conf.urls.static import static
 from django.urls import path
 
 from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
-from cabel import settings
 from cabel.settings import MEDIA_URL, MEDIA_ROOT, STATIC_URL, STATIC_ROOT
 from core_api.views.access.access import AccessView
 from core_api.views.auth.login import TokenCreateView

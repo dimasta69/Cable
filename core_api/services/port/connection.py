@@ -1,5 +1,5 @@
 # from django import forms
-# from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation
+# from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation, ValidationError
 # from django.core.validators import RegexValidator
 # from django.contrib.postgres.forms import SimpleArrayField
 # from rest_framework import status
@@ -12,6 +12,8 @@
 # class ConnectionPortService(ServiceWithResult):
 #     front_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
 #     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
+#
+#     custom_validations = ['ports_presence', ]
 #
 #     def _connection(self):
 #         port_1 = Port.objects.get(id=self.cleaned_data['front_port_list'][0])
@@ -39,4 +41,16 @@
 #     @property
 #     def _ports(self):
 #         try:
-#             return Port.objects.filter(id__in=self.cleaned_data.get('front_port_list') if self.cleaned_data.get('front_port_list') else self.cleaned_data.get('back_port_list'))
+#             ports = []
+#             if self.cleaned_data['front_port_list']:
+#                 ports = self.cleaned_data['front_port_list']
+#             if self.cleaned_data['back_port_list']:
+#                 ports = self.cleaned_data['back_port_list']
+#             return Port.objects.filter(id__in=ports)
+#         except Port.DoesNotExist:
+#             return None
+#
+#     def ports_presence(self):
+#         if self._ports is None or len(self._ports) != 2:
+#             self.add_error('ports', ValidationError(f"Ports does not exist"))
+#             self.response_status = status.HTTP_404_NOT_FOUND
