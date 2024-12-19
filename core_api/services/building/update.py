@@ -33,8 +33,12 @@ class UpdateBuildingService(ServiceWithResult):
             building.number = self.cleaned_data['name']
         if self.cleaned_data['coord_x']:
             building.coord_x = self.cleaned_data['coord_x']
+        else:
+            building.coord_x = None
         if self.cleaned_data['coord_y']:
             building.coord_y = self.cleaned_data['coord_y']
+        else:
+            building.coord_y = None
         building.save()
         return building
 
@@ -71,7 +75,7 @@ class UpdateBuildingService(ServiceWithResult):
     def number_presence(self):
         if self.building:
             for building in self.building_list:
-                if building.number.lower() == self.cleaned_data['name'].lower():
+                if building.name.lower() == self.cleaned_data['name'].lower():
                     self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["name"]}'
                                                              ' already exists'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
