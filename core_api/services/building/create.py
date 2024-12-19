@@ -61,8 +61,8 @@ class CreateBuildingService(ServiceWithResult):
 
     def number_presence(self):
         for building in self.building_list:
-            if building.number.lower() == self.cleaned_data['number'].lower():
-                self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["number"]}'
+            if building.number.lower() == self.cleaned_data['name'].lower():
+                self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["name"]}'
                                                          ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
