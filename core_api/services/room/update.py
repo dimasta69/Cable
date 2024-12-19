@@ -7,7 +7,7 @@ from models_app.models import Access, User
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Room
-from models_app.models import Building
+from models_app.models import Building, Equipment
 
 
 class UpdateRoomService(ServiceWithResult):
@@ -15,9 +15,9 @@ class UpdateRoomService(ServiceWithResult):
     number = forms.CharField(required=False)
     is_server_room = forms.BooleanField(required=False)
     current_user = ModelField(User)
-    # equipment =
+    equipment_id = forms.IntegerField(required=False)
 
-    custom_validations = ['room_presence', 'number_presence', 'access_presence']
+    custom_validations = ['room_presence', 'number_presence', 'access_presence', 'equipment_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -33,6 +33,8 @@ class UpdateRoomService(ServiceWithResult):
             room.number = self.cleaned_data['number']
         if self.cleaned_data['is_server_room']:
             room.is_server_room = self.cleaned_data['is_server_room']
+        if self.cleaned_data['equipment_id']:
+            room.equipments.add(self._equipment)
         room.save()
         return room
 
@@ -60,6 +62,14 @@ class UpdateRoomService(ServiceWithResult):
             return None
 
     @property
+    @lru_cache()
+    def _equipment(self):
+        try:
+            return Equipment.objects.get(id=self.cleaned_data.get('equipment_id'))
+        except Equipment.DoesNotExist:
+            return None
+
+    @property
     def access(self):
         try:
             return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.room.building.scheme,
@@ -79,6 +89,17 @@ class UpdateRoomService(ServiceWithResult):
                     self.add_error('model', ValidationError(f'Field with number={self.cleaned_data["number"]}'
                                                             ' already exists'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def equipment_presence(self):
+        if self.cleaned_data['equipment_id'] and self._equipment is None:
+            self.add_error('equipment_id', ObjectDoesNotExist(f'Equipment if={self.cleaned_data["equipment_id"]}'
+                                                    ' not found'))
+            self.response_status = status.HTTP_404_NOT_FOUND
+        elif self.cleaned_data['equipment_id'] and self._equipment:
+            if len(self._equipment.units) != 0:
+                self.add_error('equipment_id', ValidationError(f'Equipment if={self.cleaned_data["equipment_id"]}'
+                                                               'stands in a rack'))
+                self.response_status = status.HTTP_400_BAD_REQUEST
 
     def access_presence(self):
         if self.room:
