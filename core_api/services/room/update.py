@@ -15,6 +15,7 @@ class UpdateRoomService(ServiceWithResult):
     number = forms.CharField(required=False)
     is_server_room = forms.BooleanField(required=False)
     current_user = ModelField(User)
+    # equipment =
 
     custom_validations = ['room_presence', 'number_presence', 'access_presence']
 

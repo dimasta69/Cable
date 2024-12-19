@@ -9,6 +9,7 @@ class Room(BaseModel):
     )
     number = models.CharField(null=False, verbose_name='Номер комнаты', max_length=100)
     is_server_room = models.BooleanField(null=False, blank=False)
+    equipments = models.ManyToManyField("Equipment", related_name="related_equipments", blank=True, null=True)
 
     class Meta:
         db_table = "room"

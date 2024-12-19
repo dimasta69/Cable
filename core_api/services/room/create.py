@@ -13,7 +13,7 @@ from models_app.models import Building
 class CreateRoomService(ServiceWithResult):
     building_id = forms.IntegerField(required=True)
     number = forms.CharField(required=True)
-    is_server_room = forms.BooleanField(required=True)
+    is_server_room = forms.BooleanField(required=False)
     current_user = ModelField(User)
 
     custom_validations = ['building_presence', 'number_presence', 'access_presence']
@@ -28,7 +28,7 @@ class CreateRoomService(ServiceWithResult):
     @property
     def create_room(self):
         return Room.objects.create(building=self.building, number=self.cleaned_data['number'],
-                                   is_server_room=self.cleaned_data['is_server_room'])
+                                   is_server_room=self.cleaned_data.get('is_server_room'))
 
     @property
     def room_list(self):
