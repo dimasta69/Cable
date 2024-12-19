@@ -34,7 +34,8 @@ class UpdateRoomService(ServiceWithResult):
         if self.cleaned_data['is_server_room']:
             room.is_server_room = self.cleaned_data['is_server_room']
         if self.cleaned_data['equipment_id']:
-            room.equipments.add(self._equipment)
+            self._equipment.room = room
+            self._equipment.save()
         room.save()
         return room
 
@@ -96,7 +97,7 @@ class UpdateRoomService(ServiceWithResult):
                                                     ' not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
         elif self.cleaned_data['equipment_id'] and self._equipment:
-            if getattr(self._equipment, "units", None):
+            if getattr(self._equipment, "units", None) or getattr(self._equipment, "units", None):
                 self.add_error('equipment_id', ValidationError(f'Equipment if={self.cleaned_data["equipment_id"]}'
                                                                'stands in a rack'))
                 self.response_status = status.HTTP_400_BAD_REQUEST

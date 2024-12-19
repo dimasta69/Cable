@@ -12,6 +12,10 @@ class Equipment(BaseModel):
     )
     free_ports = models.PositiveIntegerField(default=0, verbose_name='Количество свободных портов')
     connections = models.ManyToManyField('self', null=True, blank=True)
+    room = models.ForeignKey(
+        'Room', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Расположение в комнате",
+        related_name="equipments", related_query_name="equipmet"
+    )
 
     class Meta:
         db_table = 'equipment'
