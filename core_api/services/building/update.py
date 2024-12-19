@@ -29,7 +29,7 @@ class UpdateBuildingService(ServiceWithResult):
     @property
     def update_building(self):
         building = self.building
-        if self.cleaned_data['number']:
+        if self.cleaned_data['name']:
             building.number = self.cleaned_data['name']
         if self.cleaned_data['coord_x']:
             building.coord_x = self.cleaned_data['coord_x']
