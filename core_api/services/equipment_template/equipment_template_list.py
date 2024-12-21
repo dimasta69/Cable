@@ -2,21 +2,21 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from functools import lru_cache
 from rest_framework import status
-from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
+from models_app.models import EquipmentTemplateType
 from models_app.models import Manufacturer
-from cabel.settings.rest_framework import REST_FRAMEWORK
 
 
 class EquipmentTemplateListService(ServiceWithResult):
-    filter_manufacturer = forms.IntegerField(required=False)
-    filter_type = forms.CharField(required=False)
+    filter_manufacturer_id = forms.IntegerField(required=False)
+    filter_type_id = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
+    order_by = forms.CharField(required=False)
 
-    custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence']
+    custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence', 'type_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -28,15 +28,15 @@ class EquipmentTemplateListService(ServiceWithResult):
     @property
     def equipment_filter_list(self):
         equipment_template_list = self.equipment_template_list
-        if self.cleaned_data['filter_manufacturer']:
+        if self.cleaned_data['filter_manufacturer_id']:
             equipment_template_list = equipment_template_list.filter(manufacturer=self.manufacturer)
-        if self.cleaned_data['filter_type']:
-            equipment_template_list = equipment_template_list.filter(type=self.filter_type)
+        if self.cleaned_data['filter_type_id']:
+            equipment_template_list = equipment_template_list.filter(type=self._type)
         if self.cleaned_data['search_filter']:
             equipment_template_list = equipment_template_list.filter(
                 Q(model__icontains=self.cleaned_data['search_filter']) |
                 Q(manufacturer__name__icontains=self.cleaned_data['search_filter']) |
-                Q(type__icontains=self.cleaned_data['search_filter']))
+                Q(type__name__icontains=self.cleaned_data['search_filter']))
         if self.cleaned_data['order_by']:
             equipment_template_list = equipment_template_list.order_by(self.cleaned_data['order_by'])
         return equipment_template_list
@@ -52,17 +52,24 @@ class EquipmentTemplateListService(ServiceWithResult):
     @lru_cache()
     def manufacturer(self):
         try:
-            return Manufacturer.objects.get(id=self.cleaned_data['filter_manufacturer'])
+            return Manufacturer.objects.get(id=self.cleaned_data['filter_manufacturer_id'])
         except Manufacturer.DoesNotExist:
             return None
 
+    @property
+    @lru_cache()
+    def _type(self):
+        try:
+            return EquipmentTemplateType.objects.get(id=self.cleaned_data['type_id'])
+        except EquipmentTemplateType.DoesNotExist:
+            return None
+
     def type_presence(self):
-        if self.cleaned_data['filter_type']:
-            if not any(type_tuple[1] == self.cleaned_data['type'] for type_tuple in EquipmentTemplate.TYPE_CHOICES):
-                self.add_error('filter_type', ObjectDoesNotExist('Type id='
-                                                                 f'{self.cleaned_data["filter_type"]} '
-                                                                 f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
+        if self.cleaned_data['filter_type_id'] and self._type is None:
+            self.add_error('filter_type', ObjectDoesNotExist('Type id='
+                                                             f'{self.cleaned_data["filter_type_id"]} '
+                                                             f'not found'))
+            self.response_status = status.HTTP_404_NOT_FOUND
 
     def order_presence(self):
         if self.cleaned_data['order_by']:
@@ -72,9 +79,8 @@ class EquipmentTemplateListService(ServiceWithResult):
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def manufacturer_presence(self):
-        if self.cleaned_data['filter_manufacturer']:
-            if not self.manufacturer:
-                self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
-                                                                         f'{self.cleaned_data["filter_manufacturer"]} '
-                                                                         f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
+        if self.cleaned_data['filter_manufacturer_id'] and not self.manufacturer:
+            self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
+                                                                     f'{self.cleaned_data["filter_manufacturer_id"]} '
+                                                                     f'not found'))
+            self.response_status = status.HTTP_404_NOT_FOUND
