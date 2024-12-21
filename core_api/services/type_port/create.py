@@ -1,10 +1,9 @@
-from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from django.core.exceptions import ValidationError
 from rest_framework import status
 
 from django import forms
-from models_app.models import TypePort, User
+from models_app.models import TypePort
 
 
 class CreateTypePort(ServiceWithResult):
