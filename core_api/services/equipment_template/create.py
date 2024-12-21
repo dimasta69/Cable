@@ -10,7 +10,7 @@ from models_app.models import Manufacturer, EquipmentTemplateType
 
 class CreateEquipmentTemplateService(ServiceWithResult):
     manufacturer_id = forms.IntegerField(required=False)
-    type_id = forms.CharField(required=True)
+    type_id = forms.IntegerField(required=True)
     model = forms.CharField(required=True)
     number_of_units = forms.IntegerField(required=False)
     power = forms.IntegerField(required=False)

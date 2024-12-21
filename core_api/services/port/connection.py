@@ -1,12 +1,11 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation, ValidationError
-from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 from django.contrib.postgres.forms import SimpleArrayField
 from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
-from models_app.models import Port
+from models_app.models import Port, Line
 
 
 class ConnectionPortService(ServiceWithResult):
@@ -53,7 +52,13 @@ class ConnectionPortService(ServiceWithResult):
 
         line_1.extend(line_2)
 
+        port_1.line = line_1
+        port_2.line = line_1
+        port_1.save()
+        port_2.save()
+
     @property
+    @lru_cache()
     def _ports(self) -> Port | None:
         try:
             ports = []
