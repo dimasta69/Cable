@@ -12,9 +12,6 @@ from cabel.settings.rest_framework import REST_FRAMEWORK
 
 
 class EquipmentTemplateListService(ServiceWithResult):
-    page = forms.IntegerField(required=False)
-    per_page = forms.IntegerField(required=False)
-    order_by = forms.CharField(required=False)
     filter_manufacturer = forms.IntegerField(required=False)
     filter_type = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
@@ -24,19 +21,9 @@ class EquipmentTemplateListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.equipment_template_pagination
+            self.result = self.equipment_filter_list
             self.response_status = status.HTTP_200_OK
         return self
-
-    @property
-    def equipment_template_pagination(self):
-        try:
-            return (Paginator(self.equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                    REST_FRAMEWORK['PAGE_SIZE'])).
-                    page(self.cleaned_data['page'] or 1))
-        except EmptyPage:
-            return (Paginator(self.equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                    REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def equipment_filter_list(self):

@@ -5,12 +5,12 @@ from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
-from models_app.models import Manufacturer
+from models_app.models import Manufacturer, EquipmentTemplateType
 
 
 class CreateEquipmentTemplateService(ServiceWithResult):
     manufacturer_id = forms.IntegerField(required=False)
-    type = forms.CharField(required=True)
+    type_id = forms.CharField(required=True)
     model = forms.CharField(required=True)
     number_of_units = forms.IntegerField(required=False)
     power = forms.IntegerField(required=False)
@@ -27,7 +27,7 @@ class CreateEquipmentTemplateService(ServiceWithResult):
     @property
     def create_equipment_template(self):
         return EquipmentTemplate.objects.create(manufacturer=self.manufacturer,
-                                                type=self.cleaned_data['type'],
+                                                type=self._type,
                                                 model=self.cleaned_data['model'],
                                                 number_of_units=self.cleaned_data['number_of_units'],
                                                 power=self.cleaned_data['power'])
@@ -41,6 +41,14 @@ class CreateEquipmentTemplateService(ServiceWithResult):
             return None
 
     @property
+    @lru_cache()
+    def _type(self):
+        try:
+            return EquipmentTemplateType.objects.get(id=self.cleaned_data['type_id'])
+        except EquipmentTemplateType.DoesNotExist:
+            return None
+
+    @property
     def equipment_template_list(self):
         try:
             return EquipmentTemplate.objects.all()
@@ -48,9 +56,11 @@ class CreateEquipmentTemplateService(ServiceWithResult):
             return EquipmentTemplate.objects.none()
 
     def type_presence(self):
-        if self.cleaned_data['type']:
-            if not any(type_tuple[1] == self.cleaned_data['type'] for type_tuple in EquipmentTemplate.TYPE_CHOICES):
-                self.add_error('type', ObjectDoesNotExist(f'Type {self.cleaned_data["type"]} not found'))
+        if self.cleaned_data['type_id']:
+            if not self._type:
+                self.add_error('type_id', ObjectDoesNotExist('Type  id='
+                                                             f'{self.cleaned_data["type_id"]} not '
+                                                             'found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def model_presence(self):
