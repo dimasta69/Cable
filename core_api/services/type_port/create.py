@@ -1,5 +1,3 @@
-from rest_framework.exceptions import PermissionDenied
-
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from django.core.exceptions import ValidationError
@@ -11,7 +9,6 @@ from models_app.models import TypePort, User
 
 class CreateTypePort(ServiceWithResult):
     name = forms.CharField(required=True)
-    current_user = ModelField(User)
 
     custom_validations = ['unique_type',]
 
