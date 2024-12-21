@@ -20,7 +20,7 @@ class EquipmentTemplateSerializer(serializers.Serializer):
     def get_type(self, obj):
         return {
             "id": obj.type.id,
-            "is_active": obj.is_active,
+            "is_active": obj.type.is_active,
             "name": obj.name,
         }
 
