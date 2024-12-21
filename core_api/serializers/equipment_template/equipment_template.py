@@ -21,7 +21,7 @@ class EquipmentTemplateSerializer(serializers.Serializer):
         return {
             "id": obj.type.id,
             "is_active": obj.type.is_active,
-            "name": obj.name,
+            "name": obj.type.name,
         }
 
     def get_count_port(cls, obj):
