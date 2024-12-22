@@ -7,6 +7,7 @@ class EquipmentTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = EquipmentTemplateType
         fields = (
+            "id",
             "name",
             "is_active",
         )

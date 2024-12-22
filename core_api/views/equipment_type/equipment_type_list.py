@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from utils.services import ServiceOutcome
 from core_api.services.equipment_type.equipment_type_list import ListEquipmentTypeService
-from core_api.serializers.EquipmentType.resource import EquipmentTypeSerializer
+from core_api.serializers.equipment_type.resource import EquipmentTypeSerializer
 
 
 class ListEquipmentTypeView(APIView):
