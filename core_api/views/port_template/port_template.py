@@ -43,11 +43,11 @@ class PortTemplateView(APIView):
         return Response(PortTemplateListSerializer(outcome.result).data, status=outcome.response_status)
 
 
-class ConnectionPortShip(APIView):
+class ConnectionPortShipView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, **kwargs):
-        outcome = ServiceOutcome(ConnectionPortShipService, request.data | kwargs)
+        outcome = ServiceOutcome(ConnectionPortShipService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortShipSerializer(outcome.result).data, status=status.HTTP_201_CREATED)

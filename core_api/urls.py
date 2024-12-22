@@ -11,7 +11,7 @@ from core_api.views.auth.logout import TokenDestroyView
 from core_api.views.scheme.scheme_list import SchemeListView
 from core_api.views.scheme.scheme import SchemeView
 from core_api.views.port_template.port_template_list import PortTemplateListView
-from core_api.views.port_template.port_template import PortTemplateView
+from core_api.views.port_template.port_template import PortTemplateView, ConnectionPortShipView
 from core_api.views.manufacturer.manufacturer import ManufacturerView
 from core_api.views.manufacturer.manufacturer_list import ManufacturerListView
 from core_api.views.equipment_template.equipment_tamplate_list import EquipmentTemplateListView
@@ -85,6 +85,7 @@ urlpatterns = [
     path('access/<int:id>/', AccessView.as_view()),
     path('type_port/', TypePortListView.as_view()),
     path('users_list/', UsersListView.as_view()),
+    path('connection_port_ship/', ConnectionPortShipView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
