@@ -40,6 +40,7 @@ from core_api.views.sfp_template.adding_to_port import AddingToPortSfpTemplateVi
 from core_api.views.access.access_list import AccessListView
 from core_api.views.type_port.type_port_list import TypePortListView
 from core_api.views.users.users_list import UsersListView
+from core_api.views.equipment_type.equipment_type_list import ListEquipmentTypeView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -64,6 +65,7 @@ urlpatterns = [
     path('equipment/<int:id>/', EquipmentView.as_view()),
     path('equipment/<int:id>/add_equipment_for_unit/', AddEquipmentForUnitView.as_view()),
     path('equipment/create_from_room/', CreateEquipmentFromRoomView.as_view()),
+    path('equipment_type/', ListEquipmentTypeView.as_view()),
     path('port/', PortListView.as_view()),
     path('port/<int:id>/', PortView.as_view()),
     path('port/<int:id>/connection_pigtail/', ConnectionPigtailView.as_view()),
