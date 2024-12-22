@@ -26,7 +26,7 @@ class ConnectionPortShipService(ServiceWithResult):
 
     @property
     def _create_port_ship(self):
-        return PortShip.object.create(
+        return PortShip.objects.create(
             equipment_template=self._equipment_template,
             port_template=self._port_template,
             count=self.cleaned_data.get('count'),
