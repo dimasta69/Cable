@@ -6,7 +6,7 @@ from models_app.models import EquipmentTemplateType
 
 class ListEquipmentTypeService(ServiceWithResult):
     search_filter = forms.CharField(required=False)
-    filter_active = forms.BooleanField(required=False)
+    filter_active = forms.CharField(required=False)
 
     def process(self):
         if self.is_valid():
@@ -16,9 +16,8 @@ class ListEquipmentTypeService(ServiceWithResult):
     @property
     def _filter_equipment_template_types(self):
         equipment_template_types = self._equipment_template_types
-        filter_active = self.cleaned_data.get('filter_active', None)
-        if filter_active is not None:
-            equipment_template_types = equipment_template_types.filter(is_active=filter_active)
+        if self.cleaned_data.get('filter_active'):
+            equipment_template_types = equipment_template_types.filter(is_active=self.cleaned_data.get('filter_active'))
         if self.cleaned_data['search_filter']:
             equipment_template_types = equipment_template_types.filter(
                 name__icontains=self.cleaned_data['search_filter']
