@@ -1,34 +1,38 @@
 from rest_framework import serializers
+from models_app.models import PortTemplate, LineType
 
 
 class SpeedSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     value = serializers.IntegerField(required=True)
-    unit = serializers.CharField()
 
 
-class PortTemplateListSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=True)
-    name = serializers.CharField(required=True)
-    type_port = serializers.SerializerMethodField()
-    speed = SpeedSerializer()
-    count = serializers.IntegerField(required=True)
-    modular = serializers.BooleanField(required=False)
-    unit = serializers.ListField(child=serializers.IntegerField())
-    lines = serializers.IntegerField(required=True)
+class LineTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LineType
+        fields = (
+            "id",
+            "name",
+        )
+
+
+class PortTemplateListSerializer(serializers.ModelSerializer):
+    speeds = serializers.SerializerMethodField()
+    lines_type = serializers.SerializerMethodField()
+
+    def get_speeds(self, obj: PortTemplate) -> SpeedSerializer:
+        return SpeedSerializer(obj.speed.all(), many=True).data if obj.speed else None
+
+    def get_lines_type(self, obj: PortTemplate) -> LineTypeSerializer:
+        return LineTypeSerializer(obj.line_type.all(), many=True).data if obj.line_type else None
 
     class Meta:
-        ref = 'core_api_port_template_list_serializer'
-
-    @classmethod
-    def get_equipment_tmp(cls, obj):
-        return {
-            'manufacturer': obj.equipment_tmp.manufacturer.name,
-            'model': obj.equipment_tmp.model,
-        }
-
-    @classmethod
-    def get_type_port(cls, obj):
-        if obj.type_port:
-            return obj.type_port.name
-        return None
+        model = PortTemplate
+        fields = (
+            'id',
+            'name',
+            'type_port',
+            'modular',
+            'speeds',
+            'lines_type',
+        )

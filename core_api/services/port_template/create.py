@@ -15,10 +15,10 @@ class CreatePortTemplateService(ServiceWithResult):
     type_port_id = forms.IntegerField(required=False)
     modular = forms.BooleanField(required=False)
     speed_list_id = ListIntegerField(required=False)
-    line_type_list_id = ListIntegerField()
+    line_type_list_id = ListIntegerField(required=False)
 
-    custom_validations = ['name_presence', 'type_port_presence', 'type_and_modular_presence', 'count_unit',
-                          'lines_presence', 'unit_max', 'speed_presence', 'line_presence', ]
+    custom_validations = ['name_presence', 'type_port_presence', 'type_and_modular_presence',
+                          'speed_presence', 'line_presence', ]
 
     def process(self):
         self.run_custom_validations()
@@ -97,30 +97,12 @@ class CreatePortTemplateService(ServiceWithResult):
             self.add_error('modular', ValidationError('A port cannot be non-modular and cannot have a type'))
             self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def count_unit(self):
-        if self.cleaned_data['unit'] and self.equipment_tmp:
-            if self.equipment_tmp.number_of_units < len(self.cleaned_data['unit']):
-                self.add_error('unit', ValidationError('The number of units does not match'))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def lines_presence(self):
-        if self.cleaned_data['lines'] and self.equipment_tmp:
-            if (len(self.cleaned_data['unit']) / self.cleaned_data['lines']) < 0.5:
-                self.add_error('unit', ValidationError('Еhe number of lines per unit should not exceed 2'))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def unit_max(self):
-        if self.cleaned_data['unit'] and self.equipment_tmp:
-            if max(self.cleaned_data['unit']) > self.equipment_tmp.number_of_units:
-                self.add_error('unit', ValidationError('The number of units is less than the available unit'))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
     def speed_presence(self):
-        if len(self.cleaned_data['speed_list_id']) == len(self._speeds):
+        if len(self.cleaned_data['speed_list_id']) != len(self._speeds):
             self.add_error('speed_list_id', ObjectDoesNotExist(f"Speed id={self.cleaned_data['speed_list_id']} "
                                                                "not found"))
 
     def line_presence(self):
-        if len(self.cleaned_data['line_type_list_id']) == len(self._line_type):
+        if len(self.cleaned_data['line_type_list_id']) != len(self._line_type):
             self.add_error('speed_list_id', ObjectDoesNotExist(f"Speed id={self.cleaned_data['speed_list_id']} "
                                                                "not found"))
