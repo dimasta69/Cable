@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.forms import SimpleArrayField
+from django.db import transaction
 from rest_framework import status
 from functools import lru_cache
 
@@ -12,7 +13,7 @@ class ConnectionPortService(ServiceWithResult):
     front_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
 
-    custom_validations = ['ports_presence', 'free_ports']
+    custom_validations = ['ports_presence', 'free_ports', 'backside_and_active_equipment']
 
     def process(self):
         self.run_custom_validations()
@@ -24,38 +25,44 @@ class ConnectionPortService(ServiceWithResult):
         return self
 
     def _connection(self, front=True) -> None:
-        if front:
-            port_1 = Port.objects.get(id=self.cleaned_data["front_port_list"][0])
-            port_2 = Port.objects.get(id=self.cleaned_data["front_port_list"][1])
-            port_1.front_side = port_2
-            port_2.front_side = port_1
-        else:
-            port_1 = Port.objects.get(id=self.cleaned_data["back_port_list"][0])
-            port_2 = Port.objects.get(id=self.cleaned_data["back_port_list"][1])
-            port_1.back_side = port_2
-            port_2.back_side = port_1
+        with transaction.atomic():
+            if front:
+                port_1 = Port.objects.get(id=self.cleaned_data["front_port_list"][0])
+                port_2 = Port.objects.get(id=self.cleaned_data["front_port_list"][1])
+                port_1.front_side = port_2
+                port_2.front_side = port_1
+            else:
+                port_1 = Port.objects.get(id=self.cleaned_data["back_port_list"][0])
+                port_2 = Port.objects.get(id=self.cleaned_data["back_port_list"][1])
+                port_1.back_side = port_2
+                port_2.back_side = port_1
 
-        line_1 = None
-        line_2 = None
+            line_1 = None
+            line_2 = None
 
-        if port_1.line is None and port_2.line is None:
-            line_list = [port_1.id, port_2.id]
-            Port.objects.create(connection=line_list)
-        if port_1.line:
-            line_1 = port_1.line if port_1.line[-1] == port_1.id else list(reversed(port_1.line))
+            if port_1.line is None and port_2.line is None:
+                line_list = [port_1.id, port_2.id]
+                line = Line.objects.create(connection=line_list)
+                port_1.line = line
+                port_2.line = line
+            else:
+                if port_1.line:
+                    line_1 = port_1.line.connection if port_1.line.connection[-1] == port_1.id \
+                        else list(reversed(port_1.line.connection))
 
-        if port_2.line:
-            line_2 = port_2.line if port_2.line[0] == port_2.id else list(reversed(port_2.line))
+                if port_2.line:
+                    line_2 = port_2.line.connection if port_2.line.connection[0] == port_2.id \
+                        else list(reversed(port_2.line.connection))
 
-        line_1 = line_1 if line_1 else [port_1.id]
-        line_2 = line_2 if line_2 else [port_2.id]
+                line_1 = line_1 if line_1 else [port_1.id]
+                line_2 = line_2 if line_2 else [port_2.id]
 
-        line_1.extend(line_2)
+                line_1.extend(line_2)
 
-        port_1.line = line_1
-        port_2.line = line_1
-        port_1.save()
-        port_2.save()
+                port_1.line.connection = line_1
+                port_2.line = port_1.line
+            port_1.save()
+            port_2.save()
 
     @property
     @lru_cache()
@@ -80,3 +87,13 @@ class ConnectionPortService(ServiceWithResult):
             for i in self._ports:
                 if self.cleaned_data['front_port_list'] and i.front_side is not None:
                     self.add_error('front_port_list', ValidationError(f'Port id={i.id} already connected'))
+                elif self.cleaned_data['back_port_list'] and i.back_side is not None:
+                    self.add_error('back_port_list', ValidationError(f'Port id={i.id} already connected'))
+
+    def backside_and_active_equipment(self):
+        if self.cleaned_data['back_port_list'] and self._ports:
+            for port in self._ports:
+                if port.equipment.template.type.is_active:
+                    self.add_error('back_port_list', ValidationError('It is not possible to'
+                                                                     ' connect to active equipment at "back_side"')
+                                   )

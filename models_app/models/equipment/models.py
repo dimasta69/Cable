@@ -23,7 +23,9 @@ class Equipment(BaseModel):
         verbose_name_plural = 'Оборудования'
 
     def __str__(self):
-        return str(str(self.id) + " " + self.template.manufacturer.name + ' ' + self.template.model)
+        return str(
+            str(self.id) + " " + self.template.manufacturer.name + ' ' + self.template.model) if self.template.manufacturer and self.template.model else (
+                    str(self.pk) + " " + str(self.template.type))
 
 
 @receiver(post_save, sender=Equipment)

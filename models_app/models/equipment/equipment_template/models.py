@@ -11,7 +11,7 @@ class EquipmentTemplate(BaseModel):
         "Manufacturer", related_name='equipment_templates', null=True, blank=True, on_delete=models.CASCADE,
         verbose_name='Производитель', related_query_name="equipment_template"
     )
-    model = models.CharField(null=False, blank=False, verbose_name='Модель', max_length=255, unique=True)
+    model = models.CharField(null=True, blank=True, verbose_name='Модель', max_length=255, unique=True)
     power = models.PositiveIntegerField(null=True, blank=True, verbose_name='Мощность')
     number_of_units = models.PositiveIntegerField(null=False, blank=False, verbose_name='Количество занимаемых юнитов')
     count_port = models.IntegerField(default=0, verbose_name='Количество портов')
@@ -23,4 +23,5 @@ class EquipmentTemplate(BaseModel):
         verbose_name_plural = 'Шаблоны оборудований'
 
     def __str__(self):
-        return str(self.manufacturer.name + " " + self.model)
+        return str(self.manufacturer.name + " " + self.model) if self.manufacturer and self.model else (
+            str(self.pk) + " " + str(self.type))
