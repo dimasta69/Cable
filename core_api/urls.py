@@ -42,6 +42,7 @@ from core_api.views.access.access_list import AccessListView
 from core_api.views.type_port.type_port_list import TypePortListView
 from core_api.views.users.users_list import UsersListView
 from core_api.views.equipment_type.equipment_type_list import ListEquipmentTypeView
+from core_api.views.line_type.line_type_list import LineTypeListView
 from core_api.views.speed.list import SpeedListView
 
 schema_view = get_schema_view(
@@ -92,6 +93,7 @@ urlpatterns = [
     path('connection_port_ship/', ConnectionPortShipView.as_view()),
     path("connection/", ConnectionView.as_view()),
     path("speed/", SpeedListView.as_view()),
+    path("line_type/", LineTypeListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
