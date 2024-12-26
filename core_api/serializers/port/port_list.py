@@ -3,6 +3,10 @@ from rest_framework import serializers
 from models_app.models import Unit
 
 
+class LineSerializer(serializers.Serializer):
+    line_type = serializers.CharField(source="line_type.name")
+
+
 class PortListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     uid = serializers.IntegerField(required=True)
@@ -16,6 +20,7 @@ class PortListSerializer(serializers.Serializer):
     mac = serializers.CharField()
     connection = serializers.SerializerMethodField()
     connection_pigtail = serializers.SerializerMethodField()
+    line = LineSerializer()
 
     @classmethod
     def get_speed(cls, obj):

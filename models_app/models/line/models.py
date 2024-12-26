@@ -12,7 +12,7 @@ class Line(BaseModel):
         related_query_name="line",
     )
     connection = ArrayField(models.IntegerField(), blank=True, default=list)
-    filled_line = models.BooleanField(default=False, blank=True)
+    ports = models.ManyToManyField()
 
     def __str__(self):
         return str(f'{self.line_type.name} + {self.pk}' if self.line_type else str(self.pk))

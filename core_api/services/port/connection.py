@@ -27,13 +27,13 @@ class ConnectionPortService(ServiceWithResult):
     def _connection(self, front=True) -> None:
         with transaction.atomic():
             if front:
-                port_1 = Port.objects.get(id=self.cleaned_data["front_port_list"][0])
-                port_2 = Port.objects.get(id=self.cleaned_data["front_port_list"][1])
+                port_1 = self._ports.get(id=self.cleaned_data["front_port_list"][0])
+                port_2 = self._ports.get(id=self.cleaned_data["front_port_list"][1])
                 port_1.front_side = port_2
                 port_2.front_side = port_1
             else:
-                port_1 = Port.objects.get(id=self.cleaned_data["back_port_list"][0])
-                port_2 = Port.objects.get(id=self.cleaned_data["back_port_list"][1])
+                port_1 = self._ports.get(id=self.cleaned_data["back_port_list"][0])
+                port_2 = self._ports.get(id=self.cleaned_data["back_port_list"][1])
                 port_1.back_side = port_2
                 port_2.back_side = port_1
 
