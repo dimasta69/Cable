@@ -25,7 +25,7 @@ class EquipmentAdmin(admin.ModelAdmin):
     search_fields = ('id',)
     readonly_fields = ("free_ports", 'created_at')
     ordering = ('-created_at',)
-    list_filter = ("units__server_rack__title",)
+    list_filter = ("unit__server_rack__title",)
     inlines = (
         PortTabularInline,
     )

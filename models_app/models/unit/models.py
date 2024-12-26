@@ -9,8 +9,8 @@ class Unit(BaseModel):
         related_query_name='unit',
     )
     equipment = models.ForeignKey(
-        "Equipment", related_name='unit', on_delete=models.SET_NULL, verbose_name='Оборудование', null=True,
-        blank=True, related_query_name='units',
+        "Equipment", related_name='units', on_delete=models.SET_NULL, verbose_name='Оборудование', null=True,
+        blank=True, related_query_name='unit',
     )
     SIDE_CHOICES = [
         ("Front", "Лицевая"),

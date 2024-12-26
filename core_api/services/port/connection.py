@@ -9,6 +9,42 @@ from utils.services import ServiceWithResult
 from models_app.models import Port, Line
 
 
+def port_json(port):
+    return {
+        str(port.id): {
+                        "uid": str(port.uid),
+                        "equipment_id": str(port.equipment.id),
+                        "equipment_manufacturer": str(port.equipment.template.manufacturer),
+                        "equipment_type": str(port.equipment.template.type),
+                        "equipment_model": str(port.equipment.template.model),
+
+                        "server_rack_id": str(port.equipment.units.first().server_rack.id)
+                        if not port.equipment.room else None,
+
+                        "unit_uuid": str(port.equipment.units.first().uid)
+                        if not port.equipment.room else None,
+
+                        "unit_side": str(port.equipment.units.first().side)
+                        if not port.equipment.room else None,
+
+                        "room_id": str(port.equipment.units.first().server_rack.room.id)
+                        if not port.equipment.room else str(port.equipment.room.id),
+
+                        "room_number": str(port.equipment.units.first().server_rack.room.number)
+                        if not port.equipment.room else str(port.equipment.room.number),
+
+                        "is_server_room": str(port.equipment.units.first().server_rack.room.is_server_room)
+                        if not port.equipment.room else str(port.equipment.room.is_server_room),
+
+                        "building_id": str(port.equipment.units.first().server_rack.room.building.id)
+                        if not port.equipment.room else str(port.equipment.room.bulding.id),
+
+                        "building_name": str(port.equipment.units.first().server_rack.room.building.name)
+                        if not port.equipment.room else str(port.equipment.room.bulding.name),
+                    }
+    }
+
+
 class ConnectionPortService(ServiceWithResult):
     front_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
@@ -41,21 +77,22 @@ class ConnectionPortService(ServiceWithResult):
             line_2 = None
 
             if port_1.line is None and port_2.line is None:
-                line_list = [port_1.id, port_2.id]
+                line_list = [port_json(port_1), port_json(port_2)]
+                breakpoint()
                 line = Line.objects.create(connection=line_list)
                 port_1.line = line
                 port_2.line = line
             else:
                 if port_1.line:
-                    line_1 = port_1.line.connection if port_1.line.connection[-1] == port_1.id \
+                    line_1 = port_1.line.connection if port_1.line.connection[-1].keys() == port_1.id \
                         else list(reversed(port_1.line.connection))
 
                 if port_2.line:
-                    line_2 = port_2.line.connection if port_2.line.connection[0] == port_2.id \
+                    line_2 = port_2.line.connection if port_2.line.connection[0].keys() == port_2.id \
                         else list(reversed(port_2.line.connection))
 
-                line_1 = line_1 if line_1 else [port_1.id]
-                line_2 = line_2 if line_2 else [port_2.id]
+                line_1 = line_1 if line_1 else [port_json(port_1)]
+                line_2 = line_2 if line_2 else [port_json(port_2)]
 
                 line_1.extend(line_2)
 
@@ -73,7 +110,17 @@ class ConnectionPortService(ServiceWithResult):
                 ports = self.cleaned_data['front_port_list']
             if self.cleaned_data['back_port_list']:
                 ports = self.cleaned_data['back_port_list']
-            return Port.objects.filter(id__in=ports)
+            return Port.objects.filter(id__in=ports).select_related(
+                "equipment",
+                "equipment__template__manufacturer",
+                "equipment__template__type",
+                "equipment__room",
+            ).prefetch_related(
+                "equipment__units",
+                "equipment__units__server_rack",
+                "equipment__units__server_rack__room",
+                "equipment__units__server_rack__room__building",
+            )
         except Port.DoesNotExist:
             return None
 
