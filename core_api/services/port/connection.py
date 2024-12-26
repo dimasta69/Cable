@@ -78,7 +78,6 @@ class ConnectionPortService(ServiceWithResult):
 
             if port_1.line is None and port_2.line is None:
                 line_list = [port_json(port_1), port_json(port_2)]
-                breakpoint()
                 line = Line.objects.create(connection=line_list)
                 port_1.line = line
                 port_2.line = line
@@ -86,6 +85,8 @@ class ConnectionPortService(ServiceWithResult):
                 if port_1.line:
                     line_1 = port_1.line.connection if port_1.line.connection[-1].keys() == port_1.id \
                         else list(reversed(port_1.line.connection))
+                else:
+                    port_1.line = Line.objects.create()
 
                 if port_2.line:
                     line_2 = port_2.line.connection if port_2.line.connection[0].keys() == port_2.id \
@@ -97,7 +98,11 @@ class ConnectionPortService(ServiceWithResult):
                 line_1.extend(line_2)
 
                 port_1.line.connection = line_1
+                port_2.line.delete()
                 port_2.line = port_1.line
+
+                port_1.line.save()
+
             port_1.save()
             port_2.save()
 
