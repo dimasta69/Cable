@@ -37,7 +37,6 @@ class PortShip(BaseModel):
     lines = models.IntegerField(null=True, verbose_name='Количество занимаемых линий', default=2)
 
     class Meta:
-        unique_together = ('equipment_template', 'port_template')
         db_table = 'port_ship'
         verbose_name = 'Промежуточная таблица портов'
         verbose_name_plural = 'Промежуточная таблица портов'

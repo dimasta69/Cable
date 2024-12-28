@@ -12,3 +12,4 @@ class LineTypeListView(APIView):
 
     def get(self, request):
         return Response(LineTypeSerializer(LineType.objects.all(), many=True).data, status=status.HTTP_200_OK)
+    
