@@ -20,6 +20,7 @@ class RoomListService(ServiceWithResult):
     order_by = forms.CharField(required=False)
     filter_building_id = forms.IntegerField(required=True)
     filter_is_server_room = forms.BooleanField(required=False)
+    filter_floor = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
 
     custom_validations = ['building_presence', 'order_presence', 'access_presence']
@@ -46,6 +47,8 @@ class RoomListService(ServiceWithResult):
         room_list = self.room_list
         if self.cleaned_data['filter_is_server_room']:
             room_list = room_list.filter(is_server_room=self.cleaned_data['filter_is_server_room'])
+        if self.cleaned_data['floor']:
+            room_list = room_list.filter(floor=self.cleaned_data["floor"])
         if self.cleaned_data['search_filter']:
             room_list = room_list.filter(
                 Q(number__icontains=self.cleaned_data['search_filter']))

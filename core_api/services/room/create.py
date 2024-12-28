@@ -14,6 +14,7 @@ class CreateRoomService(ServiceWithResult):
     building_id = forms.IntegerField(required=True)
     number = forms.CharField(required=True)
     is_server_room = forms.BooleanField(required=False)
+    floor = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
     custom_validations = ['building_presence', 'number_presence', 'access_presence']
@@ -27,8 +28,11 @@ class CreateRoomService(ServiceWithResult):
 
     @property
     def create_room(self):
-        return Room.objects.create(building=self.building, number=self.cleaned_data['number'],
-                                   is_server_room=self.cleaned_data.get('is_server_room'))
+        return Room.objects.create(
+            building=self.building, number=self.cleaned_data['number'],
+            is_server_room=self.cleaned_data.get('is_server_room'),
+            floor=self.cleaned_data.get('floor')
+        )
 
     @property
     def room_list(self):

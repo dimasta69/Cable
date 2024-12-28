@@ -33,6 +33,9 @@ def port_json(port: Port) -> json:
             "room_id": str(port.equipment.units.first().server_rack.room.id)
             if not port.equipment.room else str(port.equipment.room.id),
 
+            "room_floor": str(port.equipment.units.first().server_rack.room.floor)
+            if not port.equipment.room else str(port.equipment.room.floor),
+
             "room_number": str(port.equipment.units.first().server_rack.room.number)
             if not port.equipment.room else str(port.equipment.room.number),
 

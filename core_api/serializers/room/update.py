@@ -6,3 +6,4 @@ class UpdateRoomSerializer(serializers.Serializer):
     number = serializers.CharField(required=False)
     is_server_room = serializers.BooleanField(required=False)
     equipment_id = serializers.IntegerField(required=False)
+    floor = serializers.IntegerField(required=False)

@@ -7,3 +7,4 @@ class RoomListSerializer(serializers.Serializer):
     number = serializers.CharField(required=True)
     is_server_room = serializers.BooleanField(required=True)
     equipments = EquipmentSerializer(many=True, required=False)
+    floor = serializers.IntegerField(required=False)

@@ -15,6 +15,7 @@ class UpdateRoomService(ServiceWithResult):
     number = forms.CharField(required=False)
     is_server_room = forms.BooleanField(required=False)
     current_user = ModelField(User)
+    floor = forms.IntegerField(required=False)
     equipment_id = forms.IntegerField(required=False)
 
     custom_validations = ['room_presence', 'number_presence', 'access_presence', 'equipment_presence']
@@ -33,6 +34,8 @@ class UpdateRoomService(ServiceWithResult):
             room.number = self.cleaned_data['number']
         if self.cleaned_data['is_server_room']:
             room.is_server_room = self.cleaned_data['is_server_room']
+        if self.cleaned_data["floor"]:
+            room.floor = self.cleaned_data["floor"]
         if self.cleaned_data['equipment_id']:
             self._equipment.room = room
             self._equipment.save()
