@@ -3,6 +3,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from models_app.models.base_model import BaseModel
+from utils.errors import ValidationError
 
 
 class Equipment(BaseModel):
@@ -11,11 +12,17 @@ class Equipment(BaseModel):
         null=False, blank=False, related_query_name='equipment',
     )
     free_ports = models.PositiveIntegerField(default=0, verbose_name='Количество свободных портов')
-    connections = models.ManyToManyField('self', null=True, blank=True)
+    connections = models.ManyToManyField('self', blank=True)
     room = models.ForeignKey(
         'Room', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Расположение в комнате",
         related_name="equipments", related_query_name="equipmet"
     )
+
+    def clean(self):
+        super().clean()
+        if self.pk:
+            if self in self.connections.all():
+                raise ValidationError("Нельзя подключить оборудование само к себе")
 
     class Meta:
         db_table = 'equipment'

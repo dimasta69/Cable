@@ -14,7 +14,7 @@ from models_app.models import Port, Line
 
 def port_json(port: Port) -> json:
     return {
-        str(port.id): {
+            "port_id": str(port.pk),
             "uid": str(port.uid),
             "equipment_id": str(port.equipment.id),
             "equipment_manufacturer": str(port.equipment.template.manufacturer),
@@ -45,7 +45,6 @@ def port_json(port: Port) -> json:
             "building_name": str(port.equipment.units.first().server_rack.room.building.name)
             if not port.equipment.room else str(port.equipment.room.bulding.name),
         }
-    }
 
 
 class ConnectionPortService(ServiceWithResult):
@@ -62,14 +61,13 @@ class ConnectionPortService(ServiceWithResult):
             self._connection(port_1, port_2)
         return self
 
-    def _front_or_back_side(self) -> Literal['front_side', 'back_side']:
-        match True:
-            case self.cleaned_data.get('front_port_list') if self.cleaned_data['front_port_list']:
-                return "front_side"
-            case self.cleaned_data.get('back_port_list') if self.cleaned_data['back_port_list']:
-                return "back_side"
+    def _front_or_back_side(self) -> Literal['front_port_list', 'back_port_list']:
+        if self.cleaned_data.get('front_port_list'):
+            return "front_port_list"
+        elif self.cleaned_data.get('back_port_list'):
+            return "back_port_list"
 
-    def _lines_is_null(self, side: Literal['front_side', 'back_side']) -> Tuple[Port, Port]:
+    def _lines_is_null(self, side: Literal['front_port_list', 'back_port_list']) -> Tuple[Port, Port]:
         port_1 = self._ports.get(id=self.cleaned_data[side][0])
         port_2 = self._ports.get(id=self.cleaned_data[side][1])
         setattr(port_1, side, port_2)
@@ -78,23 +76,32 @@ class ConnectionPortService(ServiceWithResult):
 
     def _connection(self, port_1: Port, port_2: Port) -> None:
         with transaction.atomic():
+            line_1 = None
+            line_2 = None
+
             if port_1.line is None and port_2.line is None:
-                line = Line.objects.create(connection=[port_json(port_1), port_json(port_2)])
+                line_list = [port_json(port_1), port_json(port_2)]
+                line = Line.objects.create(connection=line_list)
                 port_1.line = line
                 port_2.line = line
             else:
-                line_1 = self._get_line(port_1)
-                line_2 = self._get_line(port_2)
-
-                combined_line = line_1 + line_2
-                port_1.line.connection = combined_line
+                if port_1.line:
+                    line_1 = port_1.line.connection if port_1.line.connection[-1] == port_1.pk \
+                        else list(reversed(port_1.line.connection))
 
                 if port_2.line:
-                    port_2.line.delete()
-                port_2.line = port_1.line
+                    line_2 = port_2.line.connection if port_2.line.connection[0] == port_2.pk \
+                        else list(reversed(port_2.line.connection))
 
+                line_1 = line_1 if line_1 else [port_json(port_1)]
+                line_2 = line_2 if line_2 else [port_json(port_2)]
+
+                line_1.extend(line_2)
+
+                port_1.line.connection = line_1
                 port_1.line.save()
-
+                port_2.line.delete()
+                port_2.line = port_1.line
             port_1.save()
             port_2.save()
 

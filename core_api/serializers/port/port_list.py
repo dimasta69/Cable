@@ -1,36 +1,35 @@
 from rest_framework import serializers
 
-from models_app.models import Port, Vlan
+from models_app.models import Port, Vlan, Line
 from core_api.serializers.port_template.port_template_list import SpeedSerializer
 from core_api.serializers.vlan.resource import VlanSerializer
 
 
-class LineSerializer(serializers.Serializer):
-    line_type = serializers.CharField(source="line_type.name")
-    connection = serializers.ListField()
+class LineSerializer(serializers.ModelSerializer):
+    line_type = serializers.CharField(source="line_type.name", default=None)
+
+    class Meta:
+        model = Line
+        fields = (
+            "id",
+            "line_type",
+            "connection",
+        )
 
 
-class PortListSerializer(serializers.ModelSerializer):
+class PortListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     uid = serializers.IntegerField(required=True)
     type = serializers.CharField(source="port_template.type_port.name")
     sfp = serializers.SerializerMethodField()
     speed = serializers.SerializerMethodField()
-    line_type = serializers.CharField(source="line.line_type.name")
+    line_type = serializers.CharField(source="line.line_type.name", default=None)
     vlan = serializers.SerializerMethodField()
-    ip = serializers.IPAddressField()
+    # ip = serializers.IPAddressField(default=None)
     mac = serializers.CharField()
-    line = LineSerializer(many=True)
+    line = LineSerializer()
 
-    class Meta:
-        model = Port
-        fields = (
-            "id",
-            "uid",
-            "line_type"
-        )
-
-    def get_speed(cls, obj: Port):
+    def get_speed(self, obj: Port):
         return SpeedSerializer(obj.port_template.speed, many=True).data
 
     def get_sfp(self, obj: Port):
