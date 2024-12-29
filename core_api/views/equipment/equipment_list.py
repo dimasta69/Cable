@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +8,6 @@ from models_app.models import Equipment
 from core_api.serializers.equipment.create import CreateEquipmentSerializer
 from core_api.services.equipment.create import CreateEquipmentService
 from core_api.services.equipment.equipment_list import EquipmentListService
-from core_api.serializers.server_rack.server_rack import ServerRackSerializer
 from core_api.serializers.equipment.equipment_list import EquipmentListSerializer
 from core_api.swagger_scheme.equipment import create_equipment, equipment_list
 from utils.pagination import CustomPagination
@@ -35,4 +35,4 @@ class EquipmentListView(APIView):
         outcome = ServiceOutcome(CreateEquipmentService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(ServerRackSerializer(outcome.result).data, status=outcome.response_status)
+        return Response(EquipmentListSerializer(outcome.result).data, status=status.HTTP_201_CREATED)

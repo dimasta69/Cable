@@ -8,6 +8,7 @@ from rest_framework import status
 from models_app.models import Port, Line
 from utils.errors import ValidationError
 from utils.services import ServiceWithResult
+from core_api.utils.connection import delete_past_line
 
 
 class DisconnectPortService(ServiceWithResult):
@@ -22,7 +23,9 @@ class DisconnectPortService(ServiceWithResult):
             with transaction.atomic():
                 side = self._front_or_back_side()
                 port_1, port_2, side = self._lines_is_null(side)
-                self._disconnect(port_1, port_2)
+                line_1, line_2 = self._disconnect(port_1, port_2)
+                delete_past_line(port_1, port_2)
+
         return self
 
     def _front_or_back_side(self) -> tuple[str, str]:
@@ -40,19 +43,20 @@ class DisconnectPortService(ServiceWithResult):
         port_2.save()
         return port_1, port_2, side[0]
 
-    def _disconnect(self, port_1: Port, port_2: Port):
+    def _disconnect(self, port_1: Port, port_2: Port) -> tuple[Line, Line]:
         line = port_1.line.connection
         for i in range(len(line)):
             if line[i]["port_id"] == port_1:
-                if line[i+1]["port_id"] == port_2.id:
-                    line_1 = Line.objects.create(connection=line[:i+1])
-                    line_2 = Line.objects.create(connection=line[i+1:])
+                if line[i + 1]["port_id"] == port_2.id:
+                    line_1 = Line.objects.create(connection=line[:i + 1])
+                    line_2 = Line.objects.create(connection=line[i + 1:])
                     return line_1, line_2
-                elif line[i-1]["port_id"] == port_2.id:
-                    pass
+                elif line[i - 1]["port_id"] == port_2.id:
+                    line_2 = Line.objects.create(connection=line[:i + 1])
+                    line_1 = Line.objects.create(connection=line[i + 1:])
+                    return line_1, line_2
                 else:
                     pass
-
 
     @property
     @lru_cache()
