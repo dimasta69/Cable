@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
 from core_api.services.equipment.equipment import EquipmentService
-from core_api.serializers.equipment.equipment import EquipmentSerializer
+from core_api.serializers.equipment.equipment_list import EquipmentListSerializer
 from core_api.services.equipment.delete import DeleteEquipmentService
 from core_api.services.equipment.update import UpdateEquipmentService
 from core_api.serializers.equipment.update import UpdateEquipmentSerializer
@@ -47,4 +47,4 @@ class ReleaseEquipmentView(APIView):
         outcome = ServiceOutcome(ReleaseEquipmentService, kwargs)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(EquipmentSerializer(outcome.result).data, status=status.HTTP_200_OK)
+        return Response(EquipmentListSerializer(outcome.result).data, status=status.HTTP_200_OK)
