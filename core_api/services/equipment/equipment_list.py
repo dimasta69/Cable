@@ -20,7 +20,7 @@ class EquipmentListService(ServiceWithResult):
     filter_manufacturer = forms.IntegerField(required=False)
     filter_type = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
-    filter_scheme_id = forms.IntegerField(required=False)
+    filter_scheme_id = forms.IntegerField(required=True)
     filter_server_rack_id = forms.IntegerField(required=False)
 
     custom_validations = ['order_presence', 'manufacturer_presence', 'server_rack_presence',
@@ -94,7 +94,6 @@ class EquipmentListService(ServiceWithResult):
             return ServerRack.objects.get(id=self.cleaned_data['filter_server_rack_id'])
         except ServerRack.DoesNotExist:
             return None
-
 
     def order_presence(self):
         if self.cleaned_data['order_by']:
