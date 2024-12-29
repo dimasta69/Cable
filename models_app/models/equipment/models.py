@@ -17,6 +17,9 @@ class Equipment(BaseModel):
         'Room', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Расположение в комнате",
         related_name="equipments", related_query_name="equipmet"
     )
+    scheme = models.ForeignKey(
+        "Scheme", related_name="equipments", related_query_name="equipment", on_delete=models.CASCADE, blank=False,
+    )
 
     def clean(self):
         super().clean()
