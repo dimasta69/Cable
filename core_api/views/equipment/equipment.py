@@ -43,7 +43,7 @@ class EquipmentView(APIView):
 class ReleaseEquipmentView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def path(self, request, **kwargs):
+    def patch(self, request, **kwargs):
         outcome = ServiceOutcome(ReleaseEquipmentService, kwargs)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
