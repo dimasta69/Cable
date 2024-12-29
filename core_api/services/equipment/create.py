@@ -4,7 +4,7 @@ from functools import lru_cache
 
 from rest_framework import status
 
-from models_app.models import Unit
+from models_app.models import Unit, Scheme
 from utils.services import ServiceWithResult
 from utils.fields import JsonIpField
 from utils.fields import ListIntegerField
@@ -20,10 +20,11 @@ class CreateEquipmentService(ServiceWithResult):
     vlan_ip = JsonIpField(required=False)
     unit_list_id = ListIntegerField(required=True)
     server_rack_id = forms.IntegerField(required=True)
+    scheme_id = forms.IntegerField(required=True)
 
     custom_validations = ['equipment_template_presence', 'port_template_presence',
                           'unit_free_presence', 'count_unit_presence', 'unit_list_presence', 'server_rack_presence',
-                          'server_rack_correspond_presence', 'power_presence']
+                          'server_rack_correspond_presence', 'power_presence', 'scheme_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -34,7 +35,9 @@ class CreateEquipmentService(ServiceWithResult):
 
     @property
     def create_equipment(self):
-        equipment = Equipment.objects.create(template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'])
+        equipment = Equipment.objects.create(
+            template=self.equipment_template, vlan_ip=self.cleaned_data['vlan_ip'], scheme=self.scheme,
+        )
         number = 0
         objects_to_create = []
 
@@ -84,6 +87,14 @@ class CreateEquipmentService(ServiceWithResult):
         if unit_list.count() < len(self.cleaned_data['unit_list_id']):
             return Unit.objects.none()
         return unit_list
+
+    @property
+    @lru_cache()
+    def scheme(self):
+        try:
+            return Scheme.objects.get(id=self.cleaned_data['filter_scheme_id'])
+        except Scheme.DoesNotExist:
+            return None
 
     def equipment_template_presence(self):
         if not self.equipment_template:
@@ -141,3 +152,10 @@ class CreateEquipmentService(ServiceWithResult):
                     self.add_error('server_rack_id', ValidationError('Not enough freer power = '
                                                                      f'{self.server_rack.free_power}'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def scheme_presence(self):
+        if self.cleaned_data['filter_scheme_id']:
+            if not self.scheme:
+                self.add_error('filter_scheme_id', ObjectDoesNotExist(
+                    f'Server rack id={self.cleaned_data["filter_scheme_id"]} not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
