@@ -142,5 +142,6 @@ class EquipmentListService(ServiceWithResult):
 
     def room_presence(self) -> None:
         if self.cleaned_data["filter_room_id"] and not self._room:
-            self.add_error('id', ObjectDoesNotExist(f"Room id ={self.cleaned_data['filter_room_id']} not found"))
+            self.add_error('filter_room_id', ObjectDoesNotExist(f"Room id ={self.cleaned_data['filter_room_id']} "
+                                                                "not found"))
             self.response_status = status.HTTP_404_NOT_FOUND
