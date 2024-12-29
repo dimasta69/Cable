@@ -19,7 +19,7 @@ class PortTemplateListService(ServiceWithResult):
     search_filter = forms.CharField(required=False)
     filter_speed = ListIntegerField(required=False)
     filter_line_type = ListIntegerField(required=False)
-    filter_type_port = ListIntegerField(required=False)
+    filter_type_port = forms.IntegerField(required=False)
     filter_modular = forms.BooleanField(required=False)
 
     custom_validations = ['order_presence', 'speed_presence', 'line_type_presence', 'type_port_presence']
@@ -58,7 +58,7 @@ class PortTemplateListService(ServiceWithResult):
             )
         if self.cleaned_data['filter_type_port']:
             port_list = port_list.filter(
-                type_port__in=self.cleaned_data['filter_type_port']
+                type_port=self.cleaned_data['filter_type_port']
             )
         if self.cleaned_data['filter_modular']:
             port_list = port_list.filter(
@@ -119,7 +119,7 @@ class PortTemplateListService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def type_port_presence(self):
-        if self.cleaned_data['filter_type_port'] and len(self.cleaned_data['filter_type_port']) != len(self._type_port):
+        if self.cleaned_data['filter_type_port'] and not self.cleaned_data['filter_type_port']:
             self.add_error('filter_type_port', ObjectDoesNotExist(f"TypePort =  "
                                                                   f"{self.cleaned_data['filter_type_port']} not found"))
             self.response_status = status.HTTP_404_NOT_FOUND
