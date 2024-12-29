@@ -79,6 +79,8 @@ class ConnectionPortService(ServiceWithResult):
         port_2 = self._ports.get(id=self.cleaned_data[side[1]][1])
         setattr(port_1, side[0], port_2)
         setattr(port_2, side[0], port_1)
+        port_1.save()
+        port_2.save()
         return port_1, port_2, side[0]
 
     def _create_line(self, port_1: Port, port_2: Port, side: Literal["front_side", "back_side"]) -> Line:
@@ -94,7 +96,8 @@ class ConnectionPortService(ServiceWithResult):
         else:
             line_2 = [port_json(port_2, side)]
 
-        return Line.objects.create(connection=line_1.extend(line_2))
+        line_1.extend(line_2)
+        return Line.objects.create(connection=line_1)
 
     def _delete_past_line(self, port_1: Port, port_2: Port) -> None:
         if port_1.line:
@@ -103,10 +106,10 @@ class ConnectionPortService(ServiceWithResult):
             port_2.line.delete()
 
     def _connection_port(self, line: Line) -> None:
-        line_ports_id = [port['id'] for port in line.connection]
+        line_ports = [port for port in line.connection]
         ports_update = []
-        for ids in line_ports_id:
-            ports_update.append([Port(id=ids, line=line)])
+        for port in line_ports:
+            ports_update.append(Port(id=port["port_id"], line=line, equipment_id=port["equipment_id"]))
         Port.objects.bulk_update(ports_update, ['line'])
 
     @property

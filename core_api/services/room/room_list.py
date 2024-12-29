@@ -47,8 +47,8 @@ class RoomListService(ServiceWithResult):
         room_list = self.room_list
         if self.cleaned_data['filter_is_server_room']:
             room_list = room_list.filter(is_server_room=self.cleaned_data['filter_is_server_room'])
-        if self.cleaned_data['floor']:
-            room_list = room_list.filter(floor=self.cleaned_data["floor"])
+        if self.cleaned_data['filter_floor']:
+            room_list = room_list.filter(floor=self.cleaned_data["filter_floor"])
         if self.cleaned_data['search_filter']:
             room_list = room_list.filter(
                 Q(number__icontains=self.cleaned_data['search_filter']))
