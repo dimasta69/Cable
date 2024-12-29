@@ -64,8 +64,8 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
-                Q(template__manufacturer__name__icontains=self.cleaned_data['search_filter']) |
-                Q(template__type__icontains=self.cleaned_data['search_filter']) |
+                Q(template__manufacturer__name__icontains=self.cleaned_data['search_filter'])
+            )
         if self.cleaned_data['order_by']:
             equipment_list = equipment_list.order_by(self.cleaned_data['order_by'])
         return equipment_list
