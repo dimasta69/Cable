@@ -73,3 +73,26 @@ def connection_port(line: Line) -> None:
     for port in line_ports:
         ports_update.append(Port(id=port["port_id"], line=line, equipment_id=port["equipment_id"]))
     Port.objects.bulk_update(ports_update, ['line'])
+
+
+def disconnect(port_1: Port, port_2: Port) -> tuple[Line, Line]:
+    line = port_1.line.connection
+    for i in range(len(line)):
+        if line[i]["port_id"] == port_1:
+            if line[i + 1]["port_id"] == port_2.id:
+                line_1 = Line.objects.create(connection=line[:i + 1])
+                line_2 = Line.objects.create(connection=line[i + 1:])
+                return line_1, line_2
+            elif line[i - 1]["port_id"] == port_2.id:
+                line_2 = Line.objects.create(connection=line[:i + 1])
+                line_1 = Line.objects.create(connection=line[i + 1:])
+                return line_1, line_2
+            else:
+                pass  #тут должна быть ошибка
+
+
+def new_lines(port_1: Port, port_2: Port, line_1: Line, line_2: Line) -> None:
+    port_1.line = line_1
+    port_2.line = line_2
+    port_1.save()
+    port_2.save()
