@@ -23,7 +23,7 @@ class EquipmentListService(ServiceWithResult):
     filter_scheme_id = forms.IntegerField(required=False)
     filter_server_rack_id = forms.IntegerField(required=False)
 
-    custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence', 'server_rack_presence',
+    custom_validations = ['order_presence', 'manufacturer_presence', 'server_rack_presence',
                           'scheme_presence']
 
     def process(self):
@@ -95,14 +95,6 @@ class EquipmentListService(ServiceWithResult):
         except ServerRack.DoesNotExist:
             return None
 
-    def type_presence(self):
-        if self.cleaned_data['filter_type']:
-            if not any(type_tuple[1] == self.cleaned_data['filter_type']
-                       for type_tuple in EquipmentTemplate.TYPE_CHOICES):
-                self.add_error('filter_type', ObjectDoesNotExist('Type id='
-                                                                 f'{self.cleaned_data["filter_type"]} '
-                                                                 f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def order_presence(self):
         if self.cleaned_data['order_by']:

@@ -1,15 +1,12 @@
-import json
-
 from django import forms
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.forms import SimpleArrayField
 from django.db import transaction
 from rest_framework import status
 from functools import lru_cache
-from typing import Literal, Tuple, Any
 
 from utils.services import ServiceWithResult
-from models_app.models import Port, Line
+from models_app.models import Port
 from core_api.utils.connection import create_line, delete_past_line, connection_port
 
 
