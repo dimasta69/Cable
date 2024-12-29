@@ -7,6 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from utils.services import ServiceOutcome
 from core_api.services.equipment.equipment import EquipmentService
 from core_api.serializers.equipment.equipment_list import EquipmentListSerializer
+from core_api.serializers.equipment.equipment import EquipmentSerializer
 from core_api.services.equipment.delete import DeleteEquipmentService
 from core_api.services.equipment.update import UpdateEquipmentService
 from core_api.serializers.equipment.update import UpdateEquipmentSerializer
