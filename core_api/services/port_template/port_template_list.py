@@ -58,7 +58,7 @@ class PortTemplateListService(ServiceWithResult):
             )
         if self.cleaned_data['filter_type_port']:
             port_list = port_list.filter(
-                type_port=self.cleaned_data['filter_type_port']
+                type_port=self._type_port
             )
         if self.cleaned_data['filter_modular']:
             port_list = port_list.filter(
