@@ -1,0 +1,58 @@
+from functools import lru_cache
+
+from django import forms
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import status
+
+from models_app.models import Equipment, Room
+from utils.services import ServiceWithResult
+
+
+class AddEquipmentFromRoomService(ServiceWithResult):
+    room_id = forms.IntegerField(required=True)
+    equipment_id = forms.IntegerField(required=True)
+
+    custom_validations = ["equipment_presence", "room_presence", "equipment_room_null"]
+
+    def process(self):
+        self.run_custom_validations()
+        if self.is_valid():
+            self._connection_to_room()
+        return self
+
+    def _connection_to_room(self) -> None:
+        equipment = self._equipment
+        equipment.room = self._room
+        equipment.save()
+
+    @property
+    @lru_cache()
+    def _equipment(self) -> Equipment | None:
+        try:
+            return Equipment.objects.get(id=self.cleaned_data['equipment_id'])
+        except Equipment.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def _room(self) -> Room | None:
+        try:
+            return Room.objects.get(id=self.cleaned_data['room_id'])
+        except Room.DoesNotExist:
+            return None
+
+    def equipment_presence(self) -> None:
+        if not self._equipment:
+            self.add_error('id', ObjectDoesNotExist(f"Equipment id ={self.cleaned_data['equipment_id']} not found"))
+            self.response_status = status.HTTP_404_NOT_FOUND
+
+    def room_presence(self) -> None:
+        if not self._room:
+            self.add_error('id', ObjectDoesNotExist(f"Room id ={self.cleaned_data['room_id']} not found"))
+            self.response_status = status.HTTP_404_NOT_FOUND
+
+    def equipment_room_null(self) -> None:
+        if self._equipment and self._equipment.room:
+            self.add_error('id', ObjectDoesNotExist(f"Equipment id ={self.cleaned_data['equipment_id']} "
+                                                    "already standing in the room"))
+            self.response_status = status.HTTP_400_BAD_REQUEST
