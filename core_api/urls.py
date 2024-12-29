@@ -44,6 +44,7 @@ from core_api.views.equipment_type.equipment_type_list import ListEquipmentTypeV
 from core_api.views.line_type.line_type_list import LineTypeListView
 from core_api.views.speed.list import SpeedListView
 from core_api.views.equipment.equipment_to_room import AddEquipmentRoomView
+from core_api.views.equipment.equipment import ReleaseEquipmentView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -77,6 +78,7 @@ urlpatterns = [
     path('port/disconnect_sfp/', DisconnectSfpView.as_view()),
     path('port/disconnect_pigtail/', DisconnectPigtailView.as_view()),
     path('port/disconnect_port_list/', DisconnectPortListView.as_view()),
+    path('equipment/release/<int:id>/', ReleaseEquipmentView.as_view()),
     path('building/', BuildingListView.as_view()),
     path('building/<int:id>/', BuildingView.as_view()),
     path('room/', RoomListView.as_view()),

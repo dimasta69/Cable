@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from core_api.serializers.equipment.equipment import EquipmentSerializer
 from core_api.services.equipment.delete import DeleteEquipmentService
 from core_api.services.equipment.update import UpdateEquipmentService
 from core_api.serializers.equipment.update import UpdateEquipmentSerializer
+from core_api.services.equipment.release_equipment import ReleaseEquipmentService
 from core_api.swagger_scheme.equipment import equipment, delete_equipment, update_equipment
 
 
@@ -36,3 +38,13 @@ class EquipmentView(APIView):
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)
+
+
+class ReleaseEquipmentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request, **kwargs):
+        outcome = ServiceOutcome(ReleaseEquipmentService, kwargs)
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response(EquipmentSerializer(outcome.result).data, status=status.HTTP_200_OK)
