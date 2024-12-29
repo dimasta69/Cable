@@ -38,7 +38,7 @@ class CreateEquipmentService(ServiceWithResult):
     @lru_cache()
     def _scheme(self) -> Scheme | None:
         try:
-            return Scheme.objects.get(id=self.cleaned_data['filter_scheme_id'])
+            return Scheme.objects.get(id=self.cleaned_data['scheme_id'])
         except Scheme.DoesNotExist:
             return None
 
