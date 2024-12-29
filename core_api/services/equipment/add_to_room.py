@@ -17,13 +17,15 @@ class AddEquipmentFromRoomService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self._connection_to_room()
+            self.result = self._connection_to_room
         return self
 
+    @property
     def _connection_to_room(self) -> None:
         equipment = self._equipment
         equipment.room = self._room
         equipment.save()
+        return equipment
 
     @property
     @lru_cache()
