@@ -19,6 +19,7 @@ CORS_ALLOW_METHODS = [
     "PUT",
     "DELETE",
     "OPTIONS",
+    "PATH",
 ]
 
 CORS_ALLOW_CREDENTIALS = True 

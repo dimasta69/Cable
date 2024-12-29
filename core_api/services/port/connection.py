@@ -7,7 +7,7 @@ from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from models_app.models import Port
-from core_api.utils.connection import create_line, delete_past_line, connection_port
+from core_api.utils.connection import connection
 
 
 class ConnectionPortService(ServiceWithResult):
@@ -22,9 +22,7 @@ class ConnectionPortService(ServiceWithResult):
             with transaction.atomic():
                 side = self._front_or_back_side()
                 port_1, port_2, side = self._lines_is_null(side)
-                line = create_line(port_1, port_2, side)
-                delete_past_line(port_1, port_2)
-                connection_port(line)
+                connection(port_1, port_2, side)
         return self
 
     def _front_or_back_side(self) -> tuple[str, str]:

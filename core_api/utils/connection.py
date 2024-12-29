@@ -4,6 +4,18 @@ from models_app.models import Port, Line
 from typing import Literal
 
 
+def connection(port_1: Port, port_2: Port, side: Literal["front_side", "back_side"]):
+    line = create_line(port_1, port_2, side)
+    delete_past_line(port_1, port_2)
+    connection_port(line)
+
+
+def disconnection(port_1: Port, port_2: Port, side: Literal["front_side", "back_side"]):
+    line_1, line_2 = disconnect(port_1, port_2, side)
+    delete_past_line(port_1, port_2)
+    new_lines(port_1, port_2, line_1, line_2)
+
+
 def port_json(port: Port, side: Literal["front_side", "back_side"]) -> json:
     return {
         "port_id": str(port.pk),
@@ -75,10 +87,10 @@ def connection_port(line: Line) -> None:
     Port.objects.bulk_update(ports_update, ['line'])
 
 
-def disconnect(port_1: Port, port_2: Port) -> tuple[Line, Line]:
+def disconnect(port_1: Port, port_2: Port, side: Literal["front_side", "back_side"]) -> tuple[Line, Line]:
     line = port_1.line.connection
     for i in range(len(line)):
-        if line[i]["port_id"] == port_1:
+        if line[i]["port_id"] == port_1 and line[i + 1]["side"] == side:
             if line[i + 1]["port_id"] == port_2.id:
                 line_1 = Line.objects.create(connection=line[:i + 1])
                 line_2 = Line.objects.create(connection=line[i + 1:])

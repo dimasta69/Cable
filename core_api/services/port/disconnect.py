@@ -8,7 +8,7 @@ from rest_framework import status
 from models_app.models import Port
 from utils.errors import ValidationError
 from utils.services import ServiceWithResult
-from core_api.utils.connection import delete_past_line, disconnect, new_lines
+from core_api.utils.connection import disconnection
 
 
 class DisconnectPortService(ServiceWithResult):
@@ -23,9 +23,7 @@ class DisconnectPortService(ServiceWithResult):
             with transaction.atomic():
                 side = self._front_or_back_side()
                 port_1, port_2, side = self._lines_is_null(side)
-                line_1, line_2 = disconnect(port_1, port_2)
-                delete_past_line(port_1, port_2)
-                new_lines(port_1, port_2, line_1, line_2)
+                disconnection(port_1, port_2, side)
         return self
 
     def _front_or_back_side(self) -> tuple[str, str]:
