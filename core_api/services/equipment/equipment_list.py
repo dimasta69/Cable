@@ -7,7 +7,7 @@ from rest_framework import status
 
 from cabel.settings import REST_FRAMEWORK
 from utils.services import ServiceWithResult
-from models_app.models import EquipmentTemplate, Scheme, Room
+from models_app.models import Scheme, Room, EquipmentTemplateType
 from models_app.models import Equipment
 from models_app.models import Manufacturer
 from models_app.models import ServerRack
@@ -17,15 +17,15 @@ class EquipmentListService(ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
-    filter_manufacturer = forms.IntegerField(required=False)
-    filter_type = forms.CharField(required=False)
+    filter_manufacturer_id = forms.IntegerField(required=False)
+    filter_type_id = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
     filter_scheme_id = forms.IntegerField(required=True)
     filter_room_id = forms.IntegerField(required=False)
     filter_server_rack_id = forms.IntegerField(required=False)
 
     custom_validations = ['order_presence', 'manufacturer_presence', 'server_rack_presence',
-                          'scheme_presence', 'room_presence']
+                          'scheme_presence', 'room_presence', 'type_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -47,10 +47,10 @@ class EquipmentListService(ServiceWithResult):
     @property
     def equipment_filter_list(self):
         equipment_list = self.equipment_list
-        if self.cleaned_data['filter_manufacturer']:
-            equipment_list = equipment_list.filter(template__manufacturer=self.manufacturer)
-        if self.cleaned_data['filter_type']:
-            equipment_list = equipment_list.filter(template__type=self.cleaned_data['filter_type'])
+        if self.cleaned_data['filter_manufacturer_id']:
+            equipment_list = equipment_list.filter(template__manufacturer=self._manufacturer)
+        if self.cleaned_data['filter_type_id']:
+            equipment_list = equipment_list.filter(template__type=self._type)
         if self.cleaned_data['filter_scheme_id']:
             equipment_list = equipment_list.filter(scheme=self.scheme).distinct()
         if self.cleaned_data['filter_server_rack_id']:
@@ -79,9 +79,9 @@ class EquipmentListService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def manufacturer(self):
+    def _manufacturer(self):
         try:
-            return Manufacturer.objects.get(id=self.cleaned_data['filter_manufacturer'])
+            return Manufacturer.objects.get(id=self.cleaned_data['filter_manufacturer_id'])
         except Manufacturer.DoesNotExist:
             return None
 
@@ -109,6 +109,14 @@ class EquipmentListService(ServiceWithResult):
         except Room.DoesNotExist:
             return None
 
+    @property
+    @lru_cache()
+    def _type(self):
+        try:
+            return EquipmentTemplateType.objects.get(id=self.cleaned_data['filter_type_id'])
+        except EquipmentTemplateType.DoesNotExist:
+            return None
+
     def order_presence(self):
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['template__power', '-template__power', 'template__number_of_units',
@@ -119,11 +127,10 @@ class EquipmentListService(ServiceWithResult):
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def manufacturer_presence(self):
-        if self.cleaned_data['filter_manufacturer']:
+        if self.cleaned_data['filter_manufacturer_id']:
             if not self.manufacturer:
-                self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
-                                                                         f'{self.cleaned_data["filter_manufacturer"]} '
-                                                                         'not found'))
+                self.add_error('filter_manufacturer_id', ObjectDoesNotExist(
+                    'Manufacturer id={self.cleaned_data["filter_manufacturer_id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def server_rack_presence(self):
@@ -144,4 +151,11 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data["filter_room_id"] and not self._room:
             self.add_error('filter_room_id', ObjectDoesNotExist(f"Room id ={self.cleaned_data['filter_room_id']} "
                                                                 "not found"))
+            self.response_status = status.HTTP_404_NOT_FOUND
+
+    def type_presence(self):
+        if self.cleaned_data['filter_type_id'] and self._type is None:
+            self.add_error('filter_type', ObjectDoesNotExist('Type id='
+                                                             f'{self.cleaned_data["filter_type_id"]} '
+                                                             f'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
