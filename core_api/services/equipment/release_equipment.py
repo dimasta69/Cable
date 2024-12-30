@@ -4,8 +4,9 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 
+from core_api.utils.connection import delete_port_from_connection
 from utils.services import ServiceWithResult
-from models_app.models import Equipment, Unit
+from models_app.models import Equipment, Unit, Port
 
 
 class ReleaseEquipmentService(ServiceWithResult):
@@ -16,8 +17,13 @@ class ReleaseEquipmentService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
+            self._update_connection_port()
             self.result = self._update_equipment
         return self
+
+    def _update_connection_port(self):
+        for port in Port.objects.filter(equipment=self._equipment):
+            delete_port_from_connection(port)
 
     @property
     def _update_equipment(self):
