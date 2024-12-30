@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
+from django.contrib.postgres.forms import SimpleArrayField
 from django.db.models import Q
 from rest_framework import status
 from functools import lru_cache
@@ -17,7 +18,7 @@ class PortTemplateListService(ServiceWithResult):
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
-    filter_speed = ListIntegerField(required=False)
+    filter_speed = SimpleArrayField(forms.IntegerField(), min_length=1, required=False)
     filter_line_type = ListIntegerField(required=False)
     filter_type_port = forms.IntegerField(required=False)
     filter_modular = forms.BooleanField(required=False)
