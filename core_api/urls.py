@@ -27,7 +27,7 @@ from core_api.views.port.disconnect_sfp import DisconnectSfpView
 from core_api.views.port.disconnect_pigtail import DisconnectPigtailView
 from core_api.views.port.disconnect_port_list import DisconnectPortListView
 from core_api.views.port.add_sfp import AddSfpView
-from core_api.views.port.connection import ConnectionView
+from core_api.views.port.connection import ConnectionView, DisconnectionView
 from core_api.views.building.building_list import BuildingListView
 from core_api.views.building.building import BuildingView
 from core_api.views.room.room_list import RoomListView
@@ -94,6 +94,7 @@ urlpatterns = [
     path('users_list/', UsersListView.as_view()),
     path('connection_port_ship/', ConnectionPortShipView.as_view()),
     path("connection/", ConnectionView.as_view()),
+    path("disconnection/", DisconnectionView.as_view()),
     path("speed/", SpeedListView.as_view()),
     path("line_type/", LineTypeListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

@@ -1,8 +1,9 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from models_app.models.base_model import BaseModel
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
+from core_api.utils.connection import delete_port_from_connection
 
 
 class Port(BaseModel):
@@ -57,3 +58,8 @@ def check_count_ports_from_template(sender, instance, created, **kwargs):
         equipment = instance.equipment
         equipment.free_ports = len(Port.objects.filter(equipment=equipment, front_side__isnull=True))
         equipment.save()
+
+
+@receiver(pre_delete, sender=Port)
+def delete_connection(sender, instance, **kwargs):
+    delete_port_from_connection(instance)

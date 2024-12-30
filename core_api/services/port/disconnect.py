@@ -23,7 +23,7 @@ class DisconnectPortService(ServiceWithResult):
             with transaction.atomic():
                 side = self._front_or_back_side()
                 port_1, port_2, side = self._lines_is_null(side)
-                disconnection(port_1, port_2, side)
+                disconnection(port_1, port_2)
         return self
 
     def _front_or_back_side(self) -> tuple[str, str]:

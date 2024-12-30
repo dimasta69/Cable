@@ -1,0 +1,2 @@
+class DisconnectionValueNotFound(Exception):
+    pass

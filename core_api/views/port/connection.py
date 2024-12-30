@@ -5,6 +5,7 @@ from rest_framework import status
 
 from utils.services import ServiceOutcome
 from core_api.services.port.connection import ConnectionPortService
+from core_api.services.port.disconnect import DisconnectPortService
 
 
 class ConnectionView(APIView):
@@ -12,6 +13,16 @@ class ConnectionView(APIView):
 
     def post(self, request):
         outcome = ServiceOutcome(ConnectionPortService, request.data)
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response({}, status=status.HTTP_200_OK)
+
+
+class DisconnectionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        outcome = ServiceOutcome(DisconnectPortService, request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({}, status=status.HTTP_200_OK)
