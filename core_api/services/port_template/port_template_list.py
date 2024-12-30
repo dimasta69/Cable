@@ -95,7 +95,7 @@ class PortTemplateListService(ServiceWithResult):
     @lru_cache()
     def _type_port(self) -> TypePort | None:
         try:
-            return TypePort.objects.filter(id=self.cleaned_data["filter_type_port"])
+            return TypePort.objects.get(id=self.cleaned_data["filter_type_port"])
         except TypePort.DoesNotExist:
             return TypePort.objects.none()
 
