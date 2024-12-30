@@ -51,11 +51,11 @@ class PortTemplateListService(ServiceWithResult):
         if self.cleaned_data['filter_speed']:
             port_list = port_list.filter(
                 speed__in=self._speeds
-            )
+            ).distinct()
         if self.cleaned_data['filter_line_type']:
             port_list = port_list.filter(
                 line_type__in=self._line_type
-            )
+            ).distinct()
         if self.cleaned_data['filter_type_port']:
             port_list = port_list.filter(
                 type_port=self._type_port
