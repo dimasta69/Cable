@@ -128,7 +128,7 @@ class EquipmentListService(ServiceWithResult):
 
     def manufacturer_presence(self):
         if self.cleaned_data['filter_manufacturer_id']:
-            if not self.manufacturer:
+            if not self._manufacturer:
                 self.add_error('filter_manufacturer_id', ObjectDoesNotExist(
                     'Manufacturer id={self.cleaned_data["filter_manufacturer_id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
