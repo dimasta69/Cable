@@ -14,7 +14,7 @@ class CreateRoomService(ServiceWithResult):
     building_id = forms.IntegerField(required=True)
     number = forms.CharField(required=True)
     is_server_room = forms.BooleanField(required=False)
-    floor = forms.IntegerField(required=False)
+    floor = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
     custom_validations = ['building_presence', 'number_presence', 'access_presence']
