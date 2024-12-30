@@ -1,29 +1,29 @@
 import json
 
-from models_app.models import Port, Line
+from models_app.models import Line
 from typing import Literal
 from core_api.utils.exception import DisconnectionValueNotFound
 
 
-def connection(port_1: Port, port_2: Port, side: Literal["front_side", "back_side"]):
+def connection(port_1, port_2, side: Literal["front_side", "back_side"]):
     line = create_line(port_1, port_2, side)
     delete_past_line(port_1, port_2)
     connection_port(line)
 
 
-def disconnection(port_1: Port, port_2: Port):
+def disconnection(port_1, port_2):
     line_1, line_2 = disconnect(port_1, port_2)
     delete_past_line(port_1, port_2)
     new_lines(line_1, line_2)
 
 
-def delete_port_from_connection(port: Port):
+def delete_port_from_connection(port):
     line_1, line_2 = disconnect_delete_port(port)
     port.line.delete()
     new_lines(line_1, line_2)
 
 
-def port_json(port: Port, side: Literal["front_side", "back_side"]) -> json:
+def port_json(port, side: Literal["front_side", "back_side"]) -> json:
     return {
         "port_id": str(port.pk),
         "side": side,
@@ -62,7 +62,7 @@ def port_json(port: Port, side: Literal["front_side", "back_side"]) -> json:
     }
 
 
-def create_line(port_1: Port, port_2: Port, side: Literal["front_side", "back_side"]) -> Line:
+def create_line(port_1, port_2, side: Literal["front_side", "back_side"]) -> Line:
     if port_1.line:
         line_1 = port_1.line.connection if port_1.line.connection[-1] == port_1.pk \
             else list(reversed(port_1.line.connection))
@@ -79,7 +79,7 @@ def create_line(port_1: Port, port_2: Port, side: Literal["front_side", "back_si
     return Line.objects.create(connection=line_1)
 
 
-def delete_past_line(port_1: Port, port_2: Port) -> None:
+def delete_past_line(port_1, port_2) -> None:
     if port_1.line:
         port_1.line.delete()
     try:
@@ -96,7 +96,7 @@ def connection_port(line: Line) -> None:
     Port.objects.bulk_update(ports_update, ['line'])
 
 
-def disconnect(port_1: Port, port_2: Port) -> tuple[Line, Line]:
+def disconnect(port_1, port_2) -> tuple[Line, Line]:
     line = port_1.line.connection
     for i in range(len(line)):
         if line[i]["port_id"] == str(port_1.id):
@@ -112,7 +112,7 @@ def disconnect(port_1: Port, port_2: Port) -> tuple[Line, Line]:
                 DisconnectionValueNotFound("Порты, требуемые для отключения, не найдены")
 
 
-def disconnect_delete_port(port: Port) -> tuple[Line, Line]:
+def disconnect_delete_port(port) -> tuple[Line, Line]:
     line = port.line.connection
     for i in range(len(line)):
         if line[i]["port_id"] == str(port.id):
@@ -124,6 +124,7 @@ def disconnect_delete_port(port: Port) -> tuple[Line, Line]:
 
 
 def new_lines(line_1: Line, line_2: Line) -> None:
+    from models_app.models import Port
     ports_1 = Port.objects.filter(id__in=[port['port_1'] for port in line_1.connection])
     ports_2 = Port.objects.filter(id__in=[port['port_1'] for port in line_2.connection])
 
