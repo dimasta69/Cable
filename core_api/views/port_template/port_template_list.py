@@ -1,3 +1,4 @@
+import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -20,7 +21,22 @@ class PortTemplateListView(APIView):
 
     @swagger_auto_schema(**port_template_list)
     def get(self, request):
-        outcome = ServiceOutcome(PortTemplateListService, dict(request.GET.items()))
+        if "filter_speed" in dict(request.GET.items()):
+            filter_speed = json.loads(dict(request.GET.items())['filter_speed'])
+        else:
+            filter_speed = None
+        if "filter_line_type" in dict(request.GET.items()):
+            filter_line_type = json.loads(dict(request.GET.items())['filter_line_type'])
+        else:
+            filter_line_type = None
+        outcome = ServiceOutcome(
+            PortTemplateListService,
+            dict(request.GET.items()) |
+            {
+                "filter_speed": filter_speed,
+                "filter_line_type": filter_line_type,
+            }
+        )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({'pagination': CustomPagination(outcome.result,

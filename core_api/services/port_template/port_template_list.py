@@ -48,6 +48,7 @@ class PortTemplateListService(ServiceWithResult):
             port_list = port_list.filter(
                 Q(name__icontains=self.cleaned_data['search_filter'])
             )
+        breakpoint()
         if self.cleaned_data['filter_speed']:
             port_list = port_list.filter(
                 speed__in=self._speeds
