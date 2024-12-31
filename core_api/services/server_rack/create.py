@@ -61,7 +61,7 @@ class CreateServerRackService(ServiceWithResult):
 
     def room_server_presence(self):
         if self.room:
-            if not self.room.type == 'Серверная':
+            if not self.room.is_server_room:
                 self.add_error('room_id', ObjectDoesNotExist('Room id='
                                                              f'{self.cleaned_data["room_id"]} '
                                                              'is not server'))
