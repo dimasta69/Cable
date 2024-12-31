@@ -113,14 +113,15 @@ def disconnect(port_1, port_2) -> tuple[Line, Line]:
 
 
 def disconnect_delete_port(port) -> tuple[Line, Line]:
-    line = port.line.connection
-    for i in range(len(line)):
-        if line[i]["port_id"] == str(port.id):
-            line_1 = Line.objects.create(connection=line[:i - 1])
-            line_2 = Line.objects.create(connection=line[i + 1:])
-            return line_1, line_2
-        else:
-            DisconnectionValueNotFound("Порты, требуемые для отключения, не найдены")
+    if port.line:
+        line = port.line.connection
+        for i in range(len(line)):
+            if line[i]["port_id"] == str(port.id):
+                line_1 = Line.objects.create(connection=line[:i - 1])
+                line_2 = Line.objects.create(connection=line[i + 1:])
+                return line_1, line_2
+            else:
+                DisconnectionValueNotFound("Порты, требуемые для отключения, не найдены")
 
 
 def new_lines(line_1: Line, line_2: Line) -> None:
