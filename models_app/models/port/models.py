@@ -62,4 +62,5 @@ def check_count_ports_from_template(sender, instance, created, **kwargs):
 
 @receiver(pre_delete, sender=Port)
 def delete_connection(sender, instance, **kwargs):
-    delete_port_from_connection(instance)
+    if instance.line:
+        delete_port_from_connection(instance)

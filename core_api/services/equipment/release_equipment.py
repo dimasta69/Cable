@@ -22,7 +22,7 @@ class ReleaseEquipmentService(ServiceWithResult):
         return self
 
     def _update_connection_port(self):
-        for port in Port.objects.filter(equipment=self._equipment, connection__isnull=True):
+        for port in Port.objects.filter(equipment=self._equipment, line__isnull=False):
             delete_port_from_connection(port)
 
     @property
