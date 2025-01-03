@@ -31,7 +31,7 @@ class ServerRackSerializer(serializers.Serializer):
                 'id': unit.id,
                 'uid': unit.uid,
                 'side': str(unit.side),
-                'equipment': str(equipment_data),
+                'equipment': equipment_data,
             }
             units.append(unit_data)
 
