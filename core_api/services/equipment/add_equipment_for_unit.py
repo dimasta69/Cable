@@ -32,8 +32,6 @@ class AddEquipmentUnitService(ServiceWithResult):
         for unit in self.unit_list_int:
             unit.equipment = self.equipment
             unit.save()
-            unit.server_rack.check_free_power()
-            unit.server_rack.check_free_units()
         return self.equipment
 
     def remove_equipment(self):

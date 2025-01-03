@@ -1,5 +1,9 @@
 from django.db import models
+from django.db.models import Sum
+
 from models_app.models.base_model import BaseModel
+from django.db.models.signals import post_save, pre_delete, pre_save
+from django.dispatch import receiver
 
 
 class Unit(BaseModel):
@@ -25,3 +29,14 @@ class Unit(BaseModel):
 
     def __str__(self):
         return f'{self.uid}_{self.side}'
+
+
+@receiver(pre_save, sender=Unit)
+def check_free_power(sender, instance, **kwargs):
+    server_rack = instance.server_rack
+    if instance.pk and server_rack.power:
+        from models_app.models import Equipment
+        server_rack.free_power = server_rack.power - Equipment.objects.filter(
+            units__in=server_rack.units
+        ).distinct().aggregate(total=Sum('power'))
+        instance.server_rack.save()
