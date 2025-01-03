@@ -32,7 +32,7 @@ class AddEquipmentUnitService(ServiceWithResult):
         for unit in self.unit_list_int:
             unit.equipment = self.equipment
             unit.save()
-        return self.equipment
+        return self.unit_list_int[0].server_rack
 
     def remove_equipment(self):
         unit_equipment = self.unit_list.filter(equipment=self.equipment)
