@@ -2,7 +2,7 @@ from django.db import models
 from django.db.models import Sum
 
 from models_app.models.base_model import BaseModel
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
@@ -40,4 +40,15 @@ def check_free_power(sender, instance, created, **kwargs):
             unit__in=server_rack.units.values("id"), template__power__isnull=False
         ).distinct().aggregate(total=Sum('template__power'))["total"]
         server_rack.free_power = server_rack.max_power - sum_power if sum_power else 0
+        instance.server_rack.save()
+
+
+@receiver(post_save, sender=Unit)
+def check_free_unit(sender, instance, created, **kwargs):
+    server_rack = instance.server_rack
+    if not created:
+        from models_app.models import Equipment
+        server_rack.free_units = Equipment.objects.filter(
+            unit__in=server_rack.units.values("id")
+        ).distinct().aggregate(total=Sum('count_port'))["total"]
         instance.server_rack.save()
