@@ -48,11 +48,11 @@ def check_free_unit(sender, instance, created, **kwargs):
     server_rack = instance.server_rack
     if not created:
         from models_app.models import Equipment
-        sum_unit = server_rack.number_of_units - Equipment.objects.filter(
+        sum_unit = Equipment.objects.filter(
             unit__in=server_rack.units.values("id")
         ).distinct().aggregate(total=Sum('template__number_of_units'))["total"]
         if sum_unit:
-            server_rack.free_units = sum_unit
+            server_rack.free_units = server_rack.number_of_units - sum_unit
         elif sum_unit is None:
             server_rack.free_units = server_rack.number_of_units
         instance.server_rack.save()
