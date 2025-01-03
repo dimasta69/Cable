@@ -18,8 +18,8 @@ class ServerRackSerializer(serializers.Serializer):
                 'equipment', 'equipment__template', 'equipment__template__manufacturer'):
             if unit.equipment:
                 equipment_data = {
-                    'id': str(unit.equipment.id),
-                    'equipment_id': str(unit.equipment.id),
+                    'id': unit.equipment.id,
+                    'equipment_id': unit.equipment.id,
                     'manufacturer': str(unit.equipment.template.manufacturer.name),
                     'type': str(unit.equipment.template.type),
                     'model': str(unit.equipment.template.model),
@@ -28,8 +28,8 @@ class ServerRackSerializer(serializers.Serializer):
                 equipment_data = None
 
             unit_data = {
-                'id': str(unit.id),
-                'uid': str(unit.uid),
+                'id': unit.id,
+                'uid': unit.uid,
                 'side': str(unit.side),
                 'equipment': str(equipment_data),
             }
