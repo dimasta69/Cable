@@ -5,7 +5,7 @@ from models_app.models import Building, Room
 
 class RoomTabularInline(admin.TabularInline):
     model = Room
-    fields = ('number', 'is_server_room',)
+    fields = ('number', 'floor', 'is_server_room',)
     extra = 0
 
 

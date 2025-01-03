@@ -11,7 +11,7 @@ class ServerRackTabularInline(admin.TabularInline):
 
 class RoomAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'number', 'is_server_room', 'building__name')
-    list_display = ('id', 'number', 'is_server_room', 'building__name', 'created_at',)
+    list_display = ('id', 'number', 'floor', 'is_server_room', 'building__name', 'created_at',)
     search_fields = ('number', )
     list_filter = ('building__name',)
     ordering = ('-created_at',)
