@@ -37,6 +37,6 @@ def check_free_power(sender, instance, **kwargs):
     if instance.pk and server_rack.max_power:
         from models_app.models import Equipment
         server_rack.free_power = server_rack.max_power - Equipment.objects.filter(
-            units__in=server_rack.units
+            unit__in=server_rack.units
         ).distinct().aggregate(total=Sum('power'))
         instance.server_rack.save()
