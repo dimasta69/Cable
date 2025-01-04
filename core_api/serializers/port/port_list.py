@@ -27,6 +27,8 @@ class PortListSerializer(serializers.Serializer):
     vlan = serializers.SerializerMethodField()
     # ip = serializers.IPAddressField(default=None)
     mac = serializers.CharField()
+    front_side = serializers.IntegerField(source="front_side.id", default=None)
+    back_side = serializers.IntegerField(source="back_side.id", default=None)
     line = LineSerializer()
 
     def get_speed(self, obj: Port):
