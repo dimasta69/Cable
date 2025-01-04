@@ -89,6 +89,7 @@ def delete_past_line(port_1, port_2) -> None:
 
 
 def connection_port(line: Line) -> None:
+    from models_app.models import Port
     line_ports = [port for port in line.connection]
     ports_update = []
     for port in line_ports:
