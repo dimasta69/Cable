@@ -58,7 +58,7 @@ def port_json(port, side: Literal["front_side", "back_side"]) -> json:
         if not port.equipment.room else str(port.equipment.room.building.id),
 
         "building_name": str(port.equipment.units.first().server_rack.room.building.name)
-        if not port.equipment.room else str(port.equipment.room.bulding.name),
+        if not port.equipment.room else str(port.equipment.room.building.name),
     }
 
 
