@@ -9,7 +9,7 @@ from models_app.models import Equipment, PortShip
 class PortShipListService(ServiceWithResult):
     id = forms.IntegerField(required=True)
 
-    custom_validations = ["equipment_template_presence", "port_ship_presence"]
+    custom_validations = ["equipment_presence", "port_ship_presence"]
 
     def process(self):
         self.run_custom_validations()
@@ -19,7 +19,7 @@ class PortShipListService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def _equipment_template(self):
+    def _equipment(self):
         try:
             return Equipment.objects.get(id=self.cleaned_data['id'])
         except Equipment.DoesNotExist:
@@ -29,16 +29,16 @@ class PortShipListService(ServiceWithResult):
     @lru_cache()
     def _port_ship(self):
         try:
-            return PortShip.objects.filter(eqipment_template=self._equipment_template.template)
+            return PortShip.objects.filter(equipment_template=self._equipment.template)
         except PortShip.DoesNotExist:
             return PortShip.objects.none()
 
-    def equipment_template_presence(self):
-        if not self._equipment_template:
+    def equipment_presence(self):
+        if not self._equipment:
             self.add_error(
                 "id",
                 ObjectDoesNotExist(
-                    f"Equipment template with id={self.cleaned_data['id']} does not exist"
+                    f"Equipment with id={self.cleaned_data['id']} does not exist"
                 )
             )
 
