@@ -94,7 +94,7 @@ urlpatterns = [
     path('type_port/', TypePortListView.as_view()),
     path('users_list/', UsersListView.as_view()),
     path('connection_port_ship/', ConnectionPortShipView.as_view()),
-    path('equipment_template/<int:id>/port_ship/', PortShipView.as_view()),
+    path('equipment/<int:id>/port_ship/', PortShipView.as_view()),
     path("connection/", ConnectionView.as_view()),
     path("disconnection/", DisconnectionView.as_view()),
     path("speed/", SpeedListView.as_view()),

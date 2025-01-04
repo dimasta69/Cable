@@ -3,7 +3,7 @@ from functools import lru_cache
 from django.core.exceptions import ObjectDoesNotExist
 
 from utils.services import ServiceWithResult
-from models_app.models import EquipmentTemplate, PortShip
+from models_app.models import Equipment, PortShip
 
 
 class PortShipListService(ServiceWithResult):
@@ -21,15 +21,15 @@ class PortShipListService(ServiceWithResult):
     @lru_cache()
     def _equipment_template(self):
         try:
-            return EquipmentTemplate.objects.get(id=self.cleaned_data['id'])
-        except EquipmentTemplate.DoesNotExist:
+            return Equipment.objects.get(id=self.cleaned_data['id'])
+        except Equipment.DoesNotExist:
             return None
 
     @property
     @lru_cache()
     def _port_ship(self):
         try:
-            return PortShip.objects.filter(eqipment_template=self._equipment_template)
+            return PortShip.objects.filter(eqipment_template=self._equipment_template.template)
         except PortShip.DoesNotExist:
             return PortShip.objects.none()
 
