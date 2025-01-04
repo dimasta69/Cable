@@ -45,6 +45,7 @@ from core_api.views.line_type.line_type_list import LineTypeListView
 from core_api.views.speed.list import SpeedListView
 from core_api.views.equipment.equipment_to_room import AddEquipmentRoomView
 from core_api.views.equipment.equipment import ReleaseEquipmentView
+from core_api.views.port_template.port_template import PortShipView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -93,6 +94,7 @@ urlpatterns = [
     path('type_port/', TypePortListView.as_view()),
     path('users_list/', UsersListView.as_view()),
     path('connection_port_ship/', ConnectionPortShipView.as_view()),
+    path('equipment_template/<int:id>/port_ship/', PortShipView.as_view()),
     path("connection/", ConnectionView.as_view()),
     path("disconnection/", DisconnectionView.as_view()),
     path("speed/", SpeedListView.as_view()),
