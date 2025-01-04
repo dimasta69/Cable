@@ -22,7 +22,7 @@ class Port(BaseModel):
     )
     mac = models.CharField(max_length=150, verbose_name='Mac адрес', null=True, blank=True)
     port_template = models.ForeignKey(
-        "PortTemplate", related_name='ports', verbose_name='Шаблон порта', null=False, blank=False,
+        "PortTemplate", related_name='ports', verbose_name='Шаблон порта', null=True, blank=True,
         on_delete=models.CASCADE, related_query_name='port',
     )
     line = models.ForeignKey(
