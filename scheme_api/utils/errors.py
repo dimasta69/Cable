@@ -1,0 +1,2 @@
+class EquipmentSchemeValidate(Exception):
+    pass
