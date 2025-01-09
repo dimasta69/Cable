@@ -46,6 +46,7 @@ from core_api.views.speed.list import SpeedListView
 from core_api.views.equipment.equipment_to_room import AddEquipmentRoomView
 from core_api.views.equipment.equipment import ReleaseEquipmentView
 from core_api.views.port_template.port_template import PortShipView
+from core_api.views.map.map import MapView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -99,6 +100,7 @@ urlpatterns = [
     path("disconnection/", DisconnectionView.as_view()),
     path("speed/", SpeedListView.as_view()),
     path("line_type/", LineTypeListView.as_view()),
+    path("map/", MapView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

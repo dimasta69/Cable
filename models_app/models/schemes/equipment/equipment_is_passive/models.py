@@ -1,6 +1,6 @@
 from models_app.models import EquipmentScheme
 from django.contrib.postgres.fields import ArrayField
-from scheme_api.utils.errors import EquipmentSchemeValidate
+from core_api.utils.errors import EquipmentSchemeValidate
 from django.db import models
 
 
