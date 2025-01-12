@@ -24,7 +24,7 @@ class CreateMapService(ServiceWithResult):
 
     @property
     def _create_scheme_map(self) -> SchemeMap:
-        return SchemeMap.objects.vreate(
+        return SchemeMap.objects.create(
             name=self.cleaned_data['name'],
             scheme=self._scheme,
         )
@@ -40,7 +40,7 @@ class CreateMapService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.building.scheme,
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._scheme,
                                       role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None

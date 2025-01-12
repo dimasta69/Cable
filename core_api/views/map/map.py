@@ -12,7 +12,7 @@ class MapView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        outcome = ServiceOutcome(CreateMapService, {"current_user": request.user} | request.data())
+        outcome = ServiceOutcome(CreateMapService, {"current_user": request.user} | request.data)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(MapSerializer(outcome.result).data, status=status.HTTP_201_CREATED)
