@@ -8,7 +8,7 @@ class MapSerializer(serializers.ModelSerializer):
     equipments = serializers.ModelSerializer()
 
     def get_equipments(self, obj: SchemeMap):
-        return EquipmentSerializer(obj.scheme.equipments, many=True).data
+        return EquipmentSerializer(obj.equipment_scheme_map, many=True).data
 
     class Meta:
         model = SchemeMap

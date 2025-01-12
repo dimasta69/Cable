@@ -14,7 +14,7 @@ class MapListView(APIView):
     def get(self, request):
         outcome = ServiceOutcome(
             MapListService,
-            request.data | {"current_user": request.user}
+            dict(request.GET.items()) | {"current_user": request.user}
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)

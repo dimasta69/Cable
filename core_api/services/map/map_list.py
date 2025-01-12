@@ -1,7 +1,7 @@
 from django import forms
 from functools import lru_cache
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, NotFound
 from typing import List
 
 from utils.fields import ModelField
@@ -47,7 +47,7 @@ class MapListService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.scheme)
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._scheme)
         except Access.DoesNotExist:
             return None
 
@@ -58,3 +58,12 @@ class MapListService(ServiceWithResult):
                                                                 f'{self.cleaned_data["scheme_id"]} is '
                                                                 'not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
+
+    def scheme_presence(self) -> None:
+        if not self._scheme:
+            self.add_error(
+                "scheme_id",
+                NotFound(
+                    f"Scheme with id = {self.cleaned_data['scheme_id']} not found"
+                )
+            )
