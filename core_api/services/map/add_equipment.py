@@ -1,12 +1,12 @@
 from django import forms
-from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError
+from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from core_api.utils.refresh_connection import refresh_connection_is_active
-from models_app.models import User, Access, SchemeMap, Equipment, EquipmentSchemeIsActive, EquipmentSchemeIsPassive
+from models_app.models import User, Access, SchemeMap, Equipment, EquipmentScheme
 
 
 class AddEquipmentMapService(ServiceWithResult):
@@ -25,24 +25,15 @@ class AddEquipmentMapService(ServiceWithResult):
         return self
 
     @property
-    def _create_equipment_scheme(self):
-        if self._equipment.template.type.is_active:
-            equipment_scheme = EquipmentSchemeIsActive.objects.create(
+    def _create_equipment_scheme(self) -> EquipmentScheme:
+        equipment_scheme = EquipmentScheme.objects.create(
                 schemes=self._map,
                 equipment=self._equipment,
                 coord_x=self.cleaned_data['coord_x'],
                 coord_y=self.cleaned_data['coord_y']
             )
 
-            refresh_connection_is_active(equipment_scheme)
-
-        elif not self._equipment.template.type.is_active:
-            equipment_scheme = EquipmentSchemeIsPassive.objects.create(
-                schemes=self._map,
-                equipment=self._equipment
-            )
-        else:
-            raise ValidationError("Оборудование имеет неизестный тип")
+        refresh_connection_is_active(equipment_scheme)
 
         return equipment_scheme
 

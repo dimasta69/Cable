@@ -11,7 +11,7 @@ from core_api.serializers.map.equipment.equipment_is_active import EquipmentIsAc
 class AddEquipmentIsActiveView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def post(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             AddEquipmentMapService,
             request.data | {"current_user": request.user}

@@ -1,8 +1,7 @@
-from models_app.models import EquipmentSchemeIsActive, Port
-from django.core.exceptions import ValidationError
+from models_app.models import EquipmentScheme, Port
 
 
-def refresh_connection_is_active(equipment_scheme: EquipmentSchemeIsActive):
+def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
     ports = Port.objects.filter(equipment=equipment_scheme.equipment, line__isnull=False).select_related('line')
 
     equipments_active = set()

@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 from models_app.models.base_model import BaseModel
@@ -21,6 +22,8 @@ class EquipmentScheme(BaseModel):
         null=False,
         blank=False,
     )
+    connection_front = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
+    connection_back = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
 
     class Meta:
         abstract = True
