@@ -52,11 +52,15 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_type_id']:
             equipment_list = equipment_list.filter(template__type=self._type)
         if self.cleaned_data['filter_scheme_id']:
-            equipment_list = equipment_list.filter(scheme=self.scheme)
+            equipment_list = equipment_list.filter(scheme=self.scheme).distinct()
         if self.cleaned_data['filter_server_rack_id']:
             equipment_list = equipment_list.filter(unit__server_rack=self.server_rack).distinct()
+        else:
+            equipment_list = equipment_list.filter(unit__server_rack=None)
         if self.cleaned_data['filter_room_id']:
             equipment_list = equipment_list.filter(room=self._room)
+        else:
+            equipment_list = equipment_list.filter(room=None)
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
