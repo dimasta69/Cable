@@ -31,6 +31,7 @@ def port_json(port, side: Literal["front_side", "back_side"]) -> json:
         "equipment_id": str(port.equipment.id),
         "equipment_manufacturer": str(port.equipment.template.manufacturer),
         "equipment_type": str(port.equipment.template.type),
+        "equipment_is_active": str(port.equipment.template.type.is_active),
         "equipment_model": str(port.equipment.template.model),
 
         "server_rack_id": str(port.equipment.units.first().server_rack.id)
