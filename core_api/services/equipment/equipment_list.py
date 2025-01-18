@@ -59,8 +59,6 @@ class EquipmentListService(ServiceWithResult):
             equipment_list = equipment_list.filter(unit__server_rack=None)
         if self.cleaned_data['filter_room_id']:
             equipment_list = equipment_list.filter(room=self._room)
-        else:
-            equipment_list = equipment_list.filter(room=None)
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
