@@ -5,8 +5,8 @@ from django.db import models
 
 
 class EquipmentSchemeIsActive(EquipmentScheme):
-    connection_active = ArrayField(models.IntegerField(), default=list)
-    connection_passive = ArrayField(models.IntegerField(), default=list)
+    connection_active = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
+    connection_passive = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
 
     def clean(self):
         super().clean()
