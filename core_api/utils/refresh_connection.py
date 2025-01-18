@@ -15,12 +15,12 @@ def refresh_connection_is_active(equipment_scheme: EquipmentSchemeIsActive):
                 equipments_active.add(int(port_connection[i]["equipment_id"]))
             if int(port_connection[i]['equipment_id']) == equipment_scheme.equipment.id:
                 try:
-                    equipments_is_not_active.add(port_connection[i-1]["equipment_id"])
+                    equipments_is_not_active.add(int(port_connection[i-1]["equipment_id"]))
                 except IndexError:
                     pass
 
                 try:
-                    equipments_is_not_active.add(port_connection[i+1]["equipment_id"])
+                    equipments_is_not_active.add(int(port_connection[i+1]["equipment_id"]))
                 except IndexError:
                     pass
 
