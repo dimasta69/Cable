@@ -65,7 +65,7 @@ class AddEquipmentMapService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.map.scheme,
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._map.scheme,
                                       role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None
