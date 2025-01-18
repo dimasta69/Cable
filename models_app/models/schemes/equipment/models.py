@@ -22,8 +22,8 @@ class EquipmentScheme(BaseModel):
         null=False,
         blank=False,
     )
-    connection_front = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
-    connection_back = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
+    connection_active = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
+    connection_passive = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
 
     class Meta:
         db_table = "equipment_scheme"
