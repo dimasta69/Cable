@@ -58,7 +58,7 @@ class AddEquipmentMapService(ServiceWithResult):
     @lru_cache()
     def _equipment(self) -> Equipment | None:
         try:
-            return Equipment.objects.get(id=self.cleaned_data['equipment_id']).select_related("template__type")
+            return Equipment.objects.select_related("template__type").get(id=self.cleaned_data['equipment_id'])
         except Equipment.DoesNotExist:
             return None
 
