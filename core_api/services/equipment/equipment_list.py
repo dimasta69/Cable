@@ -54,7 +54,7 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_scheme_id']:
             equipment_list = equipment_list.filter(scheme=self.scheme).distinct()
         if self.cleaned_data['filter_server_rack_id']:
-            equipment_list = equipment_list.filter(unit__server_rack=self.server_rack).distinct()
+            equipment_list = equipment_list.filter(unit__server_rack=self.server_rack)
         else:
             equipment_list = equipment_list.filter(unit__server_rack=None)
         if self.cleaned_data['filter_room_id']:
