@@ -21,8 +21,6 @@ from models_app.models.speed.models import Speed
 from models_app.models.vlan.models import Vlan
 from models_app.models.port.port_template.models import PortShip
 from models_app.models.schemes.equipment.models import EquipmentScheme
-from models_app.models.schemes.equipment.equipment_is_active.models import EquipmentSchemeIsActive
-from models_app.models.schemes.equipment.equipment_is_passive.models import EquipmentSchemeIsPassive
 from models_app.models.schemes.schemes.models import SchemeMap
 
 
@@ -50,7 +48,5 @@ __all__ = [
     'Vlan',
     'PortShip',
     'EquipmentScheme',
-    'EquipmentSchemeIsActive',
-    'EquipmentSchemeIsPassive',
     'SchemeMap',
 ]

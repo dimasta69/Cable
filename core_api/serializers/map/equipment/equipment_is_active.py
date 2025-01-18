@@ -1,13 +1,13 @@
 from rest_framework import serializers
 
-from models_app.models import EquipmentSchemeIsActive
+from models_app.models import EquipmentScheme
 
 
 class EquipmentIsActiveMapSerializer(serializers.ModelSerializer):
     equipment_id = serializers.IntegerField(source="equipment.id")
 
     class Meta:
-        model = EquipmentSchemeIsActive
+        model = EquipmentScheme
         fields = (
             "id",
             "equipment_id",

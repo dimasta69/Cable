@@ -26,5 +26,4 @@ class EquipmentScheme(BaseModel):
     connection_back = ArrayField(models.IntegerField(), default=list, null=True, blank=True)
 
     class Meta:
-        abstract = True
         db_table = "equipment_scheme"
