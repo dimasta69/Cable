@@ -10,7 +10,7 @@ class EquipmentSchemeIsActive(EquipmentScheme):
 
     def clean(self):
         super().clean()
-        if not self.equipment.template.is_active:
+        if not self.equipment.template.type.is_active:
             raise EquipmentSchemeValidate("Equipment is not active")
 
     class Meta:
