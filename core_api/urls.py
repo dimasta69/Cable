@@ -17,7 +17,7 @@ from core_api.views.manufacturer.manufacturer_list import ManufacturerListView
 from core_api.views.equipment_template.equipment_tamplate_list import EquipmentTemplateListView
 from core_api.views.equipment_template.equipment_template import EquipmentTemplateView
 from core_api.views.equipment.equipment import EquipmentView
-from core_api.views.equipment.equipment_list import EquipmentListView
+from core_api.views.equipment.equipment_list import EquipmentListView, EquipmentsFromMapListView
 from core_api.views.equipment.add_equipment_for_unit import AddEquipmentForUnitView
 from core_api.views.port.port_list import PortListView
 from core_api.views.port.port import PortView
@@ -105,6 +105,7 @@ urlpatterns = [
     path("map/", MapView.as_view()),
     path("maps/", MapListView.as_view()),
     path("maps/add_equipment/", AddEquipmentIsActiveView.as_view()),
+    path("maps/equipments/", EquipmentsFromMapListView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
