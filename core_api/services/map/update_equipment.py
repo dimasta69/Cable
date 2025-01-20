@@ -38,7 +38,7 @@ class UpdateEquipmentService(ServiceWithResult):
     def _equipment(self) -> EquipmentScheme | None:
         try:
             return EquipmentScheme.objects.select_related('schemes__scheme').get(id=self.cleaned_data['id'])
-        except EquipmentScheme.DoesNotExsist:
+        except EquipmentScheme.DoesNotExist:
             return None
 
     @property
