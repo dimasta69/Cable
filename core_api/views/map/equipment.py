@@ -11,7 +11,7 @@ from core_api.services.map.update_equipment import UpdateEquipmentService
 class EquipmentView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def path(self, request, **kwargs) -> Response:
+    def patch(self, request, **kwargs) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             UpdateEquipmentService,
             {"current_user": request.user} | kwargs | request.data
