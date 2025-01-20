@@ -49,6 +49,7 @@ from core_api.views.port_template.port_template import PortShipView
 from core_api.views.map.map import MapView
 from core_api.views.map.map_list import MapListView
 from core_api.views.map.equipment_list import EquipmentListView as EquipmentListMapView
+from core_api.views.map.equipment import EquipmentView as EquipmentMapView
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -106,6 +107,7 @@ urlpatterns = [
     path("maps/", MapListView.as_view()),
     path("maps/equipments_scheme/", EquipmentListMapView.as_view()),
     path("maps/equipments/", EquipmentsFromMapListView.as_view()),
+    path("maps/equipment_scheme/", EquipmentMapView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
