@@ -107,7 +107,7 @@ urlpatterns = [
     path("maps/", MapListView.as_view()),
     path("maps/equipments_scheme/", EquipmentListMapView.as_view()),
     path("maps/equipments/", EquipmentsFromMapListView.as_view()),
-    path("maps/equipment_scheme/", EquipmentMapView.as_view()),
+    path("maps/equipment_scheme/<int::id>/", EquipmentMapView.as_view()),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
