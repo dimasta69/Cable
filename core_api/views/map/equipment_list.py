@@ -12,10 +12,10 @@ from core_api.serializers.map.equipment.equipment_is_active import EquipmentIsAc
 class EquipmentListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get(self, request) -> Response:
+    def get(self, request, **kwargs) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             EquipmentListService,
-            {"current_user": request.user} | request.data
+            {"current_user": request.user} | kwargs
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)

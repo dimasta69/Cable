@@ -11,7 +11,7 @@ from models_app.models import EquipmentScheme, SchemeMap, Access, User
 
 
 class EquipmentListService(ServiceWithResult):
-    map_id = forms.IntegerField(required=True)
+    id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
     custom_validations = ['map_presence', 'access_presence']
@@ -33,7 +33,7 @@ class EquipmentListService(ServiceWithResult):
     @lru_cache()
     def _map(self) -> SchemeMap | None:
         try:
-            return SchemeMap.objects.get(id=self.cleaned_data['map_id'])
+            return SchemeMap.objects.get(id=self.cleaned_data['id'])
         except SchemeMap.DoesNotExist:
             return None
 
@@ -49,7 +49,7 @@ class EquipmentListService(ServiceWithResult):
             self.add_error(
                 "map_id",
                 NotFound(
-                    f"Map id={self.cleaned_data['map_id']} not found"
+                    f"Map id={self.cleaned_data['id']} not found"
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
@@ -58,5 +58,5 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['map_id']:
             if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the map id = '
-                                                                f'{self.cleaned_data["map_id"]} is not granted'))
+                                                                f'{self.cleaned_data["id"]} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
