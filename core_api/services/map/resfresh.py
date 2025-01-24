@@ -15,7 +15,7 @@ class RefreshEquipmentMapService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ["access_presence", "map_presence"]
+    custom_validations = ["access_presence"]
 
     def process(self):
         self.run_custom_validations()
@@ -37,8 +37,8 @@ class RefreshEquipmentMapService(ServiceWithResult):
         except EquipmentScheme.DoesNotExsist:
             return EquipmentScheme.objects.none()
 
-    @lru_cache
     @property
+    @lru_cache()
     def _map(self) -> SchemeMap | None:
         try:
             return SchemeMap.objects.get(id=self.cleaned_data["id"])

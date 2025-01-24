@@ -16,8 +16,7 @@ class MapRefreshView(APIView):
             RefreshEquipmentMapService,
             {
                 "current_user": request.user,
-            },
-            kwargs,
+            } | kwargs,
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
