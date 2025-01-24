@@ -44,8 +44,10 @@ class UpdateEquipmentService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._equipment.schemes.scheme,
-                                      role__in=['Change', 'Creator'])
+            return Access.objects.get(
+                user=self.cleaned_data['current_user'],
+                scheme=self._equipment.schemes.scheme if self._equipment else None,
+                role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None
 
@@ -62,6 +64,8 @@ class UpdateEquipmentService(ServiceWithResult):
     def access_presence(self) -> None:
         if self.cleaned_data['id']:
             if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the scheme id = '
-                                                                f'{self._equipment.schemes.scheme.id} is not granted'))
+                self.add_error('current_user',
+                               PermissionDenied(
+                                   'Access to the scheme id = '
+                                   f'{self._equipment.schemes.scheme.id if self._equipment else None} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
