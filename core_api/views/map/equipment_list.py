@@ -5,21 +5,11 @@ from rest_framework import status
 
 from utils.services import ServiceOutcome
 from core_api.services.map.add_equipment import AddEquipmentMapService
-from core_api.services.map.equipment_list import EquipmentListService
 from core_api.serializers.map.equipment.equipment_is_active import EquipmentIsActiveMapSerializer
 
 
 class EquipmentListView(APIView):
     permission_classes = [IsAuthenticated]
-
-    def get(self, request) -> Response:
-        outcome: ServiceOutcome = ServiceOutcome(
-            EquipmentListService,
-            {"current_user": request.user} | request.data
-        )
-        if bool(outcome.errors):
-            return Response(outcome.errors, status=outcome.response_status)
-        return Response(EquipmentIsActiveMapSerializer(outcome.result, many=True).data, status=status.HTTP_200_OK)
 
     def post(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(

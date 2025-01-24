@@ -1,16 +1,18 @@
 from rest_framework import serializers
 
 from models_app.models import EquipmentScheme
+from core_api.serializers.equipment.equipment import EquipmentSerializer
 
 
 class EquipmentIsActiveMapSerializer(serializers.ModelSerializer):
-    equipment_id = serializers.IntegerField(source="equipment.id")
+    equipment = EquipmentSerializer()
+
 
     class Meta:
         model = EquipmentScheme
         fields = (
             "id",
-            "equipment_id",
+            "equipment",
             "coord_x",
             "coord_y",
             "connection_active",
