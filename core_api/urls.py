@@ -46,7 +46,7 @@ from core_api.views.speed.list import SpeedListView
 from core_api.views.equipment.equipment_to_room import AddEquipmentRoomView
 from core_api.views.equipment.equipment import ReleaseEquipmentView
 from core_api.views.port_template.port_template import PortShipView
-from core_api.views.map.map import MapView
+from core_api.views.map.map import MapRefreshView
 from core_api.views.map.map_list import MapListView
 from core_api.views.map.equipment_list import EquipmentListView as EquipmentListMapView
 from core_api.views.map.equipment import EquipmentView as EquipmentMapView
@@ -103,7 +103,7 @@ urlpatterns = [
     path("disconnection/", DisconnectionView.as_view()),
     path("speed/", SpeedListView.as_view()),
     path("line_type/", LineTypeListView.as_view()),
-    path("map/", MapView.as_view()),
+    path("map/refresh/<int:id>/", MapRefreshView.as_view()),
     path("maps/", MapListView.as_view()),
     path("maps/equipments_scheme/", EquipmentListMapView.as_view()),
     path("maps/equipments/", EquipmentsFromMapListView.as_view()),

@@ -3,10 +3,12 @@ from functools import lru_cache
 from django import forms
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
+from typing import List
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import User, Access, SchemeMap
+from core_api.utils.refresh_connection import refresh_connection_is_active
+from models_app.models import User, Access, SchemeMap, EquipmentScheme
 
 
 class RefreshEquipmentMapService(ServiceWithResult):
@@ -14,6 +16,26 @@ class RefreshEquipmentMapService(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = ["access_presence", "map_presence"]
+
+    def process(self):
+        self.run_custom_validations()
+        if self.is_valid():
+            self.result = self._update_equipments()
+        return self
+
+    def _update_equipments(self) -> List[EquipmentScheme]:
+        list(map(refresh_connection_is_active, self._equipments))
+        return self._equipments
+
+    @property
+    @lru_cache()
+    def _equipments(self) -> List[EquipmentScheme]:
+        try:
+            return EquipmentScheme.objects.filter(
+                schemes=self._map,
+            )
+        except EquipmentScheme.DoesNotExsist:
+            return EquipmentScheme.objects.none()
 
     @lru_cache
     @property
