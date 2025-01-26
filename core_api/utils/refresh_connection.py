@@ -30,7 +30,7 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
                     except IndexError:
                         pass
 
-    elif not equipment_scheme.equipment.type.is_active:
+    elif not equipment_scheme.equipment.template.type.is_active:
         equipments_active = None
         for port in ports:
             port_connection = port.line.connection
