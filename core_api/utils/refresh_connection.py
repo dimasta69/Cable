@@ -1,3 +1,5 @@
+import json
+
 from models_app.models import EquipmentScheme, Port
 
 
@@ -10,17 +12,17 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
     for port in ports:
         port_connection = port.line.connection
         for i in range(len(port_connection)):
-            breakpoint()
-            if port_connection[i]['equipment_is_active']:
+            is_active = port_connection[i]['equipment_is_active']
+            if json.loads(is_active == "True"):
                 equipments_active.add(int(port_connection[i]["equipment_id"]))
             if int(port_connection[i]['equipment_id']) == equipment_scheme.equipment.id:
                 try:
-                    equipments_is_not_active.add(int(port_connection[i-1]["equipment_id"]))
+                    equipments_is_not_active.add(int(port_connection[i - 1]["equipment_id"]))
                 except IndexError:
                     pass
 
                 try:
-                    equipments_is_not_active.add(int(port_connection[i+1]["equipment_id"]))
+                    equipments_is_not_active.add(int(port_connection[i + 1]["equipment_id"]))
                 except IndexError:
                     pass
 
