@@ -46,6 +46,9 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
                     except IndexError:
                         pass
 
-    equipment_scheme.connection_active = list(equipments_active)
+    if equipments_active:
+        equipment_scheme.connection_active = list(equipments_active)
+    else:
+        equipment_scheme.connection_active = None
     equipment_scheme.connection_passive = list(equipments_is_not_active)
     equipment_scheme.save()
