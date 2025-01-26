@@ -67,14 +67,15 @@ def port_json(port, side: Literal["front_side", "back_side"]) -> json:
 
 
 def create_line(port_1, port_2, side: Literal["front_side", "back_side"]) -> Line:
+    breakpoint()
     if port_1.line:
-        line_1 = port_1.line.connection if port_1.line.connection[-1] == port_1.pk \
+        line_1 = port_1.line.connection if int(port_1.line.connection[-1]['port_id']) == port_1.pk \
             else list(reversed(port_1.line.connection))
     else:
         line_1 = [port_json(port_1, side)]
 
     if port_2.line:
-        line_2 = port_2.line.connection if port_2.line.connection[0] == port_2.pk \
+        line_2 = port_2.line.connection if int(port_2.line.connection[0]['port_id']) == port_2.pk \
             else list(reversed(port_2.line.connection))
     else:
         line_2 = [port_json(port_2, side)]
@@ -108,6 +109,7 @@ def disconnect(port_1, port_2) -> tuple[Line | None, Line | None]:
             line_1 = None
             line_2 = None
 
+            breakpoint()
             if get_from_list(line, i + 1) and line[i + 1]["port_id"] == str(port_2.id):
                 if line_is_null(line[:i + 1]):
                     line_1 = Line.objects.create(connection=line[:i + 1])
