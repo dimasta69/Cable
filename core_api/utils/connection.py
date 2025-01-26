@@ -108,20 +108,26 @@ def disconnect(port_1, port_2) -> tuple[Line | None, Line | None]:
             line_1 = None
             line_2 = None
 
-            try:
-                if line[i + 1]["port_id"] == str(port_2.id):
-                    if line_is_null(line[:i + 1]):
-                        line_1 = Line.objects.create(connection=line[:i + 1])
-                    if line_is_null(line[i + 1:]):
-                        line_2 = Line.objects.create(connection=line[i + 1:])
-            except IndexError:
-                if line[i - 1]["port_id"] == str(port_2.id):
-                    if line_is_null(line[:i + 1]):
-                        line_2 = Line.objects.create(connection=line[:i + 1])
-                    if line_is_null(line[i - 1:]):
-                        line_1 = Line.objects.create(connection=line[i - 1:])
-            finally:
+            if get_from_list(line, i + 1) and line[i + 1].get(["port_id"]) == str(port_2.id):
+                if line_is_null(line[:i + 1]):
+                    line_1 = Line.objects.create(connection=line[:i + 1])
+                if line_is_null(line[i + 1:]):
+                    line_2 = Line.objects.create(connection=line[i + 1:])
                 return line_1, line_2
+            elif get_from_list(line, i - 1) and get_from_list(line, i + 1) and line[i - 1]["port_id"] == str(port_2.id):
+                if line_is_null(line[:i + 1]):
+                    line_2 = Line.objects.create(connection=line[:i + 1])
+                if line_is_null(line[i - 1:]):
+                    line_1 = Line.objects.create(connection=line[i - 1:])
+                return line_1, line_2
+            else:
+                DisconnectionValueNotFound("Порты, требуемые для отключения, не найдены")
+
+
+def get_from_list(lst, index):
+    if index < 0 or index >= len(lst):
+        return False
+    return True
 
 
 def line_is_null(line: list) -> list | None:
