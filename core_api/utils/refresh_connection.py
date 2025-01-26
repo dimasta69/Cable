@@ -19,6 +19,7 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
             for i in range(len(port_connection)):
                 if port_connection[i]['equipment_is_active'] == "True":
                     equipments_active.add(int(port_connection[i]["equipment_id"]))
+                breakpoint()
                 if int(port_connection[i]['equipment_id']) == equipment_scheme.equipment.id:
                     try:
                         equipments_is_not_active.add(int(port_connection[i - 1]["equipment_id"]))
