@@ -143,10 +143,12 @@ def disconnect_delete_port(port) -> tuple[Line, Line]:
                 DisconnectionValueNotFound("Порты, требуемые для отключения, не найдены")
 
 
-def new_lines(line_1: Line, line_2: Line) -> None:
+def new_lines(line_1: Line | None, line_2: Line | None) -> None:
     from models_app.models import Port
-    ports_1 = Port.objects.filter(id__in=[port['port_id'] for port in line_1.connection])
-    ports_2 = Port.objects.filter(id__in=[port['port_id'] for port in line_2.connection])
+    if line_1:
+        ports_1 = Port.objects.filter(id__in=[port['port_id'] for port in line_1.connection])
+        ports_1.update(line=line_1)
 
-    ports_1.update(line=line_1)
-    ports_2.update(line=line_2)
+    if line_2:
+        ports_2 = Port.objects.filter(id__in=[port['port_id'] for port in line_2.connection])
+        ports_2.update(line=line_2)
