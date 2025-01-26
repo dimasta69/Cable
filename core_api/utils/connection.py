@@ -108,7 +108,6 @@ def disconnect(port_1, port_2) -> tuple[Line | None, Line | None]:
             line_1 = None
             line_2 = None
 
-            breakpoint()
             if get_from_list(line, i + 1) and line[i + 1]["port_id"] == str(port_2.id):
                 if line_is_null(line[:i + 1]):
                     line_1 = Line.objects.create(connection=line[:i + 1])
@@ -117,9 +116,9 @@ def disconnect(port_1, port_2) -> tuple[Line | None, Line | None]:
                 return line_1, line_2
             elif get_from_list(line, i - 1) and get_from_list(line, i + 1) and line[i - 1]["port_id"] == str(port_2.id):
                 if line_is_null(line[:i + 1]):
-                    line_2 = Line.objects.create(connection=line[:i + 1])
+                    line_2 = Line.objects.create(connection=line[:i])
                 if line_is_null(line[i - 1:]):
-                    line_1 = Line.objects.create(connection=line[i - 1:])
+                    line_1 = Line.objects.create(connection=line[i:])
                 return line_1, line_2
             else:
                 DisconnectionValueNotFound("Порты, требуемые для отключения, не найдены")
