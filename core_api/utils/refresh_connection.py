@@ -12,8 +12,7 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
     for port in ports:
         port_connection = port.line.connection
         for i in range(len(port_connection)):
-            is_active = port_connection[i]['equipment_is_active']
-            if json.loads(is_active == "True"):
+            if port_connection[i]['equipment_is_active'] == "True":
                 equipments_active.add(int(port_connection[i]["equipment_id"]))
             if int(port_connection[i]['equipment_id']) == equipment_scheme.equipment.id:
                 try:
