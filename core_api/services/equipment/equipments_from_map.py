@@ -23,6 +23,7 @@ class EquipmentsFromMapListService(ServiceWithResult):
     filter_scheme_id = forms.IntegerField(required=True)
     filter_room_id = forms.IntegerField(required=False)
     filter_server_rack_id = forms.IntegerField(required=False)
+    map_id = forms.IntegerField(required=False)
 
     custom_validations = ['order_presence', 'manufacturer_presence', 'server_rack_presence',
                           'scheme_presence', 'room_presence', 'type_presence']
@@ -81,7 +82,7 @@ class EquipmentsFromMapListService(ServiceWithResult):
     @property
     def _equipment_scheme_id(self) -> list | None:
         try:
-            return EquipmentScheme.objects.filter(schemes__scheme=self.scheme).values_list('id')
+            return EquipmentScheme.objects.filter(schemes__id=self.cleaned_data.get("map_id")).values_list('id')
         except EquipmentScheme.DoesNotExist:
             return None
 
