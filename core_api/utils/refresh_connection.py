@@ -22,7 +22,7 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
                 if int(port_connection[i]['equipment_id']) == equipment_scheme.equipment.id:
                     if i - 1 >= 0:
                         equipments_is_not_active.add(int(port_connection[i - 1]["equipment_id"]))
-                    if len(port_connection) > i:
+                    if len(port_connection) > i + 1:
                         equipments_is_not_active.add(int(port_connection[i + 1]["equipment_id"]))
 
     elif not equipment_scheme.equipment.template.type.is_active:
@@ -33,7 +33,7 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
                 if int(port_connection[i]['equipment_id']) == equipment_scheme.equipment.id:
                     if i - 1 >= 0:
                         equipments_is_not_active.add(int(port_connection[i - 1]["equipment_id"]))
-                    if len(port_connection) > i:
+                    if len(port_connection) > i + 1:
                         equipments_is_not_active.add(int(port_connection[i + 1]["equipment_id"]))
 
     if equipments_active:
