@@ -101,20 +101,34 @@ def connection_port(line: Line) -> None:
     Port.objects.bulk_update(ports_update, ['line'])
 
 
-def disconnect(port_1, port_2) -> tuple[Line, Line]:
+def disconnect(port_1, port_2) -> tuple[Line | None, Line | None]:
     line = port_1.line.connection
     for i in range(len(line)):
         if line[i]["port_id"] == str(port_1.id):
+            line_1 = None
+            line_2 = None
+
             if line[i + 1]["port_id"] == str(port_2.id):
-                line_1 = Line.objects.create(connection=line[:i])
-                line_2 = Line.objects.create(connection=line[i:])
+                if line_is_null(line[:i + 1]):
+                    line_1 = Line.objects.create(connection=line[:i + 1])
+                if line_is_null(line[i + 1:]):
+                    line_2 = Line.objects.create(connection=line[i + 1:])
                 return line_1, line_2
+
             elif line[i - 1]["port_id"] == str(port_2.id):
-                line_2 = Line.objects.create(connection=line[:i])
-                line_1 = Line.objects.create(connection=line[i:])
+                if line_is_null(line[:i + 1]):
+                    line_2 = Line.objects.create(connection=line[:i + 1])
+                if line_is_null(line[i - 1:]):
+                    line_1 = Line.objects.create(connection=line[i - 1:])
                 return line_1, line_2
             else:
                 DisconnectionValueNotFound("Порты, требуемые для отключения, не найдены")
+
+
+def line_is_null(line: list) -> list | None:
+    if len(line) <= 1:
+        return None
+    return line
 
 
 def disconnect_delete_port(port) -> tuple[Line, Line]:
