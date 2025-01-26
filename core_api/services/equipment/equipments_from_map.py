@@ -7,7 +7,7 @@ from rest_framework import status
 
 from cabel.settings import REST_FRAMEWORK
 from utils.services import ServiceWithResult
-from models_app.models import Scheme, Room, EquipmentTemplateType
+from models_app.models import Scheme, Room, EquipmentTemplateType, EquipmentScheme
 from models_app.models import Equipment
 from models_app.models import Manufacturer
 from models_app.models import ServerRack
@@ -46,7 +46,7 @@ class EquipmentsFromMapListService(ServiceWithResult):
 
     @property
     def equipment_filter_list(self):
-        equipment_list = self.equipment_list
+        equipment_list = self.equipment_list.exclude(id__in=self._equipment_scheme_id)
         if self.cleaned_data['filter_manufacturer_id']:
             equipment_list = equipment_list.filter(template__manufacturer=self._manufacturer)
         if self.cleaned_data['filter_type_id']:
@@ -77,6 +77,13 @@ class EquipmentsFromMapListService(ServiceWithResult):
             )
         except Equipment.DoesNotExist:
             return Equipment.objects.none()
+    @property
+    def _equipment_scheme_id(self) -> list | None:
+        try:
+            return EquipmentScheme.objects.filter(scheme=self.scheme).values_list('id')
+        except EquipmentScheme.DoesNotExsist:
+            return None
+
 
     @property
     @lru_cache()
