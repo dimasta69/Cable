@@ -69,7 +69,7 @@ class EquipmentsFromMapListService(ServiceWithResult):
     @property
     def equipment_list(self):
         try:
-            return Equipment.objects.all().select_related('template', 'template__manufacturer')
+            return Equipment.objects.all().select_related('template', 'template__manufacturer', 'connections')
         except Equipment.DoesNotExist:
             return Equipment.objects.none()
 
