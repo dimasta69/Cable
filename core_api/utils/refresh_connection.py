@@ -13,7 +13,7 @@ def refresh_connection_is_active(equipment_scheme: EquipmentScheme) -> None:
     equipments_active = set()
     equipments_is_not_active = set()
 
-    if equipment_scheme.equipment.type.is_active:
+    if equipment_scheme.equipment.template.type.is_active:
         for port in ports:
             port_connection = port.line.connection
             for i in range(len(port_connection)):
