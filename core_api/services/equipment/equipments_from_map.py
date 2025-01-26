@@ -77,13 +77,13 @@ class EquipmentsFromMapListService(ServiceWithResult):
             )
         except Equipment.DoesNotExist:
             return Equipment.objects.none()
+
     @property
     def _equipment_scheme_id(self) -> list | None:
         try:
             return EquipmentScheme.objects.filter(scheme=self.scheme).values_list('id')
-        except EquipmentScheme.DoesNotExsist:
+        except EquipmentScheme.DoesNotExist:
             return None
-
 
     @property
     @lru_cache()
