@@ -14,7 +14,7 @@ class SegmentListView(APIView):
     def get(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             SegmentListService,
-            dict(request.GET.items),
+            dict(request.GET.items()),
         )
         if bool(outcome.errors):
             return Response(

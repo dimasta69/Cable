@@ -1,11 +1,10 @@
 from functools import lru_cache
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 from rest_framework import status
+from typing import List
 
-from cabel.settings import REST_FRAMEWORK
 from models_app.models import Access, User, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
@@ -24,14 +23,14 @@ class AccessListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.access_filter_list
+            self.result = self._access_filter_list
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def access_filter_list(self):
-        access_list = self.access if self.cleaned_data['current_user'].is_superuser \
-            else self.access.exclude(user=self.cleaned_data['current_user'])
+    def _access_filter_list(self) -> List[Access]:
+        access_list = self._access if self.cleaned_data['current_user'].is_superuser \
+            else self._access.exclude(user=self.cleaned_data['current_user'])
         if self.cleaned_data['filter_role']:
             access_list = access_list.filter(role=self.cleaned_data['filter_role'])
         if self.cleaned_data['search_filter']:
@@ -45,39 +44,39 @@ class AccessListService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def access(self):
+    def _access(self) -> List[Access]:
         try:
-            return Access.objects.filter(scheme=self.scheme)
+            return Access.objects.filter(scheme=self._scheme)
         except Access.DoesNotExist:
-            return None
+            return Access.objects.none()
 
     @property
     @lru_cache()
-    def scheme(self):
+    def _scheme(self) -> Scheme | None:
         try:
             return Scheme.objects.get(id=self.cleaned_data['filter_scheme_id'])
         except Scheme.DoesNotExist:
             return None
 
-    def filter_role_presence(self):
+    def filter_role_presence(self) -> None:
         if self.cleaned_data['filter_role']:
             if not self.cleaned_data.get('filter_role') in ['Change', 'Creator', 'Read']:
                 self.add_error('filter_role', ObjectDoesNotExist(f"Field in model with "
                                                                  f"{self.cleaned_data['filter_role']} not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def scheme_presence(self):
+    def scheme_presence(self) -> None:
         if self.cleaned_data['filter_scheme_id']:
-            if not self.scheme:
+            if not self._scheme:
                 self.add_error('filter_scheme_id', ObjectDoesNotExist('Scheme id='
                                                                       f'{self.cleaned_data["filter_scheme_id"]} '
                                                                       'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self):
-        if self.scheme and self.access:
-            if (self.scheme.creator != self.cleaned_data['current_user']
+    def access_presence(self) -> None:
+        if self._scheme and self._access:
+            if (self._scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.scheme.id} is not granted'))
+                                                                f'{self._scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

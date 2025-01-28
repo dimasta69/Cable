@@ -1,5 +1,5 @@
 from functools import lru_cache
-
+from typing import List
 from django import forms
 from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
@@ -22,13 +22,13 @@ class UpdateBuildingService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.update_building
+            self.result = self._update_building
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def update_building(self):
-        building = self.building
+    def _update_building(self) -> Building:
+        building = self._building
         if self.cleaned_data['name']:
             building.name = self.cleaned_data['name']
         if self.cleaned_data['coord_x']:
@@ -44,45 +44,44 @@ class UpdateBuildingService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def building(self):
+    def _building(self):
         try:
             return Building.objects.get(id=self.cleaned_data['id'])
         except Building.DoesNotExist:
             return None
 
     @property
-    @lru_cache()
-    def building_list(self):
+    def _building_list(self) -> List[Building]:
         try:
-            return Building.objects.filter(scheme=self.building.scheme)
+            return Building.objects.filter(scheme=self._building.scheme)
         except Building.DoesNotExist:
             return Building.objects.none()
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.building.scheme,
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._building.scheme,
                                       role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None
 
-    def building_presence(self):
-        if not self.building:
+    def building_presence(self) -> None:
+        if not self._building:
             self.add_error('id', ObjectDoesNotExist('Building id='
                                                     f'{self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def number_presence(self):
-        if self.building:
-            for building in self.building_list:
+    def number_presence(self) -> None:
+        if self._building:
+            for building in self._building_list:
                 if building.name.lower() == self.cleaned_data['name'].lower():
                     self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["name"]}'
                                                              ' already exists'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def access_presence(self):
-        if self.building:
-            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+    def access_presence(self) -> None:
+        if self._building:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.building.scheme.id} is not granted'))
+                                                                f'{self._building.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

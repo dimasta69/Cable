@@ -1,5 +1,6 @@
 from django import forms
 from functools import lru_cache
+from typing import List
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
@@ -7,8 +8,7 @@ from rest_framework import status
 from models_app.models import Access, User
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField, ModelField
-from models_app.models import Equipment
-from models_app.models import Unit
+from models_app.models import Unit, ServerRack, Equipment
 
 
 class AddEquipmentUnitService(ServiceWithResult):
@@ -22,27 +22,27 @@ class AddEquipmentUnitService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.add_equipment
+            self.result = self._add_equipment
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def add_equipment(self):
-        self.remove_equipment()
-        for unit in self.unit_list_int:
-            unit.equipment = self.equipment
+    def _add_equipment(self) -> ServerRack:
+        self._remove_equipment()
+        for unit in self._unit_list_int:
+            unit.equipment = self._equipment
             unit.save()
-        return self.unit_list_int[0].server_rack
+        return self._unit_list_int[0].server_rack
 
-    def remove_equipment(self):
-        unit_equipment = self.unit_list.filter(equipment=self.equipment)
+    def _remove_equipment(self) -> None:
+        unit_equipment = self.unit_list.filter(equipment=self._equipment)
         if unit_equipment:
             unit_equipment.equipment = None
             unit_equipment.save()
 
     @property
     @lru_cache()
-    def equipment(self):
+    def _equipment(self) -> Equipment | None:
         try:
             return Equipment.objects.get(id=self.cleaned_data['id'])
         except Equipment.DoesNotExist:
@@ -50,60 +50,59 @@ class AddEquipmentUnitService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def unit_list_int(self):
+    def _unit_list_int(self):
         unit_list = []
         for uid in self.cleaned_data['unit_list_id']:
             try:
-                unit_list.append(self.unit_list.get(id=uid))
+                unit_list.append(self._unit_list.get(id=uid))
             except Unit.DoesNotExist:
                 return None
         return unit_list
 
     @property
-    @lru_cache()
-    def unit_list(self):
+    def _unit_list(self) -> List[Unit]:
         try:
             return Unit.objects.all()
         except Unit.DoesNotExist:
             return Unit.objects.none()
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
         try:
             return Access.objects.get(user=self.cleaned_data['current_user'],
-                                      scheme=self.unit_list_int[0].server_rack.room.building.scheme,
+                                      scheme=self._unit_list_int[0].server_rack.room.building.scheme,
                                       role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None
 
-    def unit_list_presence(self):
-        if not self.unit_list_int:
+    def unit_list_presence(self) -> None:
+        if not self._unit_list_int:
             self.add_error('unit_list_id', ObjectDoesNotExist('Unit list id='
                                                               f'{self.cleaned_data["unit_list_id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def equipment_presence(self):
-        if not self.equipment:
+    def equipment_presence(self) -> None:
+        if not self._equipment:
             self.add_error('id', ObjectDoesNotExist(f'Equipment id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def count_unit_presence(self):
-        if self.unit_list_int and self.equipment:
-            if not len(self.unit_list_int) == self.equipment.template.number_of_units:
+    def count_unit_presence(self) -> None:
+        if self._unit_list_int and self._equipment:
+            if not len(self._unit_list_int) == self._equipment.template.number_of_units:
                 self.add_error('unit_list_id', ValidationError('Quantities units do not match'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def power_presence(self):
-        if self.unit_list_int and self.equipment:
-            if self.unit_list_int[0].server_rack.free_power and self.equipment.template.power:
-                if self.unit_list_int[0].server_rack.free_power < self.equipment.template.power:
+    def power_presence(self) -> None:
+        if self._unit_list_int and self._equipment:
+            if self._unit_list_int[0].server_rack.free_power and self._equipment.template.power:
+                if self._unit_list_int[0].server_rack.free_power < self._equipment.template.power:
                     self.add_error('unit_list_id', ValidationError('Not enough power'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def access_presence(self):
-        if self.unit_list_int and self.equipment:
-            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+    def access_presence(self) -> None:
+        if self._unit_list_int and self._equipment:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                        f'{self.unit_list_int[0].server_rack.room.building.scheme.id} '
+                                                        f'{self._unit_list_int[0].server_rack.room.building.scheme.id} '
                                                                 'is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
