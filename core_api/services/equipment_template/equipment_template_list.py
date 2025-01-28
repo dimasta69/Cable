@@ -51,7 +51,7 @@ class EquipmentTemplateListService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def _manufacturer(self):
+    def _manufacturer(self) -> Manufacturer | None:
         try:
             return Manufacturer.objects.get(id=self.cleaned_data['filter_manufacturer_id'])
         except Manufacturer.DoesNotExist:
@@ -59,27 +59,27 @@ class EquipmentTemplateListService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def _type(self):
+    def _type(self) -> EquipmentTemplate | None:
         try:
             return EquipmentTemplateType.objects.get(id=self.cleaned_data['filter_type_id'])
         except EquipmentTemplateType.DoesNotExist:
             return None
 
-    def type_presence(self):
+    def type_presence(self) -> None:
         if self.cleaned_data['filter_type_id'] and self._type is None:
             self.add_error('filter_type', ObjectDoesNotExist('Type id='
                                                              f'{self.cleaned_data["filter_type_id"]} '
                                                              f'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def order_presence(self):
+    def order_presence(self) -> None:
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['power', '-power', 'number_of_units', '-number_of_units',
                                                      'count_port', '-count_port', 'model', '-model']:
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def manufacturer_presence(self):
+    def manufacturer_presence(self) -> None:
         if self.cleaned_data['filter_manufacturer_id'] and not self._manufacturer:
             self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
                                                                      f'{self.cleaned_data["filter_manufacturer_id"]} '

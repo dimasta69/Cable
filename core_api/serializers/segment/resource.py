@@ -10,5 +10,5 @@ class SegmentSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "name",
-            "scheme_id",
+            "scheme_id"
         )
