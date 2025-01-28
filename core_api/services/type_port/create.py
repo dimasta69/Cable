@@ -14,13 +14,14 @@ class CreateTypePort(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._create_type_port()
+            self.result = self._create_type_port
         return self
 
-    def _create_type_port(self):
+    @property
+    def _create_type_port(self) -> TypePort:
         return TypePort.objects.create(name=self.cleaned_data['name'])
 
-    def unique_type(self):
+    def unique_type(self) -> None:
         if self.cleaned_data['name'] and TypePort.objects.filter(name=self.cleaned_data['name']):
             self.add_error("name", ValidationError(f"Name = {self.cleaned_data['name']} is not unique"))
             self.response_status = status.HTTP_400_BAD_REQUEST

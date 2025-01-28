@@ -18,39 +18,37 @@ class DeleteRoomService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.delete_room
+            self._delete_room()
             self.response_status = status.HTTP_204_NO_CONTENT
         return self
 
-    @property
-    def delete_room(self):
-        self.room.delete()
-        return None
+    def _delete_room(self) -> None:
+        self._room.delete()
 
     @property
     @lru_cache()
-    def room(self):
+    def _room(self) -> Room | None:
         try:
             return Room.objects.get(id=self.cleaned_data['id'])
         except Room.DoesNotExist:
             return None
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.room.building.scheme,
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._room.building.scheme,
                                       role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None
 
-    def room_presence(self):
-        if not self.room:
+    def room_presence(self) -> None:
+        if not self._room:
             self.add_error('id', ObjectDoesNotExist(f'Room id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self):
-        if self.room:
-            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+    def access_presence(self) -> None:
+        if self._room:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.room.building.scheme.id} is not granted'))
+                                                                f'{self._room.building.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

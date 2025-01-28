@@ -34,35 +34,35 @@ def port_json(port, side: Literal["front_side", "back_side"]) -> json:
         "equipment_is_active": str(port.equipment.template.type.is_active),
         "equipment_model": str(port.equipment.template.model),
 
-        "server_rack_id": str(port.equipment.units.first().server_rack.id)
-        if not port.equipment.room else None,
+        "server_rack_id": str(port.equipment.units.first()._server_rack.id)
+        if not port.equipment._room else None,
 
-        "server_rack_title": str(port.equipment.units.first().server_rack.title)
-        if not port.equipment.room else None,
+        "server_rack_title": str(port.equipment.units.first()._server_rack.title)
+        if not port.equipment._room else None,
 
         "unit_uuid": str(port.equipment.units.first().uid)
-        if not port.equipment.room else None,
+        if not port.equipment._room else None,
 
         "unit_side": str(port.equipment.units.first().side)
-        if not port.equipment.room else None,
+        if not port.equipment._room else None,
 
-        "room_id": str(port.equipment.units.first().server_rack.room.id)
-        if not port.equipment.room else str(port.equipment.room.id),
+        "room_id": str(port.equipment.units.first()._server_rack._room.id)
+        if not port.equipment._room else str(port.equipment._room.id),
 
-        "room_floor": str(port.equipment.units.first().server_rack.room.floor)
-        if not port.equipment.room else str(port.equipment.room.floor),
+        "room_floor": str(port.equipment.units.first()._server_rack._room.floor)
+        if not port.equipment._room else str(port.equipment._room.floor),
 
-        "room_number": str(port.equipment.units.first().server_rack.room.number)
-        if not port.equipment.room else str(port.equipment.room.number),
+        "room_number": str(port.equipment.units.first()._server_rack._room.number)
+        if not port.equipment._room else str(port.equipment._room.number),
 
-        "is_server_room": str(port.equipment.units.first().server_rack.room.is_server_room)
-        if not port.equipment.room else str(port.equipment.room.is_server_room),
+        "is_server_room": str(port.equipment.units.first()._server_rack._room.is_server_room)
+        if not port.equipment._room else str(port.equipment._room.is_server_room),
 
-        "building_id": str(port.equipment.units.first().server_rack.room.building.id)
-        if not port.equipment.room else str(port.equipment.room.building.id),
+        "building_id": str(port.equipment.units.first()._server_rack._room.building.id)
+        if not port.equipment._room else str(port.equipment._room.building.id),
 
-        "building_name": str(port.equipment.units.first().server_rack.room.building.name)
-        if not port.equipment.room else str(port.equipment.room.building.name),
+        "building_name": str(port.equipment.units.first()._server_rack._room.building.name)
+        if not port.equipment._room else str(port.equipment._room.building.name),
     }
 
 

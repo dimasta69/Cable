@@ -24,20 +24,20 @@ class RoomService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def _room(self):
+    def _room(self) -> Room | None:
         try:
             return Room.objects.select_related("building", 'building__scheme').get(id=self.cleaned_data['id'])
         except Room.DoesNotExist:
             return None
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
         try:
             return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._room.building.scheme)
         except Access.DoesNotExist:
             return None
 
-    def room_presence(self):
+    def room_presence(self) -> None:
         if self.cleaned_data['id']:
             if not self._room:
                 self.add_error('room_id', ObjectDoesNotExist('Room id='
@@ -45,9 +45,9 @@ class RoomService(ServiceWithResult):
                                                              'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self):
+    def access_presence(self) -> None:
         if self._room:
-            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._room.building.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

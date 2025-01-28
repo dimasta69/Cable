@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from core_api.serializers.room.resource import RoomListSerializer
-from core_api.services.room.room_list import RoomListService
+from core_api.services.room.list import RoomListService
 from core_api.services.room.create import CreateRoomService
 from core_api.swagger_scheme.room import room_list, create_room
 from utils.services import ServiceOutcome

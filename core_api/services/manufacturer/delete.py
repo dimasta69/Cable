@@ -16,24 +16,22 @@ class ManufacturerDeleteService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.delete_manufacturer
+            self._delete_manufacturer()
             self.response_status = status.HTTP_204_NO_CONTENT
         return self
 
-    @property
-    def delete_manufacturer(self):
-        self.manufacturer.delete()
-        return None
+    def _delete_manufacturer(self) -> None:
+        self._manufacturer.delete()
 
     @property
     @lru_cache()
-    def manufacturer(self):
+    def _manufacturer(self) -> Manufacturer | None:
         try:
             return Manufacturer.objects.get(id=self.cleaned_data['id'])
         except Manufacturer.DoesNotExist:
             return None
 
     def manufacturer_presence(self):
-        if not self.manufacturer:
+        if not self._manufacturer:
             self.add_error('id', ObjectDoesNotExist(f'Port template id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND

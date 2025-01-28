@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from core_api.serializers.equipment_template.resource import EquipmentTemplateSerializer
-from core_api.services.equipment_template.equipment_template_list import EquipmentTemplateListService
+from core_api.services.equipment_template.list import EquipmentTemplateListService
 from core_api.services.equipment_template.create import CreateEquipmentTemplateService
 from core_api.swagger_scheme.equipment_template import equipment_template_list, create_equipment_template
 from utils.services import ServiceOutcome

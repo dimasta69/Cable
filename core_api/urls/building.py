@@ -1,7 +1,7 @@
 from django.urls import path
 
 from core_api.views.building.building import BuildingView
-from core_api.views.building.building_list import BuildingListView
+from core_api.views.building.list import BuildingListView
 
 urlpatterns = [
     path('', BuildingListView.as_view()),

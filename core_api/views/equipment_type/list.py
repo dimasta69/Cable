@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from utils.services import ServiceOutcome
-from core_api.services.equipment_type.equipment_type_list import ListEquipmentTypeService
+from core_api.services.equipment_type.list import ListEquipmentTypeService
 from core_api.serializers.equipment_type.resource import EquipmentTypeSerializer
 
 

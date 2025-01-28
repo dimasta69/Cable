@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from utils.services import ServiceOutcome
 from core_api.serializers.users.resource import UsersListSerializers
-from core_api.services.user.users_list import UsersListServices
+from core_api.services.user.list import UsersListServices
 
 
 class UsersListView(APIView):

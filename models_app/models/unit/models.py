@@ -33,19 +33,19 @@ class Unit(BaseModel):
 
 @receiver(post_save, sender=Unit)
 def check_free_power(sender, instance, created, **kwargs):
-    server_rack = instance.server_rack
+    server_rack = instance._server_rack
     if not created and server_rack.max_power:
         from models_app.models import Equipment
         sum_power = Equipment.objects.filter(
             unit__in=server_rack.units.values("id"), template__power__isnull=False
         ).distinct().aggregate(total=Sum('template__power'))["total"]
         server_rack.free_power = server_rack.max_power - sum_power if sum_power else 0
-        instance.server_rack.save()
+        instance._server_rack.save()
 
 
 @receiver(post_save, sender=Unit)
 def check_free_unit(sender, instance, created, **kwargs):
-    server_rack = instance.server_rack
+    server_rack = instance._server_rack
     if not created:
         from models_app.models import Equipment
         sum_unit = Equipment.objects.filter(
@@ -55,4 +55,4 @@ def check_free_unit(sender, instance, created, **kwargs):
             server_rack.free_units = server_rack.number_of_units - sum_unit
         elif sum_unit is None:
             server_rack.free_units = server_rack.number_of_units
-        instance.server_rack.save()
+        instance._server_rack.save()

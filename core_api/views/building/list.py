@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
 from core_api.serializers.building.resource import BuildingListSerializer
-from core_api.services.building.building_list import BuildingListService
+from core_api.services.building.list import BuildingListService
 from core_api.services.building.create import CreateBuildingService
 from core_api.swagger_scheme.building import building_list, create_building
 

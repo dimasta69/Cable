@@ -24,52 +24,54 @@ class CreateServerRackService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.create_server_rack
+            self.result = self._create_server_rack
             self.response_status = status.HTTP_201_CREATED
         return self
 
     @property
-    def create_server_rack(self):
-        server_rack = ServerRack.objects.create(number_of_units=self.cleaned_data['number_of_units'],
-                                                room=self.room,
-                                                title=self.cleaned_data['title'],
-                                                max_power=self.cleaned_data['max_power'])
+    def _create_server_rack(self) -> ServerRack:
+        server_rack = ServerRack.objects.create(
+            number_of_units=self.cleaned_data['number_of_units'],
+            room=self._room,
+            title=self.cleaned_data['title'],
+            max_power=self.cleaned_data['max_power']
+        )
         return server_rack
 
     @property
     @lru_cache()
-    def room(self):
+    def _room(self) -> Room | None:
         try:
             return Room.objects.get(id=self.cleaned_data['room_id'])
         except Room.DoesNotExist:
             return None
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.room.building.scheme,
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._room.building.scheme,
                                       role__in=['Change', 'Creator'])
         except Access.DoesNotExist:
             return None
 
-    def room_presence(self):
-        if not self.room:
+    def room_presence(self) -> None:
+        if not self._room:
             self.add_error('room_id', ObjectDoesNotExist('Room id='
                                                          f'{self.cleaned_data["room_id"]} '
                                                          'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def room_server_presence(self):
-        if self.room:
-            if not self.room.is_server_room:
+    def room_server_presence(self) -> None:
+        if self._room:
+            if not self._room.is_server_room:
                 self.add_error('room_id', ObjectDoesNotExist('Room id='
                                                              f'{self.cleaned_data["room_id"]} '
                                                              'is not server'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def access_presence(self):
-        if self.room:
-            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+    def access_presence(self) -> None:
+        if self._room:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.room.building.scheme.id} is not granted'))
+                                                                f'{self._room.building.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

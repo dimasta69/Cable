@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from core_api.services.map.create import CreateMapService
 from utils.services import ServiceOutcome
-from core_api.services.map.map_list import MapListService
+from core_api.services.map.list import MapListService
 from core_api.serializers.map.resourse import MapSerializer
 
 

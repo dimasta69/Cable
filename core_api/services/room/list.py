@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 from rest_framework import status
+from typing import List
 
 from cabel.settings import REST_FRAMEWORK
 from models_app.models import Access, User
@@ -28,23 +29,23 @@ class RoomListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.room_pagination
+            self.result = self._room_pagination
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def room_pagination(self):
+    def _room_pagination(self) -> Paginator:
         try:
-            return (Paginator(self.room_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                               REST_FRAMEWORK['PAGE_SIZE'])).
+            return (Paginator(self._room_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                REST_FRAMEWORK['PAGE_SIZE'])).
                     page(self.cleaned_data['page'] or 1))
         except EmptyPage:
-            return (Paginator(self.room_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                               REST_FRAMEWORK['PAGE_SIZE'])).page(1))
+            return (Paginator(self._room_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
-    def room_filter_list(self):
-        room_list = self.room_list
+    def _room_filter_list(self) -> List[Room]:
+        room_list = self._room_list
         if self.cleaned_data['filter_is_server_room']:
             room_list = room_list.filter(is_server_room=self.cleaned_data['filter_is_server_room'])
         if self.cleaned_data['filter_floor']:
@@ -57,44 +58,44 @@ class RoomListService(ServiceWithResult):
         return room_list
 
     @property
-    def room_list(self):
+    def _room_list(self) -> List[Room]:
         try:
-            return Room.objects.filter(building=self.building)
+            return Room.objects.filter(building=self._building)
         except Room.DoesNotExist:
             return Room.objects.none()
 
     @property
     @lru_cache()
-    def building(self):
+    def _building(self) -> Building | None:
         try:
             return Building.objects.get(id=self.cleaned_data['filter_building_id'])
         except Building.DoesNotExist:
             return None
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.building.scheme)
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._building.scheme)
         except Access.DoesNotExist:
             return None
 
-    def order_presence(self):
+    def order_presence(self) -> None:
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['number', '-number']:
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def building_presence(self):
+    def building_presence(self) -> None:
         if self.cleaned_data['filter_building_id']:
-            if not self.building:
+            if not self._building:
                 self.add_error('filter_building_id', ObjectDoesNotExist('Building id='
                                                                         f'{self.cleaned_data["filter_building_id"]} '
                                                                         'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self):
-        if self.building:
-            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+    def access_presence(self) -> None:
+        if self._building:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.building.scheme.id} is not granted'))
+                                                                f'{self._building.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

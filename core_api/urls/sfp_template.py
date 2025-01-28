@@ -2,7 +2,7 @@ from django.urls import path
 
 from core_api.views.sfp_template.adding_to_port import AddingToPortSfpTemplateView
 from core_api.views.sfp_template.sfp_template import SfpTemplateView
-from core_api.views.sfp_template.sfp_template_list import SfpTemplateListView
+from core_api.views.sfp_template.list import SfpTemplateListView
 
 urlpatterns = [
     path('', SfpTemplateListView.as_view()),

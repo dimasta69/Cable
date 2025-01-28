@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
+from typing import List
 
 from utils.services import ServiceWithResult
 from django import forms
@@ -24,11 +25,12 @@ class UsersListServices(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._scheme_list_filter()
+            self.result = self._scheme_list_filter
             self.response_status = status.HTTP_200_OK
         return self
 
-    def _scheme_list_filter(self):
+    @property
+    def _scheme_list_filter(self) -> List[User]:
         user_list = self._users
         if self.cleaned_data['order_by']:
             user_list = user_list.order_by(self.cleaned_data['order_by'])
@@ -40,34 +42,34 @@ class UsersListServices(ServiceWithResult):
 
     @property
     @lru_cache()
-    def _scheme(self):
+    def _scheme(self) -> Scheme | None:
         try:
             return Scheme.objects.get(id=self.cleaned_data['scheme_id'])
         except Scheme.DoesNotExist:
             return None
 
     @property
-    def _users(self):
+    def _users(self) -> List[User]:
         try:
             return User.objects.exclude(id__in=self._access)
         except User.DoesNotExist:
             return User.objects.none()
 
     @property
-    def _access(self):
+    def _access(self) -> List[Access]:
         try:
             return Access.objects.filter(scheme=self._scheme).values_list('user__id', flat=True)
         except Access.DoesNotExist:
             return Access.objects.none()
 
-    def scheme_presence(self):
+    def scheme_presence(self) -> None:
         if not self._scheme:
             self.add_error('scheme_id', ObjectDoesNotExist('Scheme id='
                                                            f'{self.cleaned_data["scheme_id"]} '
                                                            'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def order_presence(self):
+    def order_presence(self) -> None:
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['username', '-username']:
                 self.add_error('order_by', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))

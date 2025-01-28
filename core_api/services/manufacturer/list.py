@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 from rest_framework import status
+from typing import List
 
 from utils.services import ServiceWithResult
 from models_app.models import Manufacturer
@@ -20,23 +21,23 @@ class ManufacturerListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.manufacturer_pagination
+            self.result = self._manufacturer_pagination
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def manufacturer_pagination(self):
+    def _manufacturer_pagination(self) -> Paginator:
         try:
-            return Paginator(self.filter_manufacturer_list,
+            return Paginator(self._filter_manufacturer_list,
                              per_page=(self.cleaned_data['per_page'] or REST_FRAMEWORK['PAGE_SIZE'])).page(
                 self.cleaned_data['page'] or 1)
         except EmptyPage:
-            return Paginator(self.filter_manufacturer_list,
+            return Paginator(self._filter_manufacturer_list,
                              per_page=(self.cleaned_data['per_page'] or REST_FRAMEWORK['PAGE_SIZE'])).page(1)
 
     @property
-    def filter_manufacturer_list(self):
-        manufacturer = self.manufacturer_list
+    def _filter_manufacturer_list(self) -> List[Manufacturer]:
+        manufacturer = self._manufacturer_list
         if self.cleaned_data['search_filter']:
             manufacturer = manufacturer.filter(
                 Q(name__icontains=self.cleaned_data['search_filter'])
@@ -46,13 +47,13 @@ class ManufacturerListService(ServiceWithResult):
         return manufacturer
 
     @property
-    def manufacturer_list(self):
+    def _manufacturer_list(self) -> List[Manufacturer]:
         try:
             return Manufacturer.objects.all()
         except Manufacturer.DoesNotExist:
             return Manufacturer.objects.none()
 
-    def order_presence(self):
+    def order_presence(self) -> None:
         if self.cleaned_data.get('order_by'):
             if not self.cleaned_data.get('order_by') in ['name', '-name']:
                 self.add_error('order_by', ObjectDoesNotExist(f"Field in model with "

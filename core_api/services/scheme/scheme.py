@@ -19,32 +19,32 @@ class SchemeService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.scheme
+            self.result = self._scheme
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
     @lru_cache()
-    def scheme(self):
+    def _scheme(self) -> Scheme | None:
         try:
             return Scheme.objects.get(id=self.cleaned_data['id'])
         except Scheme.DoesNotExist:
             return None
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.scheme)
+            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._scheme)
         except Access.DoesNotExist:
             return None
 
-    def scheme_presence(self):
-        if not self.scheme:
+    def scheme_presence(self) -> None:
+        if not self._scheme:
             self.add_error('id', ObjectDoesNotExist(f'Scheme id =  {self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self):
-        if not self.access and not self.cleaned_data['current_user'].is_superuser:
+    def access_presence(self) -> None:
+        if not self._access and not self.cleaned_data['current_user'].is_superuser:
             self.add_error('current_user', PermissionDenied(f'Access to the schema id = {self.cleaned_data["id"]} '
                                                             'is not granted'))
             self.response_status = status.HTTP_403_FORBIDDEN

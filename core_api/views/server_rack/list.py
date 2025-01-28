@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
 from core_api.serializers.server_rack.list import ServerRackListSerializer
-from core_api.services.server_rack.server_rack_list import ServerRackListService
+from core_api.services.server_rack.rack_list import ServerRackListService
 from core_api.services.server_rack.create import CreateServerRackService
 from core_api.swagger_scheme.server_rack import server_rack_list, create_server_rack
 

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from core_api.views.server_rack.server_rack import ServerRackView
-from core_api.views.server_rack.server_rack_list import ServerRackListView
+from core_api.views.server_rack.list import ServerRackListView
 
 urlpatterns = [
     path('', ServerRackListView.as_view()),

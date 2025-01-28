@@ -1,7 +1,7 @@
 from django.urls import path
 
 from core_api.views.scheme.scheme import SchemeView
-from core_api.views.scheme.scheme_list import SchemeListView
+from core_api.views.scheme.list import SchemeListView
 
 urlpatterns = [
     path('', SchemeListView.as_view()),

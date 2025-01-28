@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from core_api.services.access.access_list import AccessListService
+from core_api.services.access.list import AccessListService
 from core_api.serializers.access.resource import AccessListSerializer
 from core_api.services.access.create import CreateAccessService
 from core_api.swagger_scheme.access import access_list, create_access
