@@ -3,9 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models import Room
 from core_api.serializers.room.room_list import RoomListSerializer
-from core_api.serializers.room.create import CreateRoomSerializer
 from core_api.services.room.room_list import RoomListService
 from core_api.services.room.create import CreateRoomService
 from core_api.swagger_scheme.room import room_list, create_room
@@ -15,8 +13,6 @@ from utils.pagination import CustomPagination
 
 class RoomListView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = CreateRoomSerializer
-    queryset = Room.objects.all()
 
     @swagger_auto_schema(**room_list)
     def get(self, request):

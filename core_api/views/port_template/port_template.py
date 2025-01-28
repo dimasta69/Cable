@@ -5,10 +5,8 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
-from models_app.models.port.port_template.models import PortTemplate
 from core_api.services.port_template.port_template import PortTemplateService
 from core_api.serializers.port_template.port_template_list import PortTemplateListSerializer
-from core_api.serializers.port_template.update import UpdatePortTemplateSerializer
 from core_api.services.port_template.update import UpdatePortTemplateService
 from core_api.services.port_template.connection_port_ship import ConnectionPortShipService
 from core_api.services.port_template.delete import PortTemplateDeleteService
@@ -18,9 +16,7 @@ from core_api.services.port_template.port_ship_list import PortShipListService
 
 
 class PortTemplateView(APIView):
-    serializer_class = UpdatePortTemplateSerializer
     permission_classes = [IsAuthenticated]
-    queryset = PortTemplate.objects.all()
 
     @swagger_auto_schema(**port_temple)
     def get(self, request, **kwargs):

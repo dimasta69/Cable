@@ -5,7 +5,6 @@ from drf_yasg.utils import swagger_auto_schema
 
 from core_api.services.access.access_list import AccessListService
 from core_api.serializers.access.access_list import AccessListSerializer
-from core_api.serializers.access.create import CreateAccessSerializer
 from core_api.services.access.create import CreateAccessService
 from core_api.swagger_scheme.access import access_list, create_access
 from utils.services import ServiceOutcome
@@ -13,7 +12,6 @@ from utils.services import ServiceOutcome
 
 class AccessListView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = CreateAccessSerializer
 
     @swagger_auto_schema(**access_list)
     def get(self, request):

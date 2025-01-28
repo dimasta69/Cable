@@ -39,8 +39,6 @@ class AddEquipmentUnitService(ServiceWithResult):
         if unit_equipment:
             unit_equipment.equipment = None
             unit_equipment.save()
-            unit_equipment.server_rack.check_free_power()
-            unit_equipment.server_rack.check_free_units()
 
     @property
     @lru_cache()

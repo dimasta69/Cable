@@ -7,13 +7,11 @@ from utils.services import ServiceOutcome
 from core_api.services.access.delete import DeleteAccessService
 from core_api.serializers.access.access_list import AccessListSerializer
 from core_api.swagger_scheme.access import delete_room, update_access
-from core_api.serializers.access.update import UpdateAccessSerializer
 from core_api.services.access.update import UpdateAccessService
 
 
 class AccessView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UpdateAccessSerializer
 
     @swagger_auto_schema(**update_access)
     def put(self, request, **kwargs):

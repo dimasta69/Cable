@@ -8,14 +8,12 @@ from core_api.services.server_rack.server_rack import ServerRackService
 from core_api.services.server_rack.delete import DeleteServerRackService
 from core_api.services.server_rack.update import UpdateServerRackService
 from core_api.serializers.server_rack.server_rack_list import ServerRackListSerializer
-from core_api.serializers.server_rack.update import UpdateServerRackSerializer
 from core_api.serializers.server_rack.server_rack import ServerRackSerializer
 from core_api.swagger_scheme.server_rack import server_rack, delete_server_rack, update_server_rack
 
 
 class ServerRackView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UpdateServerRackSerializer
 
     @swagger_auto_schema(**server_rack)
     def get(self, request, **kwargs):

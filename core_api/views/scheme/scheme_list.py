@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models import Scheme
 from core_api.services.scheme.scheme_list import SchemeListService
 from core_api.services.scheme.create import CreateScheme
 from core_api.serializers.scheme.scheme_list import SchemeSerializer
@@ -12,9 +11,7 @@ from utils.services import ServiceOutcome
 
 
 class SchemeListView(APIView):
-    queryset = Scheme.objects.all()
     permission_classes = [IsAuthenticated]
-    serializer_class = SchemeSerializer
 
     @swagger_auto_schema(**scheme_list)
     def get(self, request):

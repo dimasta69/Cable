@@ -1,9 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models import Manufacturer
 from core_api.serializers.manufacturer.manufacturer_list import ManufacturerListSerializer
 from core_api.services.manufacturer.manufacturer import ManufacturerService
 from core_api.services.manufacturer.delete import ManufacturerDeleteService
@@ -13,8 +11,6 @@ from utils.services import ServiceOutcome
 
 class ManufacturerView(APIView):
     permission_classes = [IsAuthenticated]
-    queryset = Manufacturer.objects.all()
-    serializer_class = ManufacturerListSerializer
 
     def get(self, request, **kwargs):
         outcome = ServiceOutcome(ManufacturerService, kwargs)

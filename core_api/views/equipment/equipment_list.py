@@ -5,8 +5,6 @@ from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 
 from core_api.services.equipment.equipments_from_map import EquipmentsFromMapListService
-from models_app.models import Equipment
-from core_api.serializers.equipment.create import CreateEquipmentSerializer
 from core_api.services.equipment.create import CreateEquipmentService
 from core_api.services.equipment.equipment_list import EquipmentListService
 from core_api.serializers.equipment.equipment_list import EquipmentListSerializer
@@ -17,8 +15,6 @@ from utils.services import ServiceOutcome
 
 class EquipmentListView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = CreateEquipmentSerializer
-    queryset = Equipment.objects.all()
 
     @swagger_auto_schema(**equipment_list)
     def get(self, request):

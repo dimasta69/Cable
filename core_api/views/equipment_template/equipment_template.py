@@ -4,8 +4,6 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
-from models_app.models.equipment.equipment_template.models import EquipmentTemplate
-from core_api.serializers.equipment_template.create_equipment_template import CreateEquipmentTemplateSerializer
 from core_api.serializers.equipment_template.equipment_template import EquipmentTemplateSerializer
 from core_api.services.equipment_template.equipment_template import EquipmentTemplateService
 from core_api.services.equipment_template.update import UpdateEquipmentTemplate
@@ -16,8 +14,6 @@ from core_api.swagger_scheme.equipment_template import (equipment_template, upda
 
 class EquipmentTemplateView(APIView):
     permission_classes = [IsAuthenticated]
-    queryset = EquipmentTemplate.objects.all()
-    serializer_class = CreateEquipmentTemplateSerializer
 
     @swagger_auto_schema(**equipment_template)
     def get(self, request, **kwargs):

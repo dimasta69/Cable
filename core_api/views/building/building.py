@@ -4,8 +4,6 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
-from models_app.models import Building
-from core_api.serializers.building.update_building import UpdateBuildingSerializer
 from core_api.serializers.building.building_list import BuildingListSerializer
 from core_api.services.building.update import UpdateBuildingService
 from core_api.services.building.delete import DeleteBuildingService
@@ -13,9 +11,7 @@ from core_api.swagger_scheme.building import update_building, delete_building
 
 
 class BuildingView(APIView):
-    queryset = Building.objects.all()
     permission_classes = [IsAuthenticated]
-    serializer_class = UpdateBuildingSerializer
 
     @swagger_auto_schema(**update_building)
     def put(self, request, **kwargs):

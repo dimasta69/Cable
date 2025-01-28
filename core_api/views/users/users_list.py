@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from utils.services import ServiceOutcome
 from core_api.serializers.users.users_list import UsersListSerializers
 from core_api.services.user.users_list import UsersListServices
-from drf_yasg.utils import swagger_auto_schema
 
 
 class UsersListView(APIView):

@@ -10,14 +10,12 @@ from core_api.serializers.equipment.equipment_list import EquipmentListSerialize
 from core_api.serializers.equipment.equipment import EquipmentSerializer
 from core_api.services.equipment.delete import DeleteEquipmentService
 from core_api.services.equipment.update import UpdateEquipmentService
-from core_api.serializers.equipment.update import UpdateEquipmentSerializer
 from core_api.services.equipment.release_equipment import ReleaseEquipmentService
 from core_api.swagger_scheme.equipment import equipment, delete_equipment, update_equipment
 
 
 class EquipmentView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = UpdateEquipmentSerializer
 
     @swagger_auto_schema(**equipment)
     def get(self, request, **kwargs):

@@ -3,9 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from models_app.models.equipment.equipment_template.models import EquipmentTemplate
 from core_api.serializers.equipment_template.equipment_template import EquipmentTemplateSerializer
-from core_api.serializers.equipment_template.create_equipment_template import CreateEquipmentTemplateSerializer
 from core_api.services.equipment_template.equipment_template_list import EquipmentTemplateListService
 from core_api.services.equipment_template.create import CreateEquipmentTemplateService
 from core_api.swagger_scheme.equipment_template import equipment_template_list, create_equipment_template
@@ -14,8 +12,6 @@ from utils.services import ServiceOutcome
 
 class EquipmentTemplateListView(APIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = CreateEquipmentTemplateSerializer
-    queryset = EquipmentTemplate.objects.all()
 
     @swagger_auto_schema(**equipment_template_list)
     def get(self, request):
