@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
-from core_api.serializers.room.room_list import RoomListSerializer
+from core_api.serializers.room.resource import RoomListSerializer
 from models_app.models import Equipment
+from typing import Dict, Union
 
 
 class EquipmentListSerializer(serializers.Serializer):
@@ -11,7 +12,7 @@ class EquipmentListSerializer(serializers.Serializer):
     room = RoomListSerializer()
 
     @classmethod
-    def get_template(cls, obj: Equipment):
+    def get_template(cls, obj: Equipment) -> Dict[str, Union[str, int, None]]:
         return {
             'manufacturer': obj.template.manufacturer.name if obj.template.manufacturer else None,
             'type': obj.template.type.name,

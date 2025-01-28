@@ -1,8 +1,10 @@
 from rest_framework import serializers
 
 from models_app.models import Port, Vlan, Line
-from core_api.serializers.port_template.port_template_list import SpeedSerializer
+from core_api.serializers.port_template.resource import SpeedSerializer
 from core_api.serializers.vlan.resource import VlanSerializer
+
+from typing import Union, Dict, List
 
 
 class LineSerializer(serializers.ModelSerializer):
@@ -31,10 +33,10 @@ class PortListSerializer(serializers.Serializer):
     back_side = serializers.IntegerField(source="back_side.id", default=None)
     line = LineSerializer()
 
-    def get_speed(self, obj: Port):
+    def get_speed(self, obj: Port) -> List[int]:
         return SpeedSerializer(obj.port_template.speed, many=True).data
 
-    def get_sfp(self, obj: Port):
+    def get_sfp(self, obj: Port) -> Dict[str, Union[str, id, list[int]]]:
         if obj.sfp:
             return {
                 'id': obj.sfp.id,
@@ -47,7 +49,7 @@ class PortListSerializer(serializers.Serializer):
         else:
             return None
 
-    def get_vlan(self, obj: Port):
+    def get_vlan(self, obj: Port) -> VlanSerializer:
         return (
             VlanSerializer(Vlan.objects.filter(device_type__model='port', device_id=obj.pk), many=True).data
         )

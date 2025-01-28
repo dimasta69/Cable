@@ -7,7 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from core_api.services.equipment.equipments_from_map import EquipmentsFromMapListService
 from core_api.services.equipment.create import CreateEquipmentService
 from core_api.services.equipment.equipment_list import EquipmentListService
-from core_api.serializers.equipment.equipment_list import EquipmentListSerializer
+from core_api.serializers.equipment.list import EquipmentListSerializer
 from core_api.swagger_scheme.equipment import create_equipment, equipment_list
 from utils.pagination import CustomPagination
 from utils.services import ServiceOutcome

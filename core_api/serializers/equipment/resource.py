@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from models_app.models import Port
+from models_app.models import Equipment
+from typing import Dict, Union
 
 
 class EquipmentSerializer(serializers.Serializer):
@@ -10,8 +11,7 @@ class EquipmentSerializer(serializers.Serializer):
     free_ports = serializers.IntegerField()
     room_id = serializers.IntegerField(required=False)
 
-    @classmethod
-    def get_template(cls, obj):
+    def get_template(self, obj: Equipment) -> Dict[str, Union[str, int]]:
         return {
             'manufacturer': obj.template.manufacturer.name,
             'type': obj.template.type.name,

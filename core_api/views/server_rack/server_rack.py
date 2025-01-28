@@ -7,8 +7,8 @@ from utils.services import ServiceOutcome
 from core_api.services.server_rack.server_rack import ServerRackService
 from core_api.services.server_rack.delete import DeleteServerRackService
 from core_api.services.server_rack.update import UpdateServerRackService
-from core_api.serializers.server_rack.server_rack_list import ServerRackListSerializer
-from core_api.serializers.server_rack.server_rack import ServerRackSerializer
+from core_api.serializers.server_rack.list import ServerRackListSerializer
+from core_api.serializers.server_rack.resource import ServerRackSerializer
 from core_api.swagger_scheme.server_rack import server_rack, delete_server_rack, update_server_rack
 
 

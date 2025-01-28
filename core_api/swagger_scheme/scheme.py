@@ -1,5 +1,5 @@
 from drf_yasg import openapi
-from core_api.serializers.scheme.scheme_list import SchemeSerializer
+from core_api.serializers.scheme.resource import SchemeSerializer
 
 scheme_list = {
     'operation_description': "Get schemes",

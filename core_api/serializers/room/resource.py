@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core_api.serializers.equipment.equipment import EquipmentSerializer
+from core_api.serializers.equipment.resource import EquipmentSerializer
 
 
 class RoomListSerializer(serializers.Serializer):

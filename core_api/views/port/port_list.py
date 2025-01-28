@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
 from core_api.services.port.port_list import PortListService
-from core_api.serializers.port.port_list import PortListSerializer
+from core_api.serializers.port.resource import PortListSerializer
 from core_api.swagger_scheme.port import port_list
 
 

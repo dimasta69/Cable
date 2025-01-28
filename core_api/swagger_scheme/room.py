@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 
-from core_api.serializers.room.room_list import RoomListSerializer
+from core_api.serializers.room.resource import RoomListSerializer
 
 room_list = {
     'operation_description': 'Get room list',

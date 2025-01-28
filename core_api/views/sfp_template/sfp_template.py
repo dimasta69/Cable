@@ -5,7 +5,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
 from core_api.services.sfp_template.delete import DeleteSfpTemplateService
-from core_api.serializers.sfp_template.sfp_template_list import SfpTemplateListSerializer
+from core_api.serializers.sfp_template.resource import SfpTemplateListSerializer
 from core_api.swagger_scheme.sfp_template import delete_sfp_template
 
 

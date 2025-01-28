@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
-from core_api.serializers.server_rack.server_rack import ServerRackSerializer
+from core_api.serializers.server_rack.resource import ServerRackSerializer
 from core_api.services.equipment.add_equipment_for_unit import AddEquipmentUnitService
 from core_api.swagger_scheme.equipment import add_equipment_for_unit
 

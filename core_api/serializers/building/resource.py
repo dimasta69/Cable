@@ -1,5 +1,8 @@
 from rest_framework import serializers
 
+from models_app.models import Building
+from typing import Set
+
 
 class BuildingListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
@@ -8,8 +11,7 @@ class BuildingListSerializer(serializers.Serializer):
     coord_x = serializers.FloatField(required=False)
     coord_y = serializers.FloatField(required=False)
 
-    @classmethod
-    def get_scheme(cls, obj):
+    def get_scheme(self, obj: Building) -> Set[str]:
         return {
             obj.scheme.id
         }

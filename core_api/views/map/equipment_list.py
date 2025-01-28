@@ -5,7 +5,7 @@ from rest_framework import status
 
 from utils.services import ServiceOutcome
 from core_api.services.map.add_equipment import AddEquipmentMapService
-from core_api.serializers.map.equipment.equipment_is_active import EquipmentIsActiveMapSerializer
+from core_api.serializers.map.equipment.resource import EquipmentIsActiveMapSerializer
 
 
 class EquipmentListView(APIView):

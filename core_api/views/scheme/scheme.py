@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from core_api.serializers.scheme.scheme_list import SchemeSerializer
+from core_api.serializers.scheme.resource import SchemeSerializer
 from core_api.services.scheme.scheme import SchemeService
 from core_api.services.scheme.delete import SchemeDeleteService
 from core_api.services.scheme.update import SchemeUpdateService

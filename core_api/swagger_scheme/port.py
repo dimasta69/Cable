@@ -1,6 +1,6 @@
 from drf_yasg import openapi
-from core_api.serializers.port.port_list import PortListSerializer
-from core_api.serializers.equipment.equipment import EquipmentSerializer
+from core_api.serializers.port.resource import PortListSerializer
+from core_api.serializers.equipment.resource import EquipmentSerializer
 
 port_list = {
     'operation_description': 'Get port list',

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
-from core_api.serializers.building.building_list import BuildingListSerializer
+from core_api.serializers.building.resource import BuildingListSerializer
 from core_api.services.building.update import UpdateBuildingService
 from core_api.services.building.delete import DeleteBuildingService
 from core_api.swagger_scheme.building import update_building, delete_building

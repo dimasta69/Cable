@@ -1,7 +1,7 @@
 from drf_yasg import openapi
 
-from core_api.serializers.equipment.equipment import EquipmentSerializer
-from core_api.serializers.server_rack.server_rack import ServerRackSerializer
+from core_api.serializers.equipment.resource import EquipmentSerializer
+from core_api.serializers.server_rack.resource import ServerRackSerializer
 
 equipment_list = {
     'operation_description': 'Get equipment template list',

@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from models_app.models.port.port_template.models import PortShip
+from models_app.models import EquipmentTemplate
+from typing import Union, Dict
 
 
 class EquipmentTemplateSerializer(serializers.Serializer):
@@ -11,18 +13,18 @@ class EquipmentTemplateSerializer(serializers.Serializer):
     power = serializers.IntegerField(required=False)
     count_port = serializers.SerializerMethodField()
 
-    def get_manufacturer(cls, obj):
+    def get_manufacturer(self, obj: EquipmentTemplate) -> Dict[str, Union[int, str]]:
         return {
             'id': obj.manufacturer.id,
             'name': obj.manufacturer.name,
         }
 
-    def get_type(self, obj):
+    def get_type(self, obj: EquipmentTemplate) -> Dict[str, Union[int, bool, str]]:
         return {
             "id": obj.type.id,
             "is_active": obj.type.is_active,
             "name": obj.type.name,
         }
 
-    def get_count_port(cls, obj):
+    def get_count_port(self, obj: EquipmentTemplate) ->  int:
         return sum(PortShip.objects.filter(equipment_template=obj).values_list('count', flat=True))

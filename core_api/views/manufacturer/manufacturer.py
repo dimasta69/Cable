@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core_api.serializers.manufacturer.manufacturer_list import ManufacturerListSerializer
+from core_api.serializers.manufacturer.resource import ManufacturerListSerializer
 from core_api.services.manufacturer.manufacturer import ManufacturerService
 from core_api.services.manufacturer.delete import ManufacturerDeleteService
 from core_api.services.manufacturer.update import ManufacturerUpdateService

@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from core_api.services.port.update import UpdatePortService
-from core_api.serializers.port.port_list import PortListSerializer
+from core_api.serializers.port.resource import PortListSerializer
 from core_api.swagger_scheme.port import update_port
 from utils.services import ServiceOutcome
 

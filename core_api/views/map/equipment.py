@@ -6,7 +6,7 @@ from rest_framework import status
 from core_api.services.map.equipment_list import EquipmentListService
 from core_api.services.map.delete import DeleteEquipmentSchemeService
 from utils.services import ServiceOutcome
-from core_api.serializers.map.equipment.equipment_is_active import EquipmentIsActiveMapSerializer
+from core_api.serializers.map.equipment.resource import EquipmentIsActiveMapSerializer
 from core_api.services.map.update_equipment import UpdateEquipmentService
 
 

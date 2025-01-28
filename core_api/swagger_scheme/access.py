@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 
-from core_api.serializers.access.access_list import AccessListSerializer
+from core_api.serializers.access.resource import AccessListSerializer
 
 access_list = {
     'operation_description': 'Get access list',

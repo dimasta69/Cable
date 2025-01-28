@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 
-from core_api.serializers.building.building_list import BuildingListSerializer
+from core_api.serializers.building.resource import BuildingListSerializer
 
 building_list = {
     'operation_description': 'Get building list',

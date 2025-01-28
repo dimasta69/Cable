@@ -1,5 +1,5 @@
 from drf_yasg import openapi
-from core_api.serializers.port_template.port_template_list import PortTemplateListSerializer
+from core_api.serializers.port_template.resource import PortTemplateListSerializer
 
 port_template_list = {
     'operation_description': 'Get port template list',

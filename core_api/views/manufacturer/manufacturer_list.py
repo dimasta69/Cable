@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 from core_api.services.manufacturer.manufacturer_list import ManufacturerListService
 from core_api.services.manufacturer.create import CreateManufactureService
-from core_api.serializers.manufacturer.manufacturer_list import ManufacturerListSerializer
+from core_api.serializers.manufacturer.resource import ManufacturerListSerializer
 
 from rest_framework.permissions import IsAuthenticated
 from utils.services import ServiceOutcome

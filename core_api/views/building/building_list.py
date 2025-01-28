@@ -4,18 +4,14 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
-from models_app.models import Building
-from core_api.serializers.building.building_list import BuildingListSerializer
+from core_api.serializers.building.resource import BuildingListSerializer
 from core_api.services.building.building_list import BuildingListService
 from core_api.services.building.create import CreateBuildingService
-from core_api.serializers.building.create import CreateBuildingSerializer
 from core_api.swagger_scheme.building import building_list, create_building
 
 
 class BuildingListView(APIView):
     permission_classes = [IsAuthenticated]
-    queryset = Building.objects.all()
-    serializer_class = CreateBuildingSerializer
 
     @swagger_auto_schema(**building_list)
     def get(self, request):

@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
-from core_api.serializers.port_template.port_template_list import PortTemplateListSerializer
+from core_api.serializers.port_template.resource import PortTemplateListSerializer
 from core_api.services.port_template.port_template_list import PortTemplateListService
 from core_api.services.port_template.create import CreatePortTemplateService
 from core_api.swagger_scheme.port_template import port_template_list, create_port_template

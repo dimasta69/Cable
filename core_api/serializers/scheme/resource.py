@@ -3,11 +3,13 @@ import json
 from rest_framework import serializers
 from models_app.models import Scheme
 
+from typing import Union, Dict
+
 
 class SchemeSerializer(serializers.ModelSerializer):
     creator = serializers.SerializerMethodField()
 
-    def get_creator(self, obj: Scheme) -> json:
+    def get_creator(self, obj: Scheme) -> Dict[str, Union[int, str, bool]]:
         return {
             'id': obj.creator.id,
             'username': obj.creator.username,

@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from utils.services import ServiceOutcome
-from core_api.serializers.type_port.type_port_list import TypePortListSerializer
+from core_api.serializers.type_port.resource import TypePortListSerializer
 from core_api.services.type_port.type_port_list import TypePortListService
 from core_api.services.type_port.create import CreateTypePort
 

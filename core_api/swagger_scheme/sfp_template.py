@@ -1,5 +1,5 @@
 from drf_yasg import openapi
-from core_api.serializers.sfp_template.sfp_template_list import SfpTemplateListSerializer
+from core_api.serializers.sfp_template.resource import SfpTemplateListSerializer
 
 sfp_template_list = {
     'operation_description': "Get sfp template list",

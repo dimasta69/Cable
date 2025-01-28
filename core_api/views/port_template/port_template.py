@@ -6,12 +6,12 @@ from drf_yasg.utils import swagger_auto_schema
 
 from utils.services import ServiceOutcome
 from core_api.services.port_template.port_template import PortTemplateService
-from core_api.serializers.port_template.port_template_list import PortTemplateListSerializer
+from core_api.serializers.port_template.resource import PortTemplateListSerializer
 from core_api.services.port_template.update import UpdatePortTemplateService
 from core_api.services.port_template.connection_port_ship import ConnectionPortShipService
 from core_api.services.port_template.delete import PortTemplateDeleteService
 from core_api.swagger_scheme.port_template import port_temple, update_port_template, delete_port_template
-from core_api.serializers.port_ship.port_ship import PortShipSerializer
+from core_api.serializers.port_ship.resource import PortShipSerializer
 from core_api.services.port_template.port_ship_list import PortShipListService
 
 

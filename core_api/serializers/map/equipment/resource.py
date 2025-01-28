@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from models_app.models import EquipmentScheme
-from core_api.serializers.equipment.equipment import EquipmentSerializer
+from core_api.serializers.equipment.resource import EquipmentSerializer
 
 
 class EquipmentIsActiveMapSerializer(serializers.ModelSerializer):
