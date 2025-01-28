@@ -11,7 +11,7 @@ class SegmentListView(APIView):
     permission_classes = [IsAuthenticated]
 
 
-    def get(self, request):
+    def get(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             SegmentListService,
             dict(request.GET.items),
@@ -22,4 +22,17 @@ class SegmentListView(APIView):
             )
         return Response(
             SegmentSerializer(outcome.result, many=True).data, status=status.HTTP_200_OK,
+        )
+
+    def post(self, request) -> Response:
+        outcome: ServiceOutcome = ServiceOutcome(
+            SegmentListService,
+            request.data,
+        )
+        if bool(outcome.errors):
+            return Response(
+                outcome.errors, status=outcome.response_status,
+            )
+        return Response(
+            SegmentSerializer(outcome.result).data, status=status.HTTP_201_CREATED,
         )
