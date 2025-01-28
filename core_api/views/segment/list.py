@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from utils.services import ServiceOutcome
 from core_api.serializers.segment.resource import SegmentSerializer
 from core_api.services.segment.list import SegmentListService
+from core_api.services.segment.create import CreateSegmentService
 
 class SegmentListView(APIView):
     permission_classes = [IsAuthenticated]
@@ -26,7 +27,7 @@ class SegmentListView(APIView):
 
     def post(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
-            SegmentListService,
+            CreateSegmentService,
             request.data,
         )
         if bool(outcome.errors):
