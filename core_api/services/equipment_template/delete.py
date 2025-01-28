@@ -7,7 +7,7 @@ from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
 
 
-class DeleteEquipmentTemplateServcie(ServiceWithResult):
+class DeleteEquipmentTemplateService(ServiceWithResult):
     id = forms.IntegerField(required=True)
 
     custom_validations = ['equipment_template_presence']
@@ -15,24 +15,22 @@ class DeleteEquipmentTemplateServcie(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.delete_equipment_template
+            self.delete_equipment_template()
             self.response_status = status.HTTP_204_NO_CONTENT
         return self
 
-    @property
-    def delete_equipment_template(self):
-        self.equipment_template.delete()
-        return None
+    def delete_equipment_template(self) -> None:
+        self._equipment_template.delete()
 
     @property
     @lru_cache()
-    def equipment_template(self):
+    def _equipment_template(self) -> EquipmentTemplate | None:
         try:
             return EquipmentTemplate.objects.get(id=self.cleaned_data['id'])
         except EquipmentTemplate.DoesNotExist:
             return None
 
-    def equipment_template_presence(self):
-        if not self.equipment_template:
+    def equipment_template_presence(self) -> None:
+        if not self._equipment_template:
             self.add_error('id', ObjectDoesNotExist(f'Equipment template id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND

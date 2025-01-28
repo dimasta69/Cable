@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from functools import lru_cache
 from rest_framework import status
 from django.db.models import Q
+from typing import List
 
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
@@ -21,12 +22,12 @@ class EquipmentTemplateListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.equipment_filter_list
+            self.result = self._equipment_filter_list
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def equipment_filter_list(self):
+    def _equipment_filter_list(self) -> List[EquipmentTemplate]:
         equipment_template_list = self._equipment_template_list
         if self.cleaned_data['filter_manufacturer_id']:
             equipment_template_list = equipment_template_list.filter(manufacturer=self._manufacturer)
@@ -42,7 +43,7 @@ class EquipmentTemplateListService(ServiceWithResult):
         return equipment_template_list
 
     @property
-    def _equipment_template_list(self):
+    def _equipment_template_list(self) -> List[EquipmentTemplate]:
         try:
             return EquipmentTemplate.objects.all().select_related('manufacturer')
         except EquipmentTemplate.DoesNotExist:

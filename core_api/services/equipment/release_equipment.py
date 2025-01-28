@@ -21,12 +21,12 @@ class ReleaseEquipmentService(ServiceWithResult):
             self.result = self._update_equipment
         return self
 
-    def _update_connection_port(self):
+    def _update_connection_port(self) -> None:
         for port in Port.objects.filter(equipment=self._equipment, line__isnull=False):
             delete_port_from_connection(port)
 
     @property
-    def _update_equipment(self):
+    def _update_equipment(self) -> Equipment:
         equipment = self._equipment
         if equipment.room:
             equipment.room = None

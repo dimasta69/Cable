@@ -16,19 +16,19 @@ class EquipmentService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.equipment
+            self.result = self._equipment
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
     @lru_cache()
-    def equipment(self):
+    def _equipment(self) -> Equipment | None:
         try:
             return Equipment.objects.get(id=self.cleaned_data['id'])
         except Equipment.DoesNotExist:
             return None
 
-    def equipment_presence(self):
-        if not self.equipment:
+    def equipment_presence(self) -> None:
+        if not self._equipment:
             self.add_error('id', ObjectDoesNotExist(f'Equipment id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND

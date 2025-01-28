@@ -9,6 +9,6 @@ class SegmentSerializer(serializers.ModelSerializer):
         model = Segment
         fields = (
             "id",
-            "name"
-            "scheme_id"
+            "name",
+            "scheme_id",
         )
