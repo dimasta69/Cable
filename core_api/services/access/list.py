@@ -84,7 +84,8 @@ class AccessListService(ServiceWithResult):
             ) if access_filter else access_list
         if self.cleaned_data['search_filter']:
             access_list = access_list.filter(
-                Q(user__username__icontains=self.cleaned_data['search_filter'])             )
+                Q(user__username__icontains=self.cleaned_data['search_filter'])
+            )
         return access_list
 
     @property
