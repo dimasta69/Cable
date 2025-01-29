@@ -6,7 +6,7 @@ from rest_framework import status
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import User, Scheme
+from models_app.models import User, Scheme, Building, Room, ServerRack
 from models_app.models import Access
 
 
@@ -55,12 +55,12 @@ class DeleteAccessService(ServiceWithResult):
                 self.response_status = status.HTTP_403_FORBIDDEN
 
     @property
-    def creator(self):
-        if getattr(self._access.object, "creator"):
+    def creator(self) -> User:
+        if isinstance(self._access.object, Scheme):
             return self._access.object.creator
-        if getattr(self._access.object, "scheme.creator"):
+        if isinstance(self._access.object, Building):
             return self._access.object.scheme.creator
-        if getattr(self._access.object, "building.scheme.creator"):
+        if isinstance(self._access.object, Room):
             return self._access.object.building.scheme.creator
-        if getattr(self._access.object, "room.building.scheme.creator"):
+        if isinstance(self._access.object, ServerRack):
             return self._access.object.room.building.scheme.creator
