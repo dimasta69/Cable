@@ -58,7 +58,6 @@ class AccessListService(ServiceWithResult):
             access_filter = _access(
                 ContentType.objects.get_for_model(Building), self._building.pk,
             )
-            breakpoint()
             access_list = access_filter.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             ) | access_list
