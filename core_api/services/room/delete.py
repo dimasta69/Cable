@@ -29,15 +29,26 @@ class DeleteRoomService(ServiceWithResult):
     @lru_cache()
     def _room(self) -> Room | None:
         try:
-            return Room.objects.get(id=self.cleaned_data['id'])
+            return Room.objects.select_related("building").get(id=self.cleaned_data['id'])
         except Room.DoesNotExist:
             return None
 
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._room.building.scheme,
-                                      role__in=['Change', 'Creator'])
+            return (Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._building.scheme.id,
+                ),
+                Q(
+                    object_type=self.building_content_type,
+                    object_id=self._building.id,
+                )
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            ))
         except Access.DoesNotExist:
             return None
 

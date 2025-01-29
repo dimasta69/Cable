@@ -1,13 +1,14 @@
 from functools import lru_cache
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
+from django.db.models import Q
 
 from models_app.models import Access, User
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Room
-from models_app.models import Building
+from models_app.models import Building, Room, Scheme
 
 
 class CreateRoomService(ServiceWithResult):
@@ -16,6 +17,9 @@ class CreateRoomService(ServiceWithResult):
     is_server_room = forms.BooleanField(required=False)
     floor = forms.IntegerField(required=True)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    building_content_type = ContentType.objects.get_for_model(Building)
 
     custom_validations = ['building_presence', 'access_presence']
 
@@ -38,15 +42,26 @@ class CreateRoomService(ServiceWithResult):
     @lru_cache()
     def _building(self) -> Building | None:
         try:
-            return Building.objects.get(id=self.cleaned_data['building_id'])
+            return Building.objects.select_related("scheme").get(id=self.cleaned_data['building_id'])
         except Building.DoesNotExist:
             return None
 
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._building.scheme,
-                                      role__in=['Change', 'Creator'])
+            return (Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._building.scheme.id,
+                ),
+                Q(
+                    object_type=self.building_content_type,
+                    object_id=self._building.id,
+                )
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            ))
         except Access.DoesNotExist:
             return None
 

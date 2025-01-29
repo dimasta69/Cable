@@ -1,5 +1,6 @@
 from functools import lru_cache
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
@@ -7,7 +8,7 @@ from rest_framework import status
 from typing import List
 
 from cabel.settings import REST_FRAMEWORK
-from models_app.models import Access, User
+from models_app.models import Access, User, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Room
@@ -23,6 +24,8 @@ class RoomListService(ServiceWithResult):
     filter_is_server_room = forms.BooleanField(required=False)
     filter_floor = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = ['building_presence', 'order_presence', 'access_presence']
 
@@ -68,14 +71,18 @@ class RoomListService(ServiceWithResult):
     @lru_cache()
     def _building(self) -> Building | None:
         try:
-            return Building.objects.get(id=self.cleaned_data['filter_building_id'])
+            return Building.objects.select_related("scheme").get(id=self.cleaned_data['filter_building_id'])
         except Building.DoesNotExist:
             return None
 
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._building.scheme)
+            return Access.objects.get(
+                user=self.cleaned_data['current_user'],
+                object_type=self.scheme_content_type,
+                object_id=self._building.scheme.pk,
+            )
         except Access.DoesNotExist:
             return None
 

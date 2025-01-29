@@ -1,12 +1,15 @@
 from functools import lru_cache
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
+from django.db.models import Q
 
-from models_app.models import Access, User
+from models_app.models import Access, User, Scheme, Building
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Equipment, Room
+
 
 class UpdateRoomService(ServiceWithResult):
     id = forms.IntegerField(required=True)
@@ -15,6 +18,9 @@ class UpdateRoomService(ServiceWithResult):
     current_user = ModelField(User)
     floor = forms.IntegerField(required=False)
     equipment_id = forms.IntegerField(required=False)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    building_content_type = ContentType.objects.get_for_model(Building)
 
     custom_validations = ['room_presence', 'access_presence', 'equipment_presence']
 
@@ -44,7 +50,7 @@ class UpdateRoomService(ServiceWithResult):
     @lru_cache()
     def _room(self) -> Room:
         try:
-            return Room.objects.get(id=self.cleaned_data['id'])
+            return Room.objects.select_related("building").get(id=self.cleaned_data['id'])
         except Room.DoesNotExist:
             return None
 
@@ -59,8 +65,19 @@ class UpdateRoomService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._room.building.scheme,
-                                      role__in=['Change', 'Creator'])
+            return (Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._room.building.scheme.id,
+                ),
+                Q(
+                    object_type=self.building_content_type,
+                    object_id=self._room.building.id,
+                )
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            ))
         except Access.DoesNotExist:
             return None
 
@@ -72,7 +89,7 @@ class UpdateRoomService(ServiceWithResult):
     def equipment_presence(self) -> None:
         if self.cleaned_data['equipment_id'] and self._equipment is None:
             self.add_error('equipment_id', ObjectDoesNotExist(f'Equipment if={self.cleaned_data["equipment_id"]}'
-                                                    ' not found'))
+                                                              ' not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
         elif self.cleaned_data['equipment_id'] and self._equipment:
             if getattr(self._equipment, "units", None) or self._equipment.room is None:
