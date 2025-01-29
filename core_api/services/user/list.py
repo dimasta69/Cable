@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from typing import List
@@ -19,6 +20,8 @@ class UsersListServices(ServiceWithResult):
     search_filter = forms.CharField(required=False)
     order_by = forms.CharField(required=False)
     scheme_id = forms.IntegerField(required=True)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = ['scheme_presence', 'order_presence']
 
@@ -58,7 +61,10 @@ class UsersListServices(ServiceWithResult):
     @property
     def _access(self) -> List[Access]:
         try:
-            return Access.objects.filter(scheme=self._scheme).values_list('user__id', flat=True)
+            return Access.objects.filter(
+                object_type=self.scheme_content_type,
+                object_id=self.scheme_id,
+            ).values_list('user__id', flat=True)
         except Access.DoesNotExist:
             return Access.objects.none()
 
