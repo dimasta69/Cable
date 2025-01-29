@@ -9,7 +9,6 @@ from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Room
 from models_app.models import ServerRack
-from models_app.models import Unit
 
 
 class CreateServerRackService(ServiceWithResult):

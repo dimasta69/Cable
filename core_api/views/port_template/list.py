@@ -1,12 +1,10 @@
 import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from drf_yasg.utils import swagger_auto_schema
 
 from core_api.serializers.port_template.resource import PortTemplateListSerializer
 from core_api.services.port_template.port_template_list import PortTemplateListService
 from core_api.services.port_template.create import CreatePortTemplateService
-from core_api.swagger_scheme.port_template import port_template_list, create_port_template
 from rest_framework.permissions import IsAuthenticated
 from utils.services import ServiceOutcome
 from utils.pagination import CustomPagination
@@ -15,7 +13,6 @@ from utils.pagination import CustomPagination
 class PortTemplateListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(**port_template_list)
     def get(self, request):
         if "filter_speed" in dict(request.GET.items()):
             filter_speed = json.loads(dict(request.GET.items())['filter_speed'])
@@ -41,7 +38,6 @@ class PortTemplateListView(APIView):
                          'results': PortTemplateListSerializer(outcome.result, many=True).data},
                         status=outcome.response_status)
 
-    @swagger_auto_schema(**create_port_template)
     def post(self, request):
         outcome = ServiceOutcome(CreatePortTemplateService, request.data)
         if bool(outcome.errors):

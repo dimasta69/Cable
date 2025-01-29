@@ -5,14 +5,12 @@ from drf_yasg.utils import swagger_auto_schema
 
 from core_api.services.port.update import UpdatePortService
 from core_api.serializers.port.resource import PortListSerializer
-from core_api.swagger_scheme.port import update_port
 from utils.services import ServiceOutcome
 
 
 class PortView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(**update_port)
     def put(self, request, **kwargs):
         outcome = ServiceOutcome(UpdatePortService, kwargs | request.data)
         if bool(outcome.errors):

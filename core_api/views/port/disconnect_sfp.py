@@ -5,14 +5,12 @@ from drf_yasg.utils import swagger_auto_schema
 
 from core_api.services.port.disconnect_sfp import DisconnectSfpService
 from core_api.serializers.port.resource import PortListSerializer
-from core_api.swagger_scheme.port import disconnect_sfp
 from utils.services import ServiceOutcome
 
 
 class DisconnectSfpView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(**disconnect_sfp)
     def put(self, request):
         outcome = ServiceOutcome(DisconnectSfpService, request.data)
         if bool(outcome.errors):

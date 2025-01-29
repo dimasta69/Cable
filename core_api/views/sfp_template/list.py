@@ -1,11 +1,9 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from drf_yasg.utils import swagger_auto_schema
 
 from core_api.serializers.sfp_template.resource import SfpTemplateListSerializer
 from core_api.services.sfp_template.list import SfpTemplateListService
-from core_api.swagger_scheme.sfp_template import sfp_template_list, create_sfp_template
 from core_api.services.sfp_template.create import CreateSfpTemplateService
 from utils.pagination import CustomPagination
 from utils.services import ServiceOutcome
@@ -14,7 +12,6 @@ from utils.services import ServiceOutcome
 class SfpTemplateListView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(**sfp_template_list)
     def get(self, request):
         outcome = ServiceOutcome(SfpTemplateListService, dict(request.GET.items()))
         if bool(outcome.errors):
@@ -25,7 +22,6 @@ class SfpTemplateListView(APIView):
                          'results': SfpTemplateListSerializer(outcome.result, many=True).data},
                         status=outcome.response_status)
 
-    @swagger_auto_schema(**create_sfp_template)
     def post(self, request):
         outcome = ServiceOutcome(CreateSfpTemplateService, request.data)
         if bool(outcome.errors):
