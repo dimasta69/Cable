@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
@@ -24,4 +25,5 @@ class Scheme(BaseModel):
 @receiver(post_delete, sender=Scheme)
 def delete_access(sender, instance, **kwargs):
     from models_app.models import Access
-    Access.objects.filter(object=instance).delete()
+    content_type = ContentType.objects.get_for_model(Scheme)
+    Access.objects.filter(object_type=content_type, object_id=instance.id).delete()
