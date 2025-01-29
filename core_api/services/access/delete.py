@@ -56,11 +56,11 @@ class DeleteAccessService(ServiceWithResult):
 
     @property
     def creator(self):
-        if self._access.object.creator:
+        if getattr(self._access.object, "creator"):
             return self._access.object.creator
-        if self._access.object.scheme.creator:
+        if getattr(self._access.object, "scheme.creator"):
             return self._access.object.scheme.creator
-        if self._access.object.building.scheme.creator:
+        if getattr(self._access.object, "building.scheme.creator"):
             return self._access.object.building.scheme.creator
-        if self._access.object.room.building.scheme.creator:
+        if getattr(self._access.object, "room.building.scheme.creator"):
             return self._access.object.room.building.scheme.creator
