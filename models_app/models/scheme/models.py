@@ -2,7 +2,6 @@ from django.db import models
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from models_app.models.base_model import BaseModel
-from models_app.models import Access
 
 
 class Scheme(BaseModel):
@@ -24,4 +23,5 @@ class Scheme(BaseModel):
 
 @receiver(post_delete, sender=Scheme)
 def delete_access(sender, instance, **kwargs):
+    from models_app.models import Access
     Access.object.delete(object=instance)
