@@ -36,7 +36,8 @@ class Access(BaseModel):
 
 @receiver(post_save, sender=Access)
 def refresh_count_plus(sender, instance, created, **kwargs):
-    if created:
+    breakpoint()
+    if created and instance.object_type:
         instance.scheme.count_user += 1
         instance.scheme.save()
 
