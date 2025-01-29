@@ -24,7 +24,7 @@ class SchemeDeleteService(ServiceWithResult):
         return self
 
     def _delete_scheme(self) -> None:
-        self.scheme.delete()
+        self._scheme.delete()
 
     @property
     @lru_cache()
