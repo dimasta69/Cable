@@ -3,6 +3,7 @@ from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 
 from models_app.models.base_model import BaseModel
 
@@ -36,13 +37,46 @@ class Access(BaseModel):
 
 @receiver(post_save, sender=Access)
 def refresh_count_plus(sender, instance, created, **kwargs):
-    if created and instance.object.__class__.__name__=="Scheme":
+    if created and instance.object.__class__.__name__ == "Scheme":
         instance.object.count_user += 1
         instance.object.save()
 
 
 @receiver(post_delete, sender=Access)
 def refresh_count_minus(sender, instance, **kwargs):
-    if instance.object.__class__.__name__=="Scheme":
+    if instance.object.__class__.__name__ == "Scheme":
         instance.object.count_user -= 1
         instance.object.save()
+
+
+@receiver(post_delete, sender=Access)
+def delete_all_access(sender, instance, **kwargs):
+    from models_app.models import Building, Room, ServerRack, SchemeMap
+    object_type = instance.object.__class__.__name__
+
+    filters = {
+        "Scheme": (
+            Q(object_type=ContentType.objects.get_for_model(Building),
+              object_id__in=Building.objects.filter(scheme_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(Room),
+              object_id__in=Room.objects.filter(building__scheme_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(ServerRack),
+              object_id__in=ServerRack.objects.filter(server_rack__room__building__scheme_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(SchemeMap),
+              object_id__in=SchemeMap.objects.filter(scheme_id=instance.object_id))
+        ),
+        "Building": (
+            Q(object_type=ContentType.objects.get_for_model(Room),
+              object_id__in=Room.objects.filter(building_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(ServerRack),
+              object_id__in=ServerRack.objects.filter(server_rack__room__building_id=instance.object_id))
+        ),
+        "Room": (
+            Q(object_type=ContentType.objects.get_for_model(ServerRack),
+              object_id__in=ServerRack.objects.filter(server_rack__room_id=instance.object_id))
+        ),
+    }
+
+    if object_type in filters:
+        access_qs = Access.objects.filter(user=instance.user).filter(filters[object_type])
+        access_qs.delete()
