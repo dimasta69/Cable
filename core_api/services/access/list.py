@@ -65,24 +65,21 @@ class AccessListService(ServiceWithResult):
             access_filter = _access(
                 ContentType.objects.get_for_model(Room), self._room.pk,
             )
-            access_list += access_filter
-            access_list.exclude(
+            access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             )
         if self.cleaned_data["filter_map_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(SchemeMap), self._map.pk,
             )
-            access_list += access_filter
-            access_list.exclude(
+            access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             )
         if self.cleaned_data["filter_server_rack_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(ServerRack), self._server_rack.pk,
             )
-            access_list += access_filter
-            access_list.exclude(
+            access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             )
         if self.cleaned_data['search_filter']:
