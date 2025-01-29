@@ -54,6 +54,7 @@ class AccessListService(ServiceWithResult):
     @property
     def _access_filter_list(self) -> List[Access]:
         access_list = self._access_scheme
+        breakpoint()
         if self.cleaned_data["filter_building_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(Building), self._building.pk,
