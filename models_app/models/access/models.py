@@ -31,7 +31,7 @@ class Access(BaseModel):
         unique_together = ('user', 'object_type', 'object_id')
 
     def __str__(self):
-        return str(self.scheme.title + " " + self.user.username + " " + self.role)
+        return str(self.object.__class__.__name__ + " " + self.user.username + " " + self.role)
 
 
 @receiver(post_save, sender=Access)
