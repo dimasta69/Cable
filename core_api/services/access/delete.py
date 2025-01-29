@@ -48,8 +48,19 @@ class DeleteAccessService(ServiceWithResult):
 
     def access_owner_or_superuser(self) -> None:
         if self._access:
-            if (self._access.object.creator != self.cleaned_data['current_user']
+            if (self.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._access.object.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
+
+    @property
+    def creator(self):
+        if self._access.object.creator:
+            return self._access.object.creator
+        if self._access.object.scheme.creator:
+            return self._access.object.scheme.creator
+        if self._access.object.building.scheme.creator:
+            return self._access.object.building.scheme.creator
+        if self._access.object.room.building.scheme.creator:
+            return self._access.object.room.building.scheme.creator
