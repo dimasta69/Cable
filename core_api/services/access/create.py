@@ -35,7 +35,7 @@ class CreateAccessService(ServiceWithResult):
             user=self._user,
             role=self.cleaned_data['role'],
             object_type=self.scheme_content_type,
-            object_id=self.cleaned_data['id'],
+            object_id=self.cleaned_data['scheme_id'],
         )
 
     @property
