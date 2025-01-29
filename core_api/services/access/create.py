@@ -3,6 +3,7 @@ from functools import lru_cache
 
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
+from django.contrib.contenttypes.models import ContentType
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
@@ -17,7 +18,9 @@ class CreateAccessService(ServiceWithResult):
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['scheme_presence', 'role_presence', 'user_presence', 'access_presence', 'access_availability']
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+
+    custom_validations = ['scheme_presence', 'role_presence', 'user_presence', 'access_owner_or_superuser']
 
     def process(self):
         self.run_custom_validations()
@@ -28,7 +31,12 @@ class CreateAccessService(ServiceWithResult):
 
     @property
     def _create_access(self) -> Access:
-        return Access.objects.create(user=self.user, role=self.cleaned_data['role'], scheme=self.scheme)
+        return Access.objects.create(
+            user=self._user,
+            role=self.cleaned_data['role'],
+            object_type=self.scheme_content_type,
+            object_id=self.cleaned_data['id'],
+        )
 
     @property
     @lru_cache()
@@ -47,18 +55,17 @@ class CreateAccessService(ServiceWithResult):
             return None
 
     @property
-    def _access(self) -> Access:
+    def _access(self) -> Access | None:
         try:
-            return Access.objects.get(scheme=self._scheme, user=self._user)
+            return Access.objects.get(object_type=self.scheme_content_type, object_id=self._scheme.pk, user=self._user)
         except Access.DoesNotExist:
             return None
 
     def scheme_presence(self) -> None:
-        if self.cleaned_data['scheme_id']:
-            if not self._scheme:
-                self.add_error('filter_scheme_id', ObjectDoesNotExist('Scheme id='
-                                                                      f'{self.cleaned_data["scheme_id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
+        if not self._scheme:
+            self.add_error('filter_scheme_id', ObjectDoesNotExist('Scheme id='
+                                                                 f'{self.cleaned_data["scheme_id"]} not found'))
+            self.response_status = status.HTTP_404_NOT_FOUND
 
     def user_presence(self) -> None:
         if not self._user:
@@ -72,16 +79,10 @@ class CreateAccessService(ServiceWithResult):
                                                                  f"{self.cleaned_data['role']} not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self) -> None:
+    def access_owner_or_superuser(self) -> None:
         if self._scheme and self._user:
             if (self._scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._scheme.id} is not granted'))
+                                                                f'{self._scheme.pk} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
-
-    def access_availability(self) -> None:
-        if self._scheme and self._user:
-            if self._access:
-                self.add_error('current_user', PermissionDenied('The role already exists'))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY

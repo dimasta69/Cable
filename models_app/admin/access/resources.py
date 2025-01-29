@@ -4,10 +4,9 @@ from models_app.models import Access
 
 
 class AccessAdmin(admin.ModelAdmin):
-    list_display = ('id', 'scheme', 'user', 'role', 'created_at')
-    list_display_links = ('id', 'scheme', 'user', 'role',)
-    search_fields = ('scheme__title', 'user__username')
-    list_filter = ('scheme__title',)
+    list_display = ('id', 'object_type', 'object_id', 'object', 'user', 'role', 'created_at')
+    list_display_links = ('id',  'user', 'role',)
+    search_fields = ('user__username',)
     ordering = ('-created_at', )
 
 

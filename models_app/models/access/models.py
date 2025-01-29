@@ -1,6 +1,8 @@
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 
 from models_app.models.base_model import BaseModel
 
@@ -10,10 +12,11 @@ class Access(BaseModel):
         "User", related_name='access', related_query_name='access', on_delete=models.CASCADE, null=False,
         blank=False,
     )
-    scheme = models.ForeignKey(
-        "Scheme", related_name='access', related_query_name='access', on_delete=models.CASCADE, null=False,
-        blank=False,
+    object_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, null=True, blank=True,
     )
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    object = GenericForeignKey("object_type", "object_id")
     ROLE_CHOICES = [
         ('Read', 'Чтение'),
         ('Change', 'Изменение'),
@@ -25,6 +28,7 @@ class Access(BaseModel):
         db_table = 'access'
         verbose_name = 'Доступ'
         verbose_name_plural = 'Доступы'
+        unique_together = ('user', 'object_type', 'object_id')
 
     def __str__(self):
         return str(self.scheme.title + " " + self.user.username + " " + self.role)

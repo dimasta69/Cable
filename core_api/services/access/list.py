@@ -1,5 +1,6 @@
 from functools import lru_cache
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
 from rest_framework import status
@@ -18,7 +19,9 @@ class AccessListService(ServiceWithResult):
     filter_role = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
 
-    custom_validations = ['scheme_presence', 'access_presence', 'filter_role_presence']
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+
+    custom_validations = ['scheme_presence', 'access_owner_or_superuser', 'filter_role_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -36,8 +39,8 @@ class AccessListService(ServiceWithResult):
         if self.cleaned_data['search_filter']:
             access_list = access_list.filter(
                 Q(user__username__icontains=self.cleaned_data['search_filter']) |
-                Q(scheme__title__icontains=self.cleaned_data['search_filter']) |
-                Q(scheme__creator__username__icontains=self.cleaned_data['search_filter']) |
+                Q(object__title__icontains=self.cleaned_data['search_filter']) |
+                Q(object__creator__username__icontains=self.cleaned_data['search_filter']) |
                 Q(role__icontains=self.cleaned_data['search_filter'])
             )
         return access_list
@@ -46,7 +49,7 @@ class AccessListService(ServiceWithResult):
     @lru_cache()
     def _access(self) -> List[Access]:
         try:
-            return Access.objects.filter(scheme=self._scheme)
+            return Access.objects.filter(object_type=self.scheme_content_type, object_id=self._scheme.pk)
         except Access.DoesNotExist:
             return Access.objects.none()
 
@@ -73,10 +76,10 @@ class AccessListService(ServiceWithResult):
                                                                       'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self) -> None:
+    def access_owner_or_superuser(self) -> None:
         if self._scheme and self._access:
             if (self._scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._scheme.id} is not granted'))
+                                                                f'{self._scheme.pk} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

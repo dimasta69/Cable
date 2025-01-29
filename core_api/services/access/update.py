@@ -15,7 +15,7 @@ class UpdateAccessService(ServiceWithResult):
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['access_creator', 'access_presence', 'access_role', 'role_presence']
+    custom_validations = ['access_creator', 'access_presence', 'access_owner_or_superuser', 'role_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -26,7 +26,7 @@ class UpdateAccessService(ServiceWithResult):
 
     @property
     def _update_access(self) -> Access:
-        access = self.access
+        access = self._access
         if self.cleaned_data['role']:
             access.role = self.cleaned_data['role']
         access.save()
@@ -51,7 +51,7 @@ class UpdateAccessService(ServiceWithResult):
             self.add_error('id', ObjectDoesNotExist(f'Access id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_role(self) -> None:
+    def access_owner_or_superuser(self) -> None:
         if self._access:
             if (self._access.scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):

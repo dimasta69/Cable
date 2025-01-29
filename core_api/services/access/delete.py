@@ -6,7 +6,7 @@ from rest_framework import status
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import User
+from models_app.models import User, Scheme
 from models_app.models import Access
 
 
@@ -14,7 +14,7 @@ class DeleteAccessService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['access_creator', 'access_presence', 'access_role']
+    custom_validations = ['access_creator', 'access_presence', 'access_owner_or_superuser']
 
     def process(self):
         self.run_custom_validations()
@@ -24,7 +24,7 @@ class DeleteAccessService(ServiceWithResult):
         return self
 
     def _delete_access(self) -> None:
-        self.access.delete()
+        self._access.delete()
         return None
 
     @property
@@ -46,7 +46,7 @@ class DeleteAccessService(ServiceWithResult):
             self.add_error('id', ObjectDoesNotExist(f'Access id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_role(self) -> None:
+    def access_owner_or_superuser(self) -> None:
         if self._access:
             if (self._access.scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
