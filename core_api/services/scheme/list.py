@@ -44,6 +44,6 @@ class SchemeListService(ServiceWithResult):
             return Access.objects.filter(
                 user=self.cleaned_data['current_user'],
                 object_type=self.scheme_content_type,
-            ).select_related('object').values_list('scheme', flat=True)
+            ).select_related('object').values_list('object', flat=True)
         except Access.DoesNotExist:
             return []
