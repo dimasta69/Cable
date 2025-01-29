@@ -60,6 +60,7 @@ class AccessListService(ServiceWithResult):
             )
             access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+            )
         if self.cleaned_data["filter_room_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(Room), self._room.pk,
@@ -179,7 +180,7 @@ class AccessListService(ServiceWithResult):
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_owner_or_superuser(self) -> None:
-        if self._scheme and self._access_scheme:
+        if self._scheme and self._list_acc:
             if (self._scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
