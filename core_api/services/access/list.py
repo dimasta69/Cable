@@ -94,7 +94,7 @@ class AccessListService(ServiceWithResult):
         try:
             return Access.objects.filter(
                 object_type=self.scheme_content_type,
-                object_id=self._scheme.pk,
+                object_id=self._scheme.id,
                 role="Read",
             )
         except Access.DoesNotExist:
