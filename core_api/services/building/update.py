@@ -1,13 +1,15 @@
 from functools import lru_cache
 from typing import List
 from django import forms
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
 
 from models_app.models import User, Access
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Building
+from models_app.models import Building, Scheme
 
 
 class UpdateBuildingService(ServiceWithResult):
@@ -16,6 +18,9 @@ class UpdateBuildingService(ServiceWithResult):
     name = forms.CharField(required=False)
     coord_x = forms.FloatField(required=False)
     coord_y = forms.FloatField(required=False)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    building_content_type = ContentType.objects.get_for_model(Building)
 
     custom_validations = ['building_presence', 'number_presence', 'access_presence']
 
@@ -46,7 +51,7 @@ class UpdateBuildingService(ServiceWithResult):
     @lru_cache()
     def _building(self):
         try:
-            return Building.objects.get(id=self.cleaned_data['id'])
+            return Building.objects.select_related("scheme").get(id=self.cleaned_data['id'])
         except Building.DoesNotExist:
             return None
 
@@ -60,8 +65,13 @@ class UpdateBuildingService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._building.scheme,
-                                      role__in=['Change', 'Creator'])
+            return Access.objects.filter(
+                Q(object_type=self.scheme_content_type, object_id=self._building.scheme.id) |
+                Q(object_type=self.building_content_type, object_id=self._building.id)
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            )
         except Access.DoesNotExist:
             return None
 
