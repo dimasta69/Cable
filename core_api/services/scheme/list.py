@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from service_objects.fields import ModelField
 from rest_framework import status
 from django import forms
@@ -13,6 +14,8 @@ from utils.services import ServiceWithResult
 class SchemeListService(ServiceWithResult):
     current_user = ModelField(User)
     search_filter = forms.CharField(required=False)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     def process(self):
         if self.is_valid():
@@ -38,7 +41,9 @@ class SchemeListService(ServiceWithResult):
     @property
     def scheme_to_access(self) -> Access | list[None]:
         try:
-            return (Access.objects.filter(user=self.cleaned_data['current_user'])
-                    .select_related('scheme').values_list('scheme', flat=True))
+            return Access.objects.filter(
+                user=self.cleaned_data['current_user'],
+                object=self.scheme_content_type,
+            ).select_related('object').values_list('scheme', flat=True)
         except Access.DoesNotExist:
             return []

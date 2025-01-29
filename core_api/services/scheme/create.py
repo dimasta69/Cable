@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import status
 from service_objects.fields import ModelField
 from django.db import transaction
@@ -12,6 +13,8 @@ from models_app.models import Access
 class CreateScheme(ServiceWithResult):
     current_user = ModelField(User)
     title = forms.CharField(max_length=100, required=True)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     def process(self):
         if self.is_valid():
@@ -31,6 +34,9 @@ class CreateScheme(ServiceWithResult):
         return scheme
 
     def _create_access(self, scheme: Scheme) -> None:
-        Access.objects.create(user=self.cleaned_data['current_user'],
-                              scheme=scheme,
-                              role='Creator')
+        Access.objects.create(
+            user=self.cleaned_data['current_user'],
+            role='Creator',
+            object_type=self.scheme_content_type,
+            object_id=scheme.pk,
+        )

@@ -54,13 +54,6 @@ class CreateAccessService(ServiceWithResult):
         except User.DoesNotExist:
             return None
 
-    @property
-    def _access(self) -> Access | None:
-        try:
-            return Access.objects.get(object_type=self.scheme_content_type, object_id=self._scheme.pk, user=self._user)
-        except Access.DoesNotExist:
-            return None
-
     def scheme_presence(self) -> None:
         if not self._scheme:
             self.add_error('filter_scheme_id', ObjectDoesNotExist('Scheme id='

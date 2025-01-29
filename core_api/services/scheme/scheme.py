@@ -34,7 +34,7 @@ class SchemeService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._scheme)
+            return Access.objects.get(user=self.cleaned_data['current_user'], object=self._scheme)
         except Access.DoesNotExist:
             return None
 
