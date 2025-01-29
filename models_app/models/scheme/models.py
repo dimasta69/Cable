@@ -24,4 +24,4 @@ class Scheme(BaseModel):
 @receiver(post_delete, sender=Scheme)
 def delete_access(sender, instance, **kwargs):
     from models_app.models import Access
-    Access.objects.delete(object=instance)
+    Access.objects.filter(object=instance).delete()
