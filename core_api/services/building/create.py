@@ -2,6 +2,7 @@ from functools import lru_cache
 from typing import List
 
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
 
@@ -16,6 +17,8 @@ class CreateBuildingService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     name = forms.CharField(required=True)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = ['scheme_presence', 'number_presence', 'access_presence']
 
@@ -49,8 +52,12 @@ class CreateBuildingService(ServiceWithResult):
     @property
     def _access(self):
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._scheme,
-                                      role__in=['Change', 'Creator'])
+            return Access.objects.get(
+                user=self.cleaned_data['current_user'],
+                object_type=self.scheme_content_type,
+                object_id=self._scheme.pk,
+                role__in=['Change', 'Creator']
+            )
         except Access.DoesNotExist:
             return None
 

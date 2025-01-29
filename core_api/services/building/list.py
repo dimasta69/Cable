@@ -50,7 +50,7 @@ class BuildingListService(ServiceWithResult):
             return Access.objects.get(
                 user=self.cleaned_data['current_user'],
                 object_type=self.scheme_content_type,
-                object_id=self._scheme.pk
+                object_id=self._scheme.pk,
             )
         except Access.DoesNotExist:
             return None
