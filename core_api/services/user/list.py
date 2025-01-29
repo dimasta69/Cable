@@ -63,7 +63,7 @@ class UsersListServices(ServiceWithResult):
         try:
             return Access.objects.filter(
                 object_type=self.scheme_content_type,
-                object_id=self.scheme_id,
+                object_id=self._scheme.pk,
             ).values_list('user__id', flat=True)
         except Access.DoesNotExist:
             return Access.objects.none()
