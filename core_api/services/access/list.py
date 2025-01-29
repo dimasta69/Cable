@@ -58,9 +58,9 @@ class AccessListService(ServiceWithResult):
             access_filter = _access(
                 ContentType.objects.get_for_model(Building), self._building.pk,
             )
-            access_list = access_filter | access_list.exclude(
+            access_list = access_filter | (access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
-            ) if len(access_list) > 0 else access_list
+            ) if len(access_list) > 0 else access_list)
         if self.cleaned_data["filter_room_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(Room), self._room.pk,
