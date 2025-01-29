@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from utils.services import ServiceOutcome
-from core_api.services.access.delete import DeleteAccessService
+from core_api.services.access.delete_to_scheme import DeleteAccessService
 from core_api.serializers.access.resource import AccessListSerializer
 from core_api.services.access.update import UpdateAccessService
 
