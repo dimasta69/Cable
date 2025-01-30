@@ -1,13 +1,17 @@
+from typing import List
+
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.forms import SimpleArrayField
 from django.db import transaction
+from django.db.models import Q
 from rest_framework import status
 from functools import lru_cache
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Port, User
+from models_app.models import Port, User, Access, Scheme, Building, Room, Equipment
 from core_api.utils.connection import connection
 
 
@@ -16,7 +20,12 @@ class ConnectionPortService(ServiceWithResult):
     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
     current_user = ModelField(User)
 
-    custom_validations = ['ports_presence', 'free_ports', 'backside_and_active_equipment']
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    building_content_type = ContentType.objects.get_for_model(Building)
+    room_content_type = ContentType.objects.get_for_model(Room)
+    equipment_content_type = ContentType.objects.get_for_model(Equipment)
+
+    custom_validations = ['ports_presence', 'free_ports', 'backside_and_active_equipment', 'access_port_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -64,6 +73,61 @@ class ConnectionPortService(ServiceWithResult):
             )
         except Port.DoesNotExist:
             return None
+
+    def _access_port(self, port_id: int) -> List[Access] | None:
+        try:
+            access_list = Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._ports[port_id].equipment.scheme.id,
+                ) |
+                Q(
+                    object_type=self.equipment_content_type,
+                    object_id=self._ports[port_id].equipment.id
+                )
+            )
+            if self._ports[port_id].equipment.room:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=self.building_content_type,
+                                object_id=self._ports[port_id].equipment.room.building.id
+                            ) |
+                            Q(
+                                object_type=self.room_content_type,
+                                object_id=self._ports[port_id].equipment.room.id
+                            ),
+                        ) | access_list
+                ).filter(
+                    user=self.cleaned_data['current_user'],
+                    role__in=['Change', 'Creator'],
+                )
+            if self._ports[port_id].equipment.units:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=self.building_content_type,
+                                object_id=self._ports[port_id].equipment.units[0].server_rack.building.id
+                            ) |
+                            Q(
+                                object_type=self.room_content_type,
+                                object_id=self._ports[port_id].equipment.units[0].server_rack.id
+                            ),
+                        ) | access_list
+                ).filter(
+                    user=self.cleaned_data['current_user'],
+                    role__in=['Change', 'Creator'],
+                )
+        except Access.DoesNotExist:
+            return None
+
+    @property
+    def _access_port_first(self) -> List[Access] | None:
+        return self._access_port(0)
+
+    @property
+    def _access_port_second(self) -> List[Access] | None:
+        return self._access_port(1)
 
     def ports_presence(self) -> None:
         if self._ports is None or len(self._ports) != 2:
@@ -115,3 +179,22 @@ class ConnectionPortService(ServiceWithResult):
 
                 if not set(speed_1) & set(speed_2):
                     self.add_error("front_port_list", ValidationError("У портов не совпадают скорости"))
+
+    def access_port_presence(self) -> None:
+        if self._ports and len(self._ports) == 2:
+            if not self._access_port_first:
+                self.add_error(
+                    "front_port_list",
+                    PermissionError(
+                        f"Access with port id={self._ports[0].id} not found"
+                    )
+                )
+                self.response_status = status.HTTP_403_FORBIDDEN
+            if not self._access_port_second:
+                self.add_error(
+                    "front_port_list",
+                    PermissionError(
+                        f"Access with port id={self._ports[1].id} not found"
+                    )
+                )
+                self.response_status = status.HTTP_403_FORBIDDEN
