@@ -1,15 +1,15 @@
 from django import forms
 from functools import lru_cache
+
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
 from typing import List
 
-from models_app.models import User, Access
+from models_app.models import User, Access, Room, ServerRack, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Room
-from models_app.models import ServerRack
 
 
 class ServerRackListService(ServiceWithResult):
@@ -17,6 +17,8 @@ class ServerRackListService(ServiceWithResult):
     order_by = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = ['room_presence', 'order_presence', 'access_presence']
 
@@ -54,7 +56,11 @@ class ServerRackListService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._room.building.scheme)
+            return Access.objects.get(
+                user=self.cleaned_data['current_user'],
+                object_type=self.scheme_content_type,
+                object_id=self._room.building.scheme.pk,
+            )
         except Access.DoesNotExist:
             return None
 

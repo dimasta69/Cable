@@ -83,3 +83,33 @@ class ConnectionPortService(ServiceWithResult):
                     self.add_error('back_port_list', ValidationError('It is not possible to'
                                                                      ' connect to active equipment at "back_side"')
                                    )
+
+    def speed_match(self) -> None:
+        if self._ports and len(self._ports) == 2:
+            if self._ports[0].equipment.template.type.is_active and self._ports[1].equipment.template.type.is_active:
+                try:
+                    if not self._ports[0].port_template.modular:
+                        speed_1 = self._ports[0].port_template.speed.values("value")
+                    else:
+                        if hasattr(self._ports, 'sfp'):
+                            speed_1 = self._ports.sfp.speed.values("value")
+                        else:
+                            raise AttributeError(f"В порту id={self._ports[0].id} отсутсвует sfp")
+                except AttributeError as e:
+                    self.add_error("front_port_list", e)
+                    return None
+
+                try:
+                    if not self._ports[1].port_template.modular:
+                        speed_2 = self._ports[1].port_template.speed.values("value")
+                    else:
+                        if hasattr(self._ports, 'sfp'):
+                            speed_2 = self._ports.sfp.speed.values("value")
+                        else:
+                            raise AttributeError(f"В порту id={self._ports[1].id} отсутсвует sfp")
+                except AttributeError as e:
+                    self.add_error("front_port_list", e)
+                    return None
+
+                if not set(speed_1) & set(speed_2):
+                    self.add_error("front_port_list", ValidationError("У портов не совпадают скорости"))
