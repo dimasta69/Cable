@@ -1,18 +1,27 @@
 from functools import lru_cache
 
 from django import forms
+from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
 
-from models_app.models import Equipment, Room
+from models_app.models import Equipment, Room, Access, Scheme, Building, User
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
 class AddEquipmentFromRoomService(ServiceWithResult):
     room_id = forms.IntegerField(required=True)
     equipment_id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
-    custom_validations = ["equipment_presence", "room_presence", "equipment_room_null"]
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    building_content_type = ContentType.objects.get_for_model(Building)
+    room_content_type = ContentType.objects.get_for_model(Room)
+
+    custom_validations = ["equipment_presence", "room_presence", "equipment_room_null", "access_presence"]
 
     def process(self):
         self.run_custom_validations()
@@ -43,6 +52,29 @@ class AddEquipmentFromRoomService(ServiceWithResult):
         except Room.DoesNotExist:
             return None
 
+    @property
+    def _access(self) -> Access | None:
+        try:
+            return (Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._room.building.id,
+                ),
+                Q(
+                    object_type=self.building_content_type,
+                    object_id=self._room.building.scheme.id,
+                ),
+                Q(
+                    object_type=self.room_content_type,
+                    object_id=self._room.id,
+                ),
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            ))
+        except Access.DoesNotExist:
+            return None
+
     def equipment_presence(self) -> None:
         if not self._equipment:
             self.add_error('id', ObjectDoesNotExist(f"Equipment id ={self.cleaned_data['equipment_id']} not found"))
@@ -58,3 +90,10 @@ class AddEquipmentFromRoomService(ServiceWithResult):
             self.add_error('id', ObjectDoesNotExist(f"Equipment id ={self.cleaned_data['equipment_id']} "
                                                     "already standing in the room"))
             self.response_status = status.HTTP_400_BAD_REQUEST
+
+    def access_presence(self) -> None:
+        if self._room:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
+                self.add_error('current_user', PermissionDenied('Access to the schema id = '
+                                                                f'{self._room.building.scheme.id} is not granted'))
+                self.response_status = status.HTTP_403_FORBIDDEN

@@ -1,14 +1,15 @@
 from django import forms
+from django.db.models import Q
 from functools import lru_cache
 from typing import List
 
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from rest_framework import status
 
-from models_app.models import Access, User
+from models_app.models import Access, User, Unit, ServerRack, Equipment, Scheme, Building, Room
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField, ModelField
-from models_app.models import Unit, ServerRack, Equipment
 
 
 class AddEquipmentUnitService(ServiceWithResult):
@@ -16,8 +17,14 @@ class AddEquipmentUnitService(ServiceWithResult):
     unit_list_id = ListIntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['unit_list_presence', 'equipment_presence', 'count_unit_presence', 'power_presence',
-                          'access_presence']
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    building_content_type = ContentType.objects.get_for_model(Building)
+    room_content_type = ContentType.objects.get_for_model(Room)
+    server_rack_content_type = ContentType.objects.get_for_model(Room)
+
+    custom_validations = [
+        'unit_list_presence', 'equipment_presence', 'count_unit_presence', 'power_presence', 'access_presence'
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -69,9 +76,27 @@ class AddEquipmentUnitService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'],
-                                      scheme=self._unit_list_int[0]._server_rack._room.building.scheme,
-                                      role__in=['Change', 'Creator'])
+            return (Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._unit_list[0].server_rack.room.building.scheme.id,
+                ),
+                Q(
+                    object_type=self.building_content_type,
+                    object_id=self._unit_list[0].server_rack.room.building.id,
+                ),
+                Q(
+                    object_type=self.room_content_type,
+                    object_id=self._unit_list[0].server_rack.room.id,
+                ),
+                Q(
+                    object_type=self.server_rack_content_type,
+                    object_id=self._unit_list[0].server_rack.id,
+                ),
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            ))
         except Access.DoesNotExist:
             return None
 
@@ -103,6 +128,6 @@ class AddEquipmentUnitService(ServiceWithResult):
         if self._unit_list_int and self._equipment:
             if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                        f'{self._unit_list_int[0]._server_rack._room.building.scheme.id} '
+                                                                f'{self._unit_list_int[0]._server_rack._room.building.scheme.id} '
                                                                 'is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

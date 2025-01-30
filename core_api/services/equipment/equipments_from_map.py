@@ -1,17 +1,19 @@
 from functools import lru_cache
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 from rest_framework import status
 from typing import List
 
+from rest_framework.exceptions import PermissionDenied
+
 from cabel.settings import REST_FRAMEWORK
 from utils.services import ServiceWithResult
-from models_app.models import Scheme, Room, EquipmentTemplateType, EquipmentScheme
-from models_app.models import Equipment
-from models_app.models import Manufacturer
-from models_app.models import ServerRack
+from models_app.models import (
+    Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, Access
+)
 
 
 class EquipmentsFromMapListService(ServiceWithResult):
@@ -26,8 +28,17 @@ class EquipmentsFromMapListService(ServiceWithResult):
     filter_server_rack_id = forms.IntegerField(required=False)
     map_id = forms.IntegerField(required=False)
 
-    custom_validations = ['order_presence', 'manufacturer_presence', 'server_rack_presence',
-                          'scheme_presence', 'room_presence', 'type_presence']
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+
+    custom_validations = [
+        'order_presence',
+        'manufacturer_presence',
+        'server_rack_presence',
+        'scheme_presence',
+        'room_presence',
+        'type_presence',
+        'access_presence',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -40,11 +51,11 @@ class EquipmentsFromMapListService(ServiceWithResult):
     def _equipment_pagination(self) -> Paginator:
         try:
             return (Paginator(self._equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                    REST_FRAMEWORK['PAGE_SIZE'])).
+                                                                     REST_FRAMEWORK['PAGE_SIZE'])).
                     page(self.cleaned_data['page'] or 1))
         except EmptyPage:
             return (Paginator(self._equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
-                                                                    REST_FRAMEWORK['PAGE_SIZE'])).page(1))
+                                                                     REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def _equipment_filter_list(self) -> List[Equipment]:
@@ -127,6 +138,18 @@ class EquipmentsFromMapListService(ServiceWithResult):
         except EquipmentTemplateType.DoesNotExist:
             return None
 
+    @property
+    def _access(self) -> Access | None:
+        try:
+            return Access.objects.filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+                object_type=self.scheme_content_type,
+                object_id=self._scheme.id,
+            )
+        except Access.DoesNotExist:
+            return None
+
     def order_presence(self) -> None:
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['template__power', '-template__power', 'template__number_of_units',
@@ -169,3 +192,10 @@ class EquipmentsFromMapListService(ServiceWithResult):
                                                              f'{self.cleaned_data["filter_type_id"]} '
                                                              f'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
+
+    def access_presence(self) -> None:
+        if self._scheme:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
+                self.add_error('current_user', PermissionDenied('Access to the schema id = '
+                                                                f'{self._scheme.id} is not granted'))
+                self.response_status = status.HTTP_403_FORBIDDEN

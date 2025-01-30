@@ -12,7 +12,7 @@ class AddEquipmentRoomView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        outcome = ServiceOutcome(AddEquipmentFromRoomService, request.data)
+        outcome = ServiceOutcome(AddEquipmentFromRoomService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentListSerializer(outcome.result).data, status=status.HTTP_200_OK)

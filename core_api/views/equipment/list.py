@@ -2,7 +2,6 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from drf_yasg.utils import swagger_auto_schema
 
 from core_api.services.equipment.equipments_from_map import EquipmentsFromMapListService
 from core_api.services.equipment.create import CreateEquipmentService
@@ -26,7 +25,7 @@ class EquipmentListView(APIView):
                         status=outcome.response_status)
 
     def post(self, request):
-        outcome = ServiceOutcome(CreateEquipmentService, request.data)
+        outcome = ServiceOutcome(CreateEquipmentService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentListSerializer(outcome.result).data, status=status.HTTP_201_CREATED)

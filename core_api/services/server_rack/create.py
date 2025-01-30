@@ -58,11 +58,11 @@ class CreateServerRackService(ServiceWithResult):
             return (Access.objects.filter(
                 Q(
                     object_type=self.scheme_content_type,
-                    object_id=self._room.building.id,
+                    object_id=self._room.building.scheme.id,
                 ),
                 Q(
                     object_type=self.building_content_type,
-                    object_id=self._room.building.scheme.id,
+                    object_id=self._room.building.id,
                 ),
                 Q(
                     object_type=self.room_content_type,
