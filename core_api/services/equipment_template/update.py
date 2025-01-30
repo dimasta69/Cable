@@ -4,9 +4,12 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import status
 from typing import List
 
+from rest_framework.exceptions import PermissionDenied
+
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
-from models_app.models import Manufacturer
+from models_app.models import Manufacturer, User
 
 
 class UpdateEquipmentTemplate(ServiceWithResult):
@@ -16,8 +19,11 @@ class UpdateEquipmentTemplate(ServiceWithResult):
     model = forms.CharField(required=False)
     number_of_units = forms.CharField(required=False)
     power = forms.CharField(required=False)
+    current_user = ModelField(User)
 
-    custom_validations = ['equipment_template_presence', 'manufacturer_presence', 'type_presence', 'model_presence']
+    custom_validations = [
+        'equipment_template_presence', 'manufacturer_presence', 'type_presence', 'model_presence', 'is_superuser',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -82,3 +88,12 @@ class UpdateEquipmentTemplate(ServiceWithResult):
                 self.add_error('model', ValidationError(f'Field with model={self.cleaned_data["model"]}'
                                                         ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )

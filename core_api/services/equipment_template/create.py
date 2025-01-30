@@ -1,11 +1,12 @@
 from django import forms
 from rest_framework import status
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
 from functools import lru_cache
 
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
-from models_app.models import Manufacturer, EquipmentTemplateType
+from models_app.models import Manufacturer, EquipmentTemplateType, User
 
 
 class CreateEquipmentTemplateService(ServiceWithResult):
@@ -14,8 +15,9 @@ class CreateEquipmentTemplateService(ServiceWithResult):
     model = forms.CharField(required=True)
     number_of_units = forms.IntegerField(required=False)
     power = forms.IntegerField(required=False)
+    current_user = ModelField(User)
 
-    custom_validations = ['type_presence', 'manufacturer_presence']
+    custom_validations = ['type_presence', 'manufacturer_presence', 'is_superuser']
 
     def process(self):
         self.run_custom_validations()
@@ -65,3 +67,12 @@ class CreateEquipmentTemplateService(ServiceWithResult):
                                                                      f'{self.cleaned_data["manufacturer_id"]} not '
                                                                      'found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )

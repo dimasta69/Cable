@@ -29,7 +29,7 @@ class EquipmentTemplateListView(APIView):
         return Response(EquipmentTemplateSerializer(outcome.result, many=True).data, status=outcome.response_status)
 
     def post(self, request):
-        outcome = ServiceOutcome(CreateEquipmentTemplateService, request.data)
+        outcome = ServiceOutcome(CreateEquipmentTemplateService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentTemplateSerializer(outcome.result).data, status=outcome.response_status)

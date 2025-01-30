@@ -12,13 +12,13 @@ class EquipmentTemplateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(UpdateEquipmentTemplate, kwargs | request.data)
+        outcome = ServiceOutcome(UpdateEquipmentTemplate, kwargs | request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentTemplateSerializer(outcome.result).data, status=outcome.response_status)
 
     def delete(self, request, **kwargs):
-        outcome = ServiceOutcome(DeleteEquipmentTemplateService, kwargs)
+        outcome = ServiceOutcome(DeleteEquipmentTemplateService, kwargs | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentTemplateSerializer(outcome.result).data, status=outcome.response_status)
