@@ -8,14 +8,14 @@ from core_api.serializers.segment.resource import SegmentSerializer
 from core_api.services.segment.list import SegmentListService
 from core_api.services.segment.create import CreateSegmentService
 
+
 class SegmentListView(APIView):
     permission_classes = [IsAuthenticated]
-
 
     def get(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             SegmentListService,
-            dict(request.GET.items()),
+            dict(request.GET.items()) | {"current_user": request.user}
         )
         if bool(outcome.errors):
             return Response(
@@ -28,7 +28,7 @@ class SegmentListView(APIView):
     def post(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             CreateSegmentService,
-            request.data,
+            request.data | {"current_user": request.user},
         )
         if bool(outcome.errors):
             return Response(
