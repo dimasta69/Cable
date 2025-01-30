@@ -24,7 +24,7 @@ class ManufacturerListView(APIView):
                         status=outcome.response_status)
 
     def post(self, request):
-        outcome = ServiceOutcome(CreateManufactureService, request.data)
+        outcome = ServiceOutcome(CreateManufactureService, request.data | {"current_user": request.data})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ManufacturerListSerializer(outcome.result).data, status=outcome.response_status)

@@ -12,13 +12,13 @@ class ManufacturerView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, **kwargs):
-        outcome = ServiceOutcome(ManufacturerDeleteService, kwargs)
+        outcome = ServiceOutcome(ManufacturerDeleteService, kwargs | request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ManufacturerListSerializer(outcome.result).data, status=outcome.response_status)
 
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(ManufacturerUpdateService, kwargs | request.data)
+        outcome = ServiceOutcome(ManufacturerUpdateService, kwargs | request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(ManufacturerListSerializer(outcome.result).data, status=outcome.response_status)
