@@ -18,7 +18,6 @@ class EquipmentListService(ServiceWithResult):
     current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    map_content_type = ContentType.objects.get_for_model(SchemeMap)
 
     custom_validations = ['map_presence', 'access_presence']
 

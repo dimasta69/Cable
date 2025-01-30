@@ -59,15 +59,15 @@ class CreateEquipmentService(ServiceWithResult):
                 Q(
                     object_type=self.scheme_content_type,
                     object_id=self._scheme.id,
-                ),
+                )|
                 Q(
                     object_type=self.building_content_type,
                     object_id__in=self._scheme.buildings.values("id")
-                ),
+                )|
                 Q(
                     object_type=self.room_content_type,
                     object_id=self._scheme.buildings.rooms.values("id"),
-                ),
+                )|
                 Q(
                     object_type=self.server_rack_content_type,
                     object_id=self._scheme.buildings.rooms.server_racks.values("id"),

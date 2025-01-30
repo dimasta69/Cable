@@ -80,15 +80,15 @@ class AddEquipmentUnitService(ServiceWithResult):
                 Q(
                     object_type=self.scheme_content_type,
                     object_id=self._unit_list[0].server_rack.room.building.scheme.id,
-                ),
+                )|
                 Q(
                     object_type=self.building_content_type,
                     object_id=self._unit_list[0].server_rack.room.building.id,
-                ),
+                )|
                 Q(
                     object_type=self.room_content_type,
                     object_id=self._unit_list[0].server_rack.room.id,
-                ),
+                )|
                 Q(
                     object_type=self.server_rack_content_type,
                     object_id=self._unit_list[0].server_rack.id,

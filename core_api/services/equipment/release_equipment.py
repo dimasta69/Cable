@@ -76,15 +76,15 @@ class ReleaseEquipmentService(ServiceWithResult):
                 Q(
                     object_type=self.scheme_content_type,
                     object_id=self._equipment.scheme.id,
-                ),
+                )|
                 Q(
                     object_type=self.building_content_type,
                     object_id__in=self._equipment.scheme.buildings.values("id")
-                ),
+                )|
                 Q(
                     object_type=self.room_content_type,
                     object_id__in=self._equipment.scheme.buildings.rooms.values("id"),
-                ),
+                )|
                 Q(
                     object_type=self.server_rack_content_type,
                     object_id__in=self._equipment.scheme.buildings.rooms.server_racks.values("id"),

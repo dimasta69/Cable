@@ -1,9 +1,11 @@
 from functools import lru_cache
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db.models import Q
 from rest_framework import status
 
-from models_app.models import User, Access
+from models_app.models import User, Access, Scheme, Building
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Room
@@ -14,6 +16,9 @@ class DeleteRoomService(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = ['room_presence', 'access_presence']
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    building_content_type = ContentType.objects.get_for_model(Building)
 
     def process(self):
         self.run_custom_validations()
@@ -39,11 +44,11 @@ class DeleteRoomService(ServiceWithResult):
             return (Access.objects.filter(
                 Q(
                     object_type=self.scheme_content_type,
-                    object_id=self._building.scheme.id,
-                ),
+                    object_id=self._room.building.scheme.id,
+                )|
                 Q(
                     object_type=self.building_content_type,
-                    object_id=self._building.id,
+                    object_id=self._room.building.id,
                 )
             ).filter(
                 user=self.cleaned_data['current_user'],

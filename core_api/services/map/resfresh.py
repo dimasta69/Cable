@@ -57,7 +57,7 @@ class RefreshEquipmentMapService(ServiceWithResult):
                 Q(
                     object_type=self.map_content_type,
                     object_id=self._map.pk,
-                ),
+                )|
                 Q(
                     object_type=self.scheme_content_type,
                     object_id=self._map.scheme.pk,
