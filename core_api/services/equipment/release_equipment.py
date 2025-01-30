@@ -8,12 +8,14 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 
 from core_api.utils.connection import delete_port_from_connection
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Equipment, Unit, Port, Scheme, Building, Room, ServerRack, Access
+from models_app.models import Equipment, Unit, Port, Scheme, Building, Room, ServerRack, Access, User
 
 
 class ReleaseEquipmentService(ServiceWithResult):
     id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
     building_content_type = ContentType.objects.get_for_model(Building)

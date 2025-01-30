@@ -7,13 +7,14 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
 
 from utils.services import ServiceWithResult
-from utils.fields import JsonIpField
-from models_app.models import Equipment, Access, Scheme, Building, Room, ServerRack
+from utils.fields import JsonIpField, ModelField
+from models_app.models import Equipment, Access, Scheme, Building, Room, ServerRack, User
 
 
 class UpdateEquipmentService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     vlan_ip = JsonIpField(required=False)
+    current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
     building_content_type = ContentType.objects.get_for_model(Building)

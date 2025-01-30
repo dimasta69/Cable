@@ -15,7 +15,9 @@ class EquipmentListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        outcome = ServiceOutcome(EquipmentListService, dict(request.GET.items()))
+        outcome = ServiceOutcome(
+            EquipmentListService, dict(request.GET.items()), {"current_user": request.user}
+        )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({'pagination': CustomPagination(outcome.result,
@@ -33,7 +35,9 @@ class EquipmentListView(APIView):
 
 class EquipmentsFromMapListView(APIView):
     def get(self, request):
-        outcome = ServiceOutcome(EquipmentsFromMapListService, dict(request.GET.items()))
+        outcome = ServiceOutcome(
+            EquipmentsFromMapListService, dict(request.GET.items()) | {"current_user": request.user},
+        )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({'pagination': CustomPagination(outcome.result,

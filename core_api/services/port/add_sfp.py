@@ -59,12 +59,13 @@ class AddSfpService(ServiceWithResult):
     @property
     def _port_list(self):
         try:
-            return Port.objects.filter(equipment=self._port.equipment).select_related('equipment',
-                                                                                     'port_template__equipment_tmp',
-                                                                                     'connection_pigtail',
-                                                                                     'sfp__manufacturer',
-                                                                                     'sfp__type_port',
-                                                                                     )
+            return Port.objects.filter(equipment=self._port.equipment).select_related(
+                'equipment',
+                'port_template__equipment_tmp',
+                'connection_pigtail',
+                'sfp__manufacturer',
+                'sfp__type_port',
+            )
         except Port.DoesNotExist:
             return Port.objects.none()
 

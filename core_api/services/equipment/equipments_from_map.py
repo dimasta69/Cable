@@ -10,9 +10,10 @@ from typing import List
 from rest_framework.exceptions import PermissionDenied
 
 from cabel.settings import REST_FRAMEWORK
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import (
-    Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, Access
+    Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, Access, User
 )
 
 
@@ -27,6 +28,7 @@ class EquipmentsFromMapListService(ServiceWithResult):
     filter_room_id = forms.IntegerField(required=False)
     filter_server_rack_id = forms.IntegerField(required=False)
     map_id = forms.IntegerField(required=False)
+    current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
 

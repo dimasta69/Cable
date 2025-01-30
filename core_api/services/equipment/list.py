@@ -8,8 +8,9 @@ from rest_framework import status
 from typing import List
 
 from cabel.settings import REST_FRAMEWORK
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Scheme, Room, EquipmentTemplateType, Access, Equipment, Manufacturer, ServerRack
+from models_app.models import Scheme, Room, EquipmentTemplateType, Access, Equipment, Manufacturer, ServerRack, User
 
 
 class EquipmentListService(ServiceWithResult):
@@ -22,6 +23,7 @@ class EquipmentListService(ServiceWithResult):
     filter_scheme_id = forms.IntegerField(required=True)
     filter_room_id = forms.IntegerField(required=False)
     filter_server_rack_id = forms.IntegerField(required=False)
+    current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
