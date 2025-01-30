@@ -1,7 +1,7 @@
 from django import forms
 from rest_framework import status
 from functools import lru_cache
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 
 from utils.errors import ValidationError
 from utils.fields import ListIntegerField
@@ -16,7 +16,9 @@ class ConnectionPortShipService(ServiceWithResult):
     unit = ListIntegerField()
     lines = forms.IntegerField(required=True)
 
-    custom_validations = ['lines_presence', 'count_unit', 'unit_max', 'port_presence', 'equipment_presence']
+    custom_validations = [
+        'lines_presence', 'count_unit', 'unit_max', 'port_presence', 'equipment_presence', 'is_superuser',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -78,3 +80,12 @@ class ConnectionPortShipService(ServiceWithResult):
             self.add_error('equipment_template_id', ObjectDoesNotExist("Equipment template with id="
                                                                        f"{self.cleaned_data['equipment_template_id']}"
                                                                        " not found"))
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )

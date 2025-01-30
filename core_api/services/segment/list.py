@@ -8,6 +8,7 @@ from rest_framework.exceptions import NotFound
 from utils.services import ServiceWithResult
 from models_app.models import Segment, Scheme
 
+
 class SegmentListService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
 
@@ -37,7 +38,7 @@ class SegmentListService(ServiceWithResult):
     def scheme_presence(self) -> None:
         if not self._scheme:
             self.add_error(
-                    "scheme_id",
+                "scheme_id",
                 NotFound(
                     f"Scheme id={self.cleaned_data['scheme_id']} not found"
                 )

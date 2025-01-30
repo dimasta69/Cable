@@ -1,5 +1,5 @@
 from django import forms
-from django.core.exceptions import ValidationError, ObjectDoesNotExist
+from django.core.exceptions import ValidationError, ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
 from functools import lru_cache
 
@@ -17,8 +17,14 @@ class CreatePortTemplateService(ServiceWithResult):
     speed_list_id = ListIntegerField(required=False)
     line_type_list_id = ListIntegerField(required=False)
 
-    custom_validations = ['name_presence', 'type_port_presence', 'type_and_modular_presence',
-                          'speed_presence', 'line_presence', ]
+    custom_validations = [
+        'name_presence',
+        'type_port_presence',
+        'type_and_modular_presence',
+        'speed_presence',
+        'line_presence',
+        'is_superuser',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -106,3 +112,12 @@ class CreatePortTemplateService(ServiceWithResult):
         if len(self.cleaned_data['line_type_list_id']) != len(self._line_type):
             self.add_error('speed_list_id', ObjectDoesNotExist(f"Speed id={self.cleaned_data['speed_list_id']} "
                                                                "not found"))
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )
