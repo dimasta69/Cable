@@ -1,4 +1,6 @@
 from django import forms
+from django.db.models import Q
+from django.contrib.contenttypes.models import ContentType
 from rest_framework.exceptions import PermissionDenied, NotFound
 from rest_framework import status
 from functools import lru_cache
@@ -6,7 +8,7 @@ from functools import lru_cache
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from core_api.utils.refresh_connection import refresh_connection_is_active
-from models_app.models import User, Access, SchemeMap, Equipment, EquipmentScheme
+from models_app.models import User, Access, SchemeMap, Equipment, EquipmentScheme, Scheme
 
 
 class AddEquipmentMapService(ServiceWithResult):
@@ -15,6 +17,9 @@ class AddEquipmentMapService(ServiceWithResult):
     current_user = ModelField(User)
     coord_x = forms.IntegerField(required=True)
     coord_y = forms.IntegerField(required=True)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    map_content_type = ContentType.objects.get_for_model(SchemeMap)
 
     custom_validations = ['equipment_presence', 'map_presence', 'access_presence']
 
@@ -54,10 +59,21 @@ class AddEquipmentMapService(ServiceWithResult):
             return None
 
     @property
-    def _access(self) -> Access | None:
+    def _access(self):
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._map.scheme,
-                                      role__in=['Change', 'Creator'])
+            return Access.objects.filter(
+                Q(
+                    object_type=self.map_content_type,
+                    object_id=self._map.pk,
+                ),
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._map.scheme.pk,
+                ),
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator']
+            )
         except Access.DoesNotExist:
             return None
 

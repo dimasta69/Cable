@@ -1,17 +1,22 @@
 from django import forms
 from functools import lru_cache
 
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import User, EquipmentScheme, Access
+from models_app.models import User, EquipmentScheme, Access, Scheme, SchemeMap
 
 
 class DeleteEquipmentSchemeService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    map_content_type = ContentType.objects.get_for_model(SchemeMap)
 
     custom_validations = ['access_presence', 'equipment_presence']
 
@@ -29,17 +34,26 @@ class DeleteEquipmentSchemeService(ServiceWithResult):
     @lru_cache()
     def _equipment(self) -> EquipmentScheme | None:
         try:
-            return EquipmentScheme.objects.get(id=self.cleaned_data['id'])
+            return EquipmentScheme.objects.select_related("schemes", "schemes__scheme").get(id=self.cleaned_data['id'])
         except EquipmentScheme.DoesNotExsist:
             return None
 
     @property
-    def _access(self) -> Access | None:
+    def _access(self):
         try:
-            return Access.objects.get(
+            return Access.objects.filter(
+                Q(
+                    object_type=self.map_content_type,
+                    object_id=self._equipment.schemes.id,
+                ),
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._equipment.schemes.scheme.id,
+                ),
+            ).filter(
                 user=self.cleaned_data['current_user'],
-                scheme=self._equipment.schemes.scheme if self._equipment else None,
-                role__in=['Change', 'Creator'])
+                role__in=['Change', 'Creator']
+            )
         except Access.DoesNotExist:
             return None
 

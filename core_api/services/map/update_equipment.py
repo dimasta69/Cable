@@ -1,12 +1,13 @@
 from django import forms
 from functools import lru_cache
 
+from django.contrib.contenttypes.models import ContentType
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework import status
 
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
-from models_app.models import EquipmentScheme, User, Access
+from models_app.models import EquipmentScheme, User, Access, Scheme, SchemeMap
 
 
 class UpdateEquipmentService(ServiceWithResult):
@@ -14,6 +15,9 @@ class UpdateEquipmentService(ServiceWithResult):
     coord_x = forms.IntegerField(required=False)
     coord_y = forms.IntegerField(required=False)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    map_content_type = ContentType.objects.get_for_model(SchemeMap)
 
     custom_validations = ['equipment_presence', 'access_presence']
 
@@ -37,17 +41,26 @@ class UpdateEquipmentService(ServiceWithResult):
     @lru_cache()
     def _equipment(self) -> EquipmentScheme | None:
         try:
-            return EquipmentScheme.objects.select_related('schemes__scheme').get(id=self.cleaned_data['id'])
+            return EquipmentScheme.objects.select_related('schemes__scheme', 'schemes').get(id=self.cleaned_data['id'])
         except EquipmentScheme.DoesNotExist:
             return None
 
     @property
-    def _access(self) -> Access | None:
+    def _access(self):
         try:
-            return Access.objects.get(
+            return Access.objects.filter(
+                Q(
+                    object_type=self.map_content_type,
+                    object_id=self._equipment.schemes.pk,
+                ),
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._equipment.schemes.scheme.pk,
+                ),
+            ).filter(
                 user=self.cleaned_data['current_user'],
-                scheme=self._equipment.schemes.scheme if self._equipment else None,
-                role__in=['Change', 'Creator'])
+                role__in=['Change', 'Creator']
+            )
         except Access.DoesNotExist:
             return None
 

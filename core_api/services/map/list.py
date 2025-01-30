@@ -1,5 +1,8 @@
 from django import forms
 from functools import lru_cache
+
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, NotFound
 from typing import List
@@ -13,6 +16,8 @@ class MapListService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     search_filter = forms.CharField(required=False)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = ['scheme_presence', 'access_presence']
 
@@ -47,7 +52,14 @@ class MapListService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._scheme)
+            return Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._scheme.pk,
+                ),
+            ).filter(
+                user=self.cleaned_data['current_user'],
+            )
         except Access.DoesNotExist:
             return None
 

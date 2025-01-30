@@ -2,17 +2,23 @@ from django import forms
 from functools import lru_cache
 
 from typing import List
+
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import EquipmentScheme, SchemeMap, Access, User
+from models_app.models import EquipmentScheme, SchemeMap, Access, User, Scheme
 
 
 class EquipmentListService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    map_content_type = ContentType.objects.get_for_model(SchemeMap)
 
     custom_validations = ['map_presence', 'access_presence']
 
@@ -38,9 +44,16 @@ class EquipmentListService(ServiceWithResult):
             return None
 
     @property
-    def _access(self) -> Access | None:
+    def _access(self):
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._map.scheme)
+            return Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._map.scheme.pk,
+                ),
+            ).filter(
+                user=self.cleaned_data['current_user'],
+            )
         except Access.DoesNotExist:
             return None
 

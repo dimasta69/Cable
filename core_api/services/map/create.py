@@ -1,5 +1,7 @@
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from functools import lru_cache
@@ -13,6 +15,8 @@ class CreateMapService(ServiceWithResult):
     name = forms.CharField(required=True)
     scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = ['access_presence', 'scheme_presence']
 
@@ -38,10 +42,17 @@ class CreateMapService(ServiceWithResult):
             return None
 
     @property
-    def _access(self) -> Access | None:
+    def _access(self):
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._scheme,
-                                      role__in=['Change', 'Creator'])
+            return Access.objects.filter(
+                Q(
+                    object_type=self.scheme_content_type,
+                    object_id=self._scheme.pk,
+                ),
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator']
+            )
         except Access.DoesNotExist:
             return None
 
