@@ -12,7 +12,7 @@ class ConnectionView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        outcome = ServiceOutcome(ConnectionPortService, request.data)
+        outcome = ServiceOutcome(ConnectionPortService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({}, status=status.HTTP_200_OK)
@@ -22,7 +22,7 @@ class DisconnectionView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        outcome = ServiceOutcome(DisconnectPortService, request.data)
+        outcome = ServiceOutcome(DisconnectPortService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({}, status=status.HTTP_200_OK)

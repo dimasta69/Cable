@@ -4,8 +4,9 @@ from django.core.validators import RegexValidator
 from rest_framework import status
 from functools import lru_cache
 
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Port
+from models_app.models import Port, User
 
 
 class UpdatePortService(ServiceWithResult):
@@ -28,6 +29,7 @@ class UpdatePortService(ServiceWithResult):
 
     custom_validations = ['port_presence', 'port_connection_presence', 'vlan_presence', 'line_presence', 'port_modular',
                           'port_connection_modular']
+    current_user = ModelField(User)
 
     def process(self):
         self.run_custom_validations()

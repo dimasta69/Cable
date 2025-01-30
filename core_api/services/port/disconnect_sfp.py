@@ -4,14 +4,15 @@ from functools import lru_cache
 from django import forms
 
 from utils.services import ServiceWithResult
-from utils.fields import ListIntegerField
-from models_app.models import Port
+from utils.fields import ListIntegerField, ModelField
+from models_app.models import Port, User
 from models_app.models import Equipment
 
 
 class DisconnectSfpService(ServiceWithResult):
     port_list = ListIntegerField(required=True)
     equipment_id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
     custom_validations = ['port_presence', 'port_already', 'equipment_presence']
 

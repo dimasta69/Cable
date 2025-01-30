@@ -12,7 +12,7 @@ class DisconnectSfpView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        outcome = ServiceOutcome(DisconnectSfpService, request.data)
+        outcome = ServiceOutcome(DisconnectSfpService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortListSerializer(outcome.result, many=True).data, status=outcome.response_status)

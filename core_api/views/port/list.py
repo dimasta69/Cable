@@ -12,7 +12,7 @@ class PortListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, **kwargs):
-        outcome = ServiceOutcome(PortListService, dict(request.GET.items()))
+        outcome = ServiceOutcome(PortListService, dict(request.GET.items()) | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortListSerializer(outcome.result, many=True).data, status=outcome.response_status)

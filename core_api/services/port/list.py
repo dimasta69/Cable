@@ -2,8 +2,9 @@ from django import forms
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Port
+from models_app.models import Port, User
 from models_app.models import Equipment
 
 
@@ -11,6 +12,7 @@ class PortListService(ServiceWithResult):
     filter_equipment = forms.IntegerField(required=True)
     filter_vlan = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
+    current_user = ModelField(User)
 
     custom_validations = ['order_presence', 'equipment_presence']
 

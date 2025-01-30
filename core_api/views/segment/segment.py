@@ -13,7 +13,7 @@ class SegmentView(APIView):
     def patch(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             UpdateSegmentService,
-            request.data,
+            request.data | {"current_user": request.user},
         )
         if bool(outcome.errors):
             return Response(

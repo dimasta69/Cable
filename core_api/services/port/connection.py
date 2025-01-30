@@ -5,14 +5,16 @@ from django.db import transaction
 from rest_framework import status
 from functools import lru_cache
 
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Port
+from models_app.models import Port, User
 from core_api.utils.connection import connection
 
 
 class ConnectionPortService(ServiceWithResult):
     front_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
+    current_user = ModelField(User)
 
     custom_validations = ['ports_presence', 'free_ports', 'backside_and_active_equipment']
 
