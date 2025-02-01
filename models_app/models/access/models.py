@@ -74,7 +74,7 @@ def delete_all_access(sender, instance, **kwargs):
               object_id__in=ServerRack.objects.filter(room__building_id=instance.object_id)) |
             Q(object_type=ContentType.objects.get_for_model(Equipment),
               object_id__in=Equipment.objects.filter(
-                  unit__first__server_rack__room__building__id=instance.object_id
+                  unit__server_rack__room__building__id=instance.object_id
               ))
         ),
         "Room": (
@@ -82,7 +82,7 @@ def delete_all_access(sender, instance, **kwargs):
               object_id__in=ServerRack.objects.filter(room_id=instance.object_id)) |
             Q(object_type=ContentType.objects.get_for_model(Equipment),
               object_id__in=Equipment.objects.filter(
-                  unit__first__server_rack__room__id=instance.object_id
+                  unit__server_rack__room__id=instance.object_id
               ))
         ),
     }
