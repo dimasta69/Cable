@@ -15,7 +15,7 @@ class CreateSfpTemplateService(ServiceWithResult):
     manufacturer_id = forms.IntegerField(required=True)
     name = forms.CharField(required=False)
     type_port_id = forms.IntegerField(required=False)
-    line_type_id = forms.CharField(required=True)
+    line_type_id = ListIntegerField()
     speeds_id = ListIntegerField()
     current_user = ModelField(User)
 
