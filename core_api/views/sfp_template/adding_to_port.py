@@ -11,7 +11,7 @@ class AddingToPortSfpTemplateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, **kwargs):
-        outcome = ServiceOutcome(AddToPortSfpService, request.data | kwargs)
+        outcome = ServiceOutcome(AddToPortSfpService, request.data | kwargs | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentSerializer(outcome.result).data, status=outcome.response_status)

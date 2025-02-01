@@ -23,7 +23,7 @@ class SfpTemplateListView(APIView):
                         status=outcome.response_status)
 
     def post(self, request):
-        outcome = ServiceOutcome(CreateSfpTemplateService, request.data)
+        outcome = ServiceOutcome(CreateSfpTemplateService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(SfpTemplateListSerializer(outcome.result).data, status=outcome.response_status)
