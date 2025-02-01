@@ -16,7 +16,7 @@ class EquipmentListView(APIView):
 
     def get(self, request):
         outcome = ServiceOutcome(
-            EquipmentListService, dict(request.GET.items()), {"current_user": request.user}
+            EquipmentListService, dict(request.GET.items()) | {"current_user": request.user}
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
