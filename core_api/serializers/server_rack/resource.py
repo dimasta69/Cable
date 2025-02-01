@@ -2,11 +2,13 @@ from rest_framework import serializers
 
 from models_app.models import Unit
 
+
 class EquipmentSerializer(serializers.Serializer):
     id = serializers.IntegerField()
-    manufacturer = serializers.CharField(source="manufacturer.name")
+    manufacturer = serializers.CharField(source="template.manufacturer.name", default=None)
     type = serializers.CharField(source="template.type")
     model = serializers.CharField(source="template.model")
+
 
 class UnitSerializer(serializers.ModelSerializer):
     equipment = EquipmentSerializer(allow_null=True)
