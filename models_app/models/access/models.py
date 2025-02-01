@@ -51,7 +51,7 @@ def refresh_count_minus(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=Access)
 def delete_all_access(sender, instance, **kwargs):
-    from models_app.models import Building, Room, ServerRack, SchemeMap
+    from models_app.models import Building, Room, ServerRack, SchemeMap, Equipment
     object_type = instance.object.__class__.__name__
 
     filters = {
@@ -63,17 +63,27 @@ def delete_all_access(sender, instance, **kwargs):
             Q(object_type=ContentType.objects.get_for_model(ServerRack),
               object_id__in=ServerRack.objects.filter(room__building__scheme_id=instance.object_id)) |
             Q(object_type=ContentType.objects.get_for_model(SchemeMap),
-              object_id__in=SchemeMap.objects.filter(scheme_id=instance.object_id))
+              object_id__in=SchemeMap.objects.filter(scheme_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(Equipment),
+              object_id__in=SchemeMap.objects.filter(equipment__scheme_id=instance.object_id))
         ),
         "Building": (
             Q(object_type=ContentType.objects.get_for_model(Room),
               object_id__in=Room.objects.filter(building_id=instance.object_id)) |
             Q(object_type=ContentType.objects.get_for_model(ServerRack),
-              object_id__in=ServerRack.objects.filter(room__building_id=instance.object_id))
+              object_id__in=ServerRack.objects.filter(room__building_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(Equipment),
+              object_id__in=SchemeMap.objects.filter(
+                  equipment__units__first__server_rack__room__building__id=instance.object_id
+              ))
         ),
         "Room": (
             Q(object_type=ContentType.objects.get_for_model(ServerRack),
-              object_id__in=ServerRack.objects.filter(room_id=instance.object_id))
+              object_id__in=ServerRack.objects.filter(room_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(Equipment),
+              object_id__in=SchemeMap.objects.filter(
+                  equipment__units__first__server_rack__room__id=instance.object_id
+              ))
         ),
     }
 
