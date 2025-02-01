@@ -16,7 +16,7 @@ class EquipmentView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, **kwargs):
-        outcome = ServiceOutcome(EquipmentService, kwargs)
+        outcome = ServiceOutcome(EquipmentService, kwargs | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(EquipmentListSerializer(outcome.result).data, status=outcome.response_status)

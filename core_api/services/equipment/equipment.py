@@ -6,12 +6,14 @@ from functools import lru_cache
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Equipment, Access, Scheme
+from models_app.models import Equipment, Access, Scheme, User
 
 
 class EquipmentService(ServiceWithResult):
     id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
