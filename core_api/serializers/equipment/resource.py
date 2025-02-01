@@ -13,7 +13,7 @@ class EquipmentSerializer(serializers.Serializer):
 
     def get_template(self, obj: Equipment) -> Dict[str, Union[str, int]]:
         return {
-            'manufacturer': obj.template.manufacturer.name,
+            'manufacturer': obj.template.manufacturer.name if obj.template.manufacturer else None,
             'type': obj.template.type.name,
             'model': obj.template.model,
             'number_of_units': obj.template.number_of_units,
