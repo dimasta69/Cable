@@ -46,11 +46,11 @@ class DeleteServerRackService(ServiceWithResult):
                 Q(
                     object_type=self.scheme_content_type,
                     object_id=self._server_rack.room.building.id,
-                ),
+                )|
                 Q(
                     object_type=self.building_content_type,
                     object_id=self._server_rack.room.building.scheme.id,
-                ),
+                )|
                 Q(
                     object_type=self.room_content_type,
                     object_id=self._server_rack.room.id,

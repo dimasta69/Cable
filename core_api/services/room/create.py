@@ -53,7 +53,7 @@ class CreateRoomService(ServiceWithResult):
                 Q(
                     object_type=self.scheme_content_type,
                     object_id=self._building.scheme.id,
-                ),
+                )|
                 Q(
                     object_type=self.building_content_type,
                     object_id=self._building.id,

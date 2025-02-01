@@ -2,6 +2,7 @@ from django import forms
 from functools import lru_cache
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import Q
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework import status
 
@@ -52,7 +53,7 @@ class UpdateEquipmentService(ServiceWithResult):
                 Q(
                     object_type=self.map_content_type,
                     object_id=self._equipment.schemes.pk,
-                ),
+                )|
                 Q(
                     object_type=self.scheme_content_type,
                     object_id=self._equipment.schemes.scheme.pk,
