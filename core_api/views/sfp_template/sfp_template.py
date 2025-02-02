@@ -11,7 +11,7 @@ class SfpTemplateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def delete(self, request, **kwargs):
-        outcome = ServiceOutcome(DeleteSfpTemplateService, kwargs)
+        outcome = ServiceOutcome(DeleteSfpTemplateService, kwargs | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(SfpTemplateListSerializer(outcome.result).data, status=outcome.response_status)
