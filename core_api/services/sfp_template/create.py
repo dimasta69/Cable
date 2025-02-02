@@ -58,11 +58,11 @@ class CreateSfpTemplateService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def _line_type(self) -> LineType | None:
+    def _line_type(self) -> List[LineType]:
         try:
-            return LineType.objects.get(id=self.cleaned_data['line_type_id'])
+            return LineType.objects.filter(id__in=self.cleaned_data['line_type_id'])
         except LineType.DoesNotExist:
-            return None
+            return LineType.objects.none()
 
     @property
     @lru_cache()
@@ -73,7 +73,7 @@ class CreateSfpTemplateService(ServiceWithResult):
             return Speed.objects.none()
 
     def line_type_presence(self) -> None:
-        if self.cleaned_data['line_type_id'] and self._line_type:
+        if self.cleaned_data['line_type_id'] and len(self._line_type) != len(self.cleaned_data['line_type_id']):
             self.add_error(
                 "line_type_id",
                 ObjectDoesNotExist(

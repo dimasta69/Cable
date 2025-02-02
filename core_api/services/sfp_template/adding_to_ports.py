@@ -23,7 +23,9 @@ class AddToPortSfpService(ServiceWithResult):
     room_content_type = ContentType.objects.get_for_model(Room)
     equipment_content_type = ContentType.objects.get_for_model(Equipment)
 
-    custom_validations = ['sfp_template_presence', 'speed_control', 'check_ports', 'access_port_presence']
+    custom_validations = [
+        'sfp_template_presence', 'speed_control', 'check_ports', 'access_port_presence', 'line_type_control',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -144,6 +146,15 @@ class AddToPortSfpService(ServiceWithResult):
                             f"Sfp with={self._sfp_template.id} не совпадают скорости с портом port_id={port.id}"
                         )
                     )
+
+    def line_type_control(self):
+        if not set(self._port_list.values("port_template__line_type")).issubset(set(self._sfp_template.line_type)):
+            self.add_error(
+                "id",
+                ValidationError(
+                    "The given ports do not correspond to sfp in line_type",
+                )
+            )
 
     def access_port_presence(self) -> None:
         if self._port_list:
