@@ -39,7 +39,6 @@ class EquipmentService(ServiceWithResult):
         try:
             return Access.objects.filter(
                 user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator'],
                 object_type=self.scheme_content_type,
                 object_id=self._equipment.scheme.id,
             )
