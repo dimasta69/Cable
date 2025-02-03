@@ -50,5 +50,5 @@ class PortListSerializer(serializers.Serializer):
             return None
 
     def get_vlan(self, obj: Port) -> VlanSerializer:
-        return VlanDeviceSerializer(VlanDevice.objects.filter(object=obj), many=True).data
+        return VlanDeviceSerializer(VlanDevice.objects.filter(object_id=obj.id, object_type="port"), many=True).data
 

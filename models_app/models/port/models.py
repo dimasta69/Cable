@@ -1,7 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 from models_app.models.base_model import BaseModel
-from django.db.models.signals import post_save, pre_delete
+from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
 from core_api.utils.connection import delete_port_from_connection
 
@@ -64,3 +64,9 @@ def check_count_ports_from_template(sender, instance, created, **kwargs):
 def delete_connection(sender, instance, **kwargs):
     if instance.line:
         delete_port_from_connection(instance)
+
+
+@receiver(post_delete, sender=Port)
+def delete_device_vlan(sender, instance, **kwargs):
+    from models_app.models import VlanDevice
+    VlanDevice.objects.filter(object_id=instance.id, object_type="port").delete()

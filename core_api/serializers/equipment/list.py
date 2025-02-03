@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from core_api.serializers.room.resource import RoomListSerializer
-from models_app.models import Equipment, VlanDevice
+from models_app.models import Equipment, VlanDevice, Room
 from typing import Dict, Union
 
 
@@ -17,11 +16,22 @@ class VlanDeviceSerializer(serializers.ModelSerializer):
         )
 
 
+class RoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room,
+        fields = (
+            "id",
+            "number",
+            "is_server_room",
+            "floor",
+        )
+
+
 class EquipmentListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     template = serializers.SerializerMethodField()
     free_ports = serializers.IntegerField()
-    room = RoomListSerializer()
+    room = RoomSerializer()
     vlan = serializers.SerializerMethodField()
 
     def get_template(cls, obj: Equipment) -> Dict[str, Union[str, int, None]]:
@@ -35,4 +45,6 @@ class EquipmentListSerializer(serializers.Serializer):
         }
 
     def get_vlan(self, obj: Equipment) -> VlanDeviceSerializer:
-        return VlanDeviceSerializer(VlanDevice.objects.filter(object=obj), many=True).data
+        return VlanDeviceSerializer(
+            VlanDevice.objects.filter(object_id=obj.id, object_type="equipment"), many=True
+        ).data

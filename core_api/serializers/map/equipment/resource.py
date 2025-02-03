@@ -1,12 +1,11 @@
 from rest_framework import serializers
 
 from models_app.models import EquipmentScheme
-from core_api.serializers.equipment.resource import EquipmentSerializer
+from core_api.serializers.equipment.list import EquipmentListSerializer
 
 
 class EquipmentIsActiveMapSerializer(serializers.ModelSerializer):
-    equipment = EquipmentSerializer()
-
+    equipment = EquipmentListSerializer()
 
     class Meta:
         model = EquipmentScheme

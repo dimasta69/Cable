@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
 from models_app.models.base_model import BaseModel
@@ -35,7 +35,7 @@ class Equipment(BaseModel):
     def __str__(self):
         return str(
             str(self.id) + " " + self.template.manufacturer.name + ' ' + self.template.model) if self.template.manufacturer and self.template.model else (
-                    str(self.pk) + " " + str(self.template.type))
+                str(self.pk) + " " + str(self.template.type))
 
 
 @receiver(post_save, sender=Equipment)
@@ -52,3 +52,9 @@ def create_ports(sender, instance, created, **kwargs):
         Port.objects.bulk_create(objects_to_create)
         instance.free_ports = number
         instance.save()
+
+
+@receiver(post_delete, sender=Equipment)
+def delete_device_vlan(sender, instance, **kwargs):
+    from models_app.models import VlanDevice
+    VlanDevice.objects.filter(object_id=instance.id, object_type="equipment").delete()
