@@ -35,7 +35,7 @@ class EquipmentListSerializer(serializers.Serializer):
     room = RoomSerializer()
     vlan = serializers.SerializerMethodField()
 
-    def get_template(cls, obj: Equipment) -> Dict[str, Union[str, int, None]]:
+    def get_template(self, obj: Equipment) -> Dict[str, Union[str, int, None]]:
         return {
             'manufacturer': obj.template.manufacturer.name if obj.template.manufacturer else None,
             'type': obj.template.type.name,
