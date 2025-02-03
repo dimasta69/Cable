@@ -6,7 +6,7 @@ from django.db.models import Q
 from rest_framework import status
 from typing import List
 
-from models_app.models import Access, User, Scheme, Building, Room, ServerRack, SchemeMap
+from models_app.models import Access, User, Scheme, Building, Room, ServerRack, SchemeMap, Equipment, Segment, Vlan
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
@@ -31,6 +31,9 @@ class AccessListService(ServiceWithResult):
     filter_room_id = forms.IntegerField(required=False)
     filter_map_id = forms.IntegerField(required=False)
     filter_server_rack_id = forms.IntegerField(required=False)
+    filter_equipment_id = forms.IntegerField(required=False)
+    filter_segment_id = forms.IntegerField(required=False)
+    filter_vlan_id = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
@@ -42,6 +45,9 @@ class AccessListService(ServiceWithResult):
         'room_presence',
         'server_rack_presence',
         'map_presence',
+        'equipment_presence',
+        'segment_presence',
+        'vlan_presence',
     ]
 
     def process(self):
@@ -54,6 +60,7 @@ class AccessListService(ServiceWithResult):
     @property
     def _access_filter_list(self) -> List[Access]:
         access_list = self._list_acc
+
         if self.cleaned_data["filter_building_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(Building), self._building.pk,
@@ -61,6 +68,7 @@ class AccessListService(ServiceWithResult):
             access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
+
         if self.cleaned_data["filter_room_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(Room), self._room.pk,
@@ -68,6 +76,7 @@ class AccessListService(ServiceWithResult):
             access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
+
         if self.cleaned_data["filter_map_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(SchemeMap), self._map.pk,
@@ -75,6 +84,7 @@ class AccessListService(ServiceWithResult):
             access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
+
         if self.cleaned_data["filter_server_rack_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(ServerRack), self._server_rack.pk,
@@ -82,6 +92,31 @@ class AccessListService(ServiceWithResult):
             access_list = access_filter | access_list.exclude(
                 role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
+
+        if self.cleaned_data["filter_equipment_id"]:
+            access_filter = _access(
+                ContentType.objects.get_for_model(Equipment), self._equipment.pk,
+            )
+            access_list = access_filter | access_list.exclude(
+                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+            ) if access_filter else access_list
+
+        if self.cleaned_data["filter_segment_id"]:
+            access_filter = _access(
+                ContentType.objects.get_for_model(Segment), self._segment.pk,
+            )
+            access_list = access_filter | access_list.exclude(
+                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+            ) if access_filter else access_list
+
+        if self.cleaned_data["filter_vlan_id"]:
+            access_filter = _access(
+                ContentType.objects.get_for_model(Vlan), self._vlan.pk,
+            )
+            access_list = access_filter | access_list.exclude(
+                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+            ) if access_filter else access_list
+
         if self.cleaned_data['search_filter']:
             access_list = access_list.filter(
                 Q(user__username__icontains=self.cleaned_data['search_filter'])
@@ -100,6 +135,29 @@ class AccessListService(ServiceWithResult):
         except Access.DoesNotExist:
             return Access.objects.none()
 
+    @property
+    @lru_cache()
+    def _equipment(self) -> Equipment | None:
+        try:
+            return Equipment.objects.get(id=self.cleaned_data['filter_equipment_id'])
+        except Equipment.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def _segment(self) -> Segment | None:
+        try:
+            return Segment.objects.get(id=self.cleaned_data['filter_segment_id'])
+        except Segment.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def _vlan(self) -> Vlan | None:
+        try:
+            return Vlan.objects.get(id=self.cleaned_data['filter_vlan_id'])
+        except Vlan.DoesNotExist:
+            return None
 
     @property
     @lru_cache()
@@ -177,6 +235,30 @@ class AccessListService(ServiceWithResult):
             if not self._map:
                 self.add_error('filter_map_id', ObjectDoesNotExist('Map id='
                                                                       f'{self.cleaned_data["filter_map_id"]} '
+                                                                      'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def equipment_presence(self) -> None:
+        if self.cleaned_data['filter_equipment_id']:
+            if not self._equipment:
+                self.add_error('filter_equipment_id', ObjectDoesNotExist('Equipment id='
+                                                                      f'{self.cleaned_data["filter_equipment_id"]} '
+                                                                      'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def segment_presence(self) -> None:
+        if self.cleaned_data['filter_segment_id']:
+            if not self._segment:
+                self.add_error('filter_segment_id', ObjectDoesNotExist('Segment id='
+                                                                      f'{self.cleaned_data["filter_segment_id"]} '
+                                                                      'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def vlan_presence(self) -> None:
+        if self.cleaned_data['filter_vlan_id']:
+            if not self._vlan:
+                self.add_error('filter_vlan_id', ObjectDoesNotExist('Vlan id='
+                                                                      f'{self.cleaned_data["filter_vlan_id"]} '
                                                                       'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
