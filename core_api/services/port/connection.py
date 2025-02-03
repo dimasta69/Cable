@@ -107,7 +107,7 @@ class ConnectionPortService(ServiceWithResult):
                         Access.objects.filter(
                             Q(
                                 object_type=self.building_content_type,
-                                object_id=self._ports[port_id].equipment.units[0].server_rack.room.building.id
+                                object_id=self._ports[port_id].equipment.unit[0].server_rack.room.building.id
                             ) |
                             Q(
                                 object_type=self.room_content_type,
