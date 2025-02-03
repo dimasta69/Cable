@@ -19,7 +19,7 @@ class VlanDeviceSerializer(serializers.ModelSerializer):
 
 class RoomSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Room,
+        model = Room
         fields = (
             "id",
             "number",
