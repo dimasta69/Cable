@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from models_app.models import Equipment, VlanDevice, Room
-from typing import Dict, Union
+from typing import Dict, Union, List, Any
 
 
 class VlanDeviceSerializer(serializers.ModelSerializer):
@@ -45,7 +45,8 @@ class EquipmentListSerializer(serializers.Serializer):
             'power': obj.template.power,
         }
 
-    def get_vlan(self, obj: Equipment) -> VlanDeviceSerializer:
-        return VlanDeviceSerializer(
-            VlanDevice.objects.filter(device_id=obj.id, device_type=ContentType.objects.get_for_model(Equipment)), many=True
+    def get_vlan(self, obj: Equipment) -> List[Dict[str, Any]]:
+        vlan_devices = VlanDevice.objects.filter(
+            device_id=obj.id, device_type=ContentType.objects.get_for_model(Equipment)
         )
+        return VlanDeviceSerializer(vlan_devices, many=True).data
