@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import UniqueConstraint
+
 from models_app.models.base_model import BaseModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
@@ -24,6 +26,9 @@ class VlanDevice(BaseModel):
         db_table = "vlan_device"
         verbose_name = "Vlan Device"
         verbose_name_plural = "Vlan device's"
+        constraints = [
+            UniqueConstraint(fields=['device_type', 'device_id', 'vlan'], name='unique_device_vlan')
+        ]
 
 
 @receiver(pre_save, sender=VlanDevice)
