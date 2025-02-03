@@ -46,5 +46,5 @@ class EquipmentListSerializer(serializers.Serializer):
 
     def get_vlan(self, obj: Equipment) -> VlanDeviceSerializer:
         return VlanDeviceSerializer(
-            VlanDevice.objects.filter(object_id=obj.id, object_type="equipment"), many=True
+            VlanDevice.objects.filter(device_id=obj.id, device="equipment"), many=True
         ).data

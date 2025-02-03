@@ -57,4 +57,4 @@ def create_ports(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Equipment)
 def delete_device_vlan(sender, instance, **kwargs):
     from models_app.models import VlanDevice
-    VlanDevice.objects.filter(object_id=instance.id, object_type="equipment").delete()
+    VlanDevice.objects.filter(device_id=instance.id, device_type="equipment").delete()
