@@ -39,6 +39,7 @@ urlpatterns = [
     path("map/", include("core_api.urls.map")),
     path("segment/", include("core_api.urls.segment")),
     path("vlan_device/", include("core_api.urls.vlan_device")),
+    path("vlan/", include("core_api.urls.vlan")),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]
 
