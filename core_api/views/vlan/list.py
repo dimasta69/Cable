@@ -19,7 +19,7 @@ class VlanListView(APIView):
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(VlanSerializer(outcome.result).data, status=status.HTTP_200_OK)
+        return Response(VlanSerializer(outcome.result, many=True).data, status=status.HTTP_200_OK)
 
     def post(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(

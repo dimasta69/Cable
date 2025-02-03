@@ -19,3 +19,4 @@ class Vlan(BaseModel):
         db_table = "vlan"
         verbose_name = "Vlan"
         verbose_name_plural = "Vlan's"
+        unique_together = ('name', 'segment')
