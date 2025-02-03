@@ -6,7 +6,7 @@ from typing import Dict, Union, List, Any
 
 
 class VlanDeviceSerializer(serializers.ModelSerializer):
-    vlan_name = serializers.CharField(source="vlan__name")
+    vlan_name = serializers.CharField(source="vlan.name")
 
     class Meta:
         model = VlanDevice
