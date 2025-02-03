@@ -7,7 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Scheme, Building, Room, ServerRack, SchemeMap
+from models_app.models import Scheme, Building, Room, ServerRack, SchemeMap, Vlan, Segment, Equipment
 from models_app.models import User
 from models_app.models import Access
 
@@ -19,6 +19,9 @@ class CreateAccessService(ServiceWithResult):
     room_id = forms.IntegerField(required=False)
     map_id = forms.IntegerField(required=False)
     server_rack_id = forms.IntegerField(required=False)
+    equipment_id = forms.IntegerField(required=False)
+    vlan_id = forms.IntegerField(required=False)
+    segment_id = forms.IntegerField(required=False)
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
@@ -33,6 +36,9 @@ class CreateAccessService(ServiceWithResult):
         'room_presence',
         'server_rack_presence',
         'map_presence',
+        'equipment_presence',
+        'vlan_presence',
+        'segment_presence',
     ]
 
     def process(self):
@@ -75,6 +81,30 @@ class CreateAccessService(ServiceWithResult):
         try:
             return Scheme.objects.get(id=self.cleaned_data['scheme_id'])
         except Scheme.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def _equipment(self) -> Equipment | None:
+        try:
+            return Equipment.objects.get(id=self.cleaned_data['equipment_id'])
+        except Equipment.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def _vlan(self) -> Vlan | None:
+        try:
+            return Vlan.objects.get(id=self.cleaned_data['vlan_id'])
+        except Vlan.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def _segment(self) -> Segment | None:
+        try:
+            return Segment.objects.get(id=self.cleaned_data['segment_id'])
+        except Segment.DoesNotExist:
             return None
 
     @property
@@ -123,6 +153,30 @@ class CreateAccessService(ServiceWithResult):
                                                                   f'{self.cleaned_data["scheme_id"]} '
                                                                   'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
+
+    def equipment_presence(self) -> None:
+        if self.cleaned_data['equipment_id']:
+            if not self._equipment:
+                self.add_error('equipment_id', ObjectDoesNotExist('Equipment id='
+                                                                      f'{self.cleaned_data["equipment_id"]} '
+                                                                      'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def vlan_presence(self) -> None:
+        if self.cleaned_data['vlan_id']:
+            if not self._vlan:
+                self.add_error('vlan_id', ObjectDoesNotExist('Vlan id='
+                                                                      f'{self.cleaned_data["vlan_id"]} '
+                                                                      'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def segment_presence(self) -> None:
+        if self.cleaned_data['segment_id']:
+            if not self._segment:
+                self.add_error('segment_id', ObjectDoesNotExist('Segment id='
+                                                                      f'{self.cleaned_data["segment_id"]} '
+                                                                      'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
 
     def building_presence(self) -> None:
         if self.cleaned_data['building_id']:
