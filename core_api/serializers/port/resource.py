@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from core_api.serializers.vlan.device.resource import VlanDeviceSerializer
@@ -50,4 +51,8 @@ class PortListSerializer(serializers.Serializer):
             return None
 
     def get_vlan(self, obj: Port) -> VlanSerializer:
-        return VlanDeviceSerializer(VlanDevice.objects.filter(device_id=obj.id, device_type="port"), many=True).data
+        return VlanDeviceSerializer(
+            VlanDevice.objects.filter(
+                device_id=obj.id, device_type=ContentType.objects.get_for_model(Port)
+            ), many=True
+        ).data

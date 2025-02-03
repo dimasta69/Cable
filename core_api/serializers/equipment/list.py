@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
 from models_app.models import Equipment, VlanDevice, Room
@@ -46,5 +47,5 @@ class EquipmentListSerializer(serializers.Serializer):
 
     def get_vlan(self, obj: Equipment) -> VlanDeviceSerializer:
         return VlanDeviceSerializer(
-            VlanDevice.objects.filter(device_id=obj.id, device_type="equipment"), many=True
+            VlanDevice.objects.filter(device_id=obj.id, device_type=ContentType.objects.get_for_model(Equipment)), many=True
         ).data
