@@ -15,7 +15,8 @@ from models_app.models import Vlan, Segment, User, Access, Scheme
 
 class VlanListService(ServiceWithResult):
     current_user = ModelField(User)
-    search_field = forms.CharField(required=True)
+    segment_id = forms.IntegerField(required=True)
+    search_field = forms.CharField(required=False)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
     segment_content_type = ContentType.objects.get_for_model(Segment)

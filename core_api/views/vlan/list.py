@@ -9,8 +9,7 @@ from core_api.serializers.vlan.resource import VlanSerializer
 from utils.services import ServiceOutcome
 
 
-
-class VlanListView(APIView)
+class VlanListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request) -> Response:
@@ -21,6 +20,7 @@ class VlanListView(APIView)
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(VlanSerializer(outcome.result).data, status=status.HTTP_200_OK)
+
     def post(self, request) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             CreateVlanService,
