@@ -19,6 +19,7 @@ from models_app.models.port.port_template.models import PortTemplate
 from models_app.models.equipment.equipment_template.equipment_template_type.models import EquipmentTemplateType
 from models_app.models.speed.models import Speed
 from models_app.models.vlan.models import Vlan
+from models_app.models.vlan.Device.models import VlanDevice
 from models_app.models.port.port_template.models import PortShip
 from models_app.models.schemes.equipment.models import EquipmentScheme
 from models_app.models.schemes.schemes.models import SchemeMap
@@ -49,4 +50,5 @@ __all__ = [
     'PortShip',
     'EquipmentScheme',
     'SchemeMap',
+    'VlanDevice',
 ]
