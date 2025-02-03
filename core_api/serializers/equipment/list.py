@@ -1,8 +1,20 @@
 from rest_framework import serializers
 
 from core_api.serializers.room.resource import RoomListSerializer
-from models_app.models import Equipment
+from models_app.models import Equipment, VlanDevice
 from typing import Dict, Union
+
+
+class VlanDeviceSerializer(serializers.ModelSerializer):
+    vlan_name = serializers.CharField(source="vlan__name")
+
+    class Meta:
+        model = VlanDevice
+        fields = (
+            "id",
+            "vlan_name",
+            "ip",
+        )
 
 
 class EquipmentListSerializer(serializers.Serializer):
@@ -10,8 +22,8 @@ class EquipmentListSerializer(serializers.Serializer):
     template = serializers.SerializerMethodField()
     free_ports = serializers.IntegerField()
     room = RoomListSerializer()
+    vlan = serializers.SerializerMethodField()
 
-    @classmethod
     def get_template(cls, obj: Equipment) -> Dict[str, Union[str, int, None]]:
         return {
             'manufacturer': obj.template.manufacturer.name if obj.template.manufacturer else None,
@@ -21,3 +33,6 @@ class EquipmentListSerializer(serializers.Serializer):
             'count_port': obj.template.count_port,
             'power': obj.template.power,
         }
+
+    def get_vlan(self, obj: Equipment) -> VlanDeviceSerializer:
+        return VlanDeviceSerializer(VlanDevice.objects.filter(object=obj), many=True).data

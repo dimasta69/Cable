@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from models_app.models import Port, Vlan, Line
+from core_api.serializers.vlan.device.resource import VlanDeviceSerializer
+from models_app.models import Port, Line, VlanDevice
 from core_api.serializers.port_template.resource import SpeedSerializer
 from core_api.serializers.vlan.resource import VlanSerializer
 
@@ -27,7 +28,6 @@ class PortListSerializer(serializers.Serializer):
     speed = serializers.SerializerMethodField()
     line_type = serializers.CharField(source="line.line_type.name", default=None)
     vlan = serializers.SerializerMethodField()
-    # ip = serializers.IPAddressField(default=None)
     mac = serializers.CharField()
     front_side = serializers.IntegerField(source="front_side.id", default=None)
     back_side = serializers.IntegerField(source="back_side.id", default=None)
@@ -50,6 +50,5 @@ class PortListSerializer(serializers.Serializer):
             return None
 
     def get_vlan(self, obj: Port) -> VlanSerializer:
-        return (
-            VlanSerializer(Vlan.objects.filter(device_type__model='port', device_id=obj.pk), many=True).data
-        )
+        return VlanDeviceSerializer(VlanDevice.objects.filter(object=obj), many=True).data
+
