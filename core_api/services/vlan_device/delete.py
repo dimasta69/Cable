@@ -24,7 +24,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
     equipment_content_type = ContentType.objects.get_for_model(Equipment)
     port_content_type = ContentType.objects.get_for_model(Port)
 
-    custom_validations = ['equipment_presence', 'port_presence', 'vlan_presence', 'access_port_presence']
+    custom_validations = ['equipment_presence', 'port_presence', 'vlan_device_presence', 'access_port_presence']
 
     def process(self):
         self.run_custom_validations()
