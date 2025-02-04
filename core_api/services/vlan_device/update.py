@@ -38,6 +38,7 @@ class UpdateVlanDeviceService(ServiceWithResult):
         vlan_device = self._vlan_device
         if self.cleaned_data['ip']:
             vlan_device.ip = self.cleaned_data['ip']
+        vlan_device.save()
         return vlan_device
 
     @property
