@@ -125,7 +125,7 @@ class UpdateVlanDeviceService(ServiceWithResult):
                     object_id=self._equipment.id
                 )
             )
-            if self._port.equipment.room:
+            if self._equipment.room:
                 return (
                         Access.objects.filter(
                             Q(
@@ -141,7 +141,7 @@ class UpdateVlanDeviceService(ServiceWithResult):
                     user=self.cleaned_data['current_user'],
                     role__in=['Change', 'Creator'],
                 )
-            if self._port.equipment.units:
+            if self._equipment.units:
                 return (
                         Access.objects.filter(
                             Q(
