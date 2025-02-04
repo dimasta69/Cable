@@ -161,7 +161,7 @@ class UpdateVlanDeviceService(ServiceWithResult):
             return None
 
     def equipment_presence(self) -> None:
-        if self.cleaned_data['device_type'] == 'equipment' and not self._equipment:
+        if self._vlan_device.device_type == self.equipment_content_type and not self._equipment:
             self.add_error(
                 'device_id',
                 NotFound(
@@ -171,7 +171,7 @@ class UpdateVlanDeviceService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def port_presence(self) -> None:
-        if self.cleaned_data['device_type'] == 'port' and not self._port:
+        if self._vlan_device.device_type == self.port_content_type and not self._port:
             self.add_error(
                 'device_id',
                 NotFound(
