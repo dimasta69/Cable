@@ -34,8 +34,8 @@ class CreateSfpTemplateService(ServiceWithResult):
     def _create_sfp_template(self) -> SfpTemplate:
         sfp = SfpTemplate.objects.create(
             manufacturer=self._manufacturer, name=self.cleaned_data['name'], type_port=self._type_port)
-        sfp.line_type = self._line_type
-        sfp.speed = self._speeds
+        sfp.line_type.set(self._line_type)
+        sfp.speed.set(self._speeds)
         return sfp
 
     @property
