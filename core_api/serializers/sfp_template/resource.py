@@ -7,5 +7,5 @@ class SfpTemplateListSerializer(serializers.Serializer):
     manufacturer = serializers.CharField(source="manufacturer.name")
     name = serializers.CharField()
     type_port = serializers.CharField(source="type_port.name")
-    speed = SpeedListSerializer()
-    line_type = LineTypeSerializer()
+    speed = SpeedListSerializer(many=True)
+    line_type = LineTypeSerializer(many=True)
