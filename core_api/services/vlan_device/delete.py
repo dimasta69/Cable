@@ -120,7 +120,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
                     object_id=self._equipment.id
                 )
             )
-            if self._port.equipment.room:
+            if self._equipment.room:
                 return (
                         Access.objects.filter(
                             Q(
@@ -136,7 +136,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
                     user=self.cleaned_data['current_user'],
                     role__in=['Change', 'Creator'],
                 )
-            if self._port.equipment.units:
+            if self._equipment.units:
                 return (
                         Access.objects.filter(
                             Q(
@@ -156,7 +156,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
             return None
 
     def equipment_presence(self) -> None:
-        if self.cleaned_data['device_type'] == 'equipment' and not self._equipment:
+        if self._vlan_device.device_type == self.equipment_content_type and not self._equipment:
             self.add_error(
                 'device_id',
                 NotFound(
@@ -166,7 +166,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def port_presence(self) -> None:
-        if self.cleaned_data['device_type'] == 'port' and not self._port:
+        if self._vlan_device.device_type == self.port_content_type  and not self._port:
             self.add_error(
                 'device_id',
                 NotFound(
