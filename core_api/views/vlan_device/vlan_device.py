@@ -17,7 +17,7 @@ class VlanDeviceView(APIView):
             UpdateVlanDeviceService,
             request.data | {"current_user": request.user} | kwargs,
         )
-        if bool(outcome.result):
+        if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(VlanDeviceSerializer(outcome.result).data, status=status.HTTP_200_OK)
 
@@ -26,6 +26,6 @@ class VlanDeviceView(APIView):
             DeleteVlanDeviceService,
             {"current_user": request.user} | kwargs,
         )
-        if bool(outcome.result):
+        if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({}, status=status.HTTP_204_NO_CONTENT)
