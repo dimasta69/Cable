@@ -15,6 +15,7 @@ from models_app.admin.sfp_template.resources import SfpTemplateAdmin
 from models_app.admin.user.resources import UserAdmin
 from models_app.admin.vlan.resources import VlanAdmin
 from models_app.admin.segment.resources import SegmentAdmin
+from models_app.admin.port_mode.resources import PortModeAdmin
 
 from django.contrib import admin
 from django.contrib.auth.models import Group
