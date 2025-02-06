@@ -10,35 +10,32 @@ from utils.fields import ModelField
 from models_app.models import Vlan, User, Segment, Access, Scheme
 
 
-class CreateVlanService(ServiceWithResult):
-    name = forms.CharField(required=True)
-    segment_id = forms.IntegerField(required=True)
+class DeleteVlanService(ServiceWithResult):
+    id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
     segment_content_type = ContentType.objects.get_for_model(Segment)
+    vlan_content_type = ContentType.objects.get_for_model(Vlan)
 
-    custom_validations = ['segment_presence', 'access_presence', ]
+
+    custom_validations = ['vlan_presence', 'access_presence', ]
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._create_vlan
+            self._delete_vlan()
         return self
 
-    @property
-    def _create_vlan(self) -> Vlan:
-        return Vlan.objects.create(
-            name=self.cleaned_data['name'],
-            segment=self._segment,
-        )
+    def _delete_vlan(self) -> None:
+        self._vlan.delete()
 
     @property
     @lru_cache()
-    def _segment(self) -> Segment | None:
+    def _vlan(self) -> Vlan | None:
         try:
-            return Segment.objects.get(id=self.cleaned_data["segment_id"])
-        except Segment.DoesNotExist:
+            return Vlan.objects.get(id=self.cleaned_data["id"])
+        except Vlan.DoesNotExist:
             return None
 
     @property
@@ -47,11 +44,15 @@ class CreateVlanService(ServiceWithResult):
             return Access.objects.filter(
                 Q(
                     object_type=self.scheme_content_type,
-                    object_id=self._segment.scheme.pk,
+                    object_id=self._vlan.segment.scheme.pk,
                 ) |
                 Q(
                     object_type=self.segment_content_type,
-                    object_id=self._segment.pk,
+                    object_id=self._vlan.segment.pk,
+                ) |
+                Q(
+                    object_type=self.vlan_content_type,
+                    object_id=self._vlan.pk,
                 )
             ).filter(
                 user=self.cleaned_data['current_user'],
@@ -60,12 +61,12 @@ class CreateVlanService(ServiceWithResult):
         except Access.DoesNotExist:
             return None
 
-    def segment_presence(self) -> None:
-        if not self._segment:
+    def vlan_presence(self) -> None:
+        if not self._vlan:
             self.add_error(
-                "segment_id",
+                "id",
                 NotFound(
-                    f"Segment with id={self.cleaned_data['segment_id']} not found"
+                    f"Vlan with id={self.cleaned_data['id']} not found"
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
@@ -74,5 +75,5 @@ class CreateVlanService(ServiceWithResult):
         if not self._access:
             if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schem id = '
-                                                                f'{self._segment.id} is not granted'))
+                                                                f'{self._vlan.pk} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

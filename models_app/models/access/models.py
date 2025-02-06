@@ -51,7 +51,7 @@ def refresh_count_minus(sender, instance, **kwargs):
 
 @receiver(post_delete, sender=Access)
 def delete_all_access(sender, instance, **kwargs):
-    from models_app.models import Building, Room, ServerRack, SchemeMap, Equipment
+    from models_app.models import Building, Room, ServerRack, SchemeMap, Equipment, Segment, Vlan
     object_type = instance.object.__class__.__name__
 
     filters = {
@@ -65,7 +65,11 @@ def delete_all_access(sender, instance, **kwargs):
             Q(object_type=ContentType.objects.get_for_model(SchemeMap),
               object_id__in=SchemeMap.objects.filter(scheme_id=instance.object_id)) |
             Q(object_type=ContentType.objects.get_for_model(Equipment),
-              object_id__in=Equipment.objects.filter(scheme_id=instance.object_id))
+              object_id__in=Equipment.objects.filter(scheme_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(Segment),
+              object_id__in=Segment.objects.filter(scheme_id=instance.object_id)) |
+            Q(object_type=ContentType.objects.get_for_model(Vlan),
+              object_id__in=Vlan.objects.filter(segment__scheme_id=instance.object_id))
         ),
         "Building": (
             Q(object_type=ContentType.objects.get_for_model(Room),
@@ -84,6 +88,14 @@ def delete_all_access(sender, instance, **kwargs):
               object_id__in=Equipment.objects.filter(
                   unit__server_rack__room__id=instance.object_id
               ))
+        ),
+        "ServerRack": (
+                Q(object_type=ContentType.objects.get_for_model(Equipment),
+                  object_id__in=Equipment.objects.filter(units__server_rack_id=instance.object_id))
+        ),
+        "Segment": (
+                Q(object_type=ContentType.objects.get_for_model(Vlan),
+                  object_id__in=Vlan.objects.filter(segment_id=instance.object_id))
         ),
     }
 
