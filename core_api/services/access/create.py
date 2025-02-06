@@ -55,6 +55,9 @@ class CreateAccessService(ServiceWithResult):
             "room_id": (Room, self._room),
             "map_id": (SchemeMap, self._map),
             "server_rack_id": (ServerRack, self._server_rack),
+            "equipment_id": (Equipment, self._equipment),
+            "vlan_id": (Vlan, self._vlan),
+            "segment_id": (Segment, self._segment),
         }
 
         create_data = {
