@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
+from core_api.utils.change_mode_port import change_mode_port
 from models_app.models import Port, User, LineType, PortMode, Access, Scheme, Building, Room, Equipment
 
 
@@ -43,6 +44,7 @@ class UpdatePortService(ServiceWithResult):
         if self.cleaned_data['line_type_id']:
             port.line_type = self._line_type
         if self.cleaned_data['mode_id']:
+            change_mode_port(port.pk)
             port.mode = self._mode
         if self.cleaned_data['mac']:
             port.mac = self.cleaned_data['mac']
