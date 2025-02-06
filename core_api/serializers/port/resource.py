@@ -67,5 +67,5 @@ class PortListSerializer(serializers.Serializer):
         return VlanDeviceSerializer(
             VlanDevice.objects.filter(
                 device_id=obj.id, device_type=ContentType.objects.get_for_model(Port)
-            ), many=True
+            ).select_related("vlan").order_by("vlan__name"), many=True
         ).data

@@ -48,5 +48,5 @@ class EquipmentListSerializer(serializers.Serializer):
     def get_vlan(self, obj: Equipment) -> List[Dict[str, Any]]:
         vlan_devices = VlanDevice.objects.filter(
             device_id=obj.id, device_type=ContentType.objects.get_for_model(Equipment)
-        )
+        ).select_related("vlan").order_by("vlan__name")
         return VlanDeviceSerializer(vlan_devices, many=True).data
