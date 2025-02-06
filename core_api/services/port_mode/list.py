@@ -5,7 +5,7 @@ from utils.services import ServiceWithResult
 from models_app.models import PortMode
 
 
-class PortModeList(ServiceWithResult):
+class PortModeListService(ServiceWithResult):
     filter_is_only_vlan = forms.BooleanField(required=False)
 
     def process(self):
