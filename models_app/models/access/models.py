@@ -91,7 +91,7 @@ def delete_all_access(sender, instance, **kwargs):
         ),
         "ServerRack": (
                 Q(object_type=ContentType.objects.get_for_model(Equipment),
-                  object_id__in=Equipment.objects.filter(units__server_rack_id=instance.object_id))
+                  object_id__in=Equipment.objects.filter(unit__server_rack_id=instance.object_id))
         ),
         "Segment": (
                 Q(object_type=ContentType.objects.get_for_model(Vlan),
