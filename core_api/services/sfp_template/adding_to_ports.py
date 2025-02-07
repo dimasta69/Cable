@@ -160,6 +160,7 @@ class AddToPortSfpService(ServiceWithResult):
                     "The given ports do not correspond to sfp in line_type",
                 )
             )
+            self.response_status = status.HTTP_400_BAD_REQUEST
 
     def access_port_presence(self) -> None:
         if self._port_list:

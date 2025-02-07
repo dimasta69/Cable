@@ -1,4 +1,6 @@
 import json
+from idlelib.rpc import request_queue
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -28,8 +30,7 @@ class PortTemplateListView(APIView):
             {
                 "filter_speed": filter_speed,
                 "filter_line_type": filter_line_type,
-            }
-        )
+            }         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response({'pagination': CustomPagination(outcome.result,
@@ -39,7 +40,7 @@ class PortTemplateListView(APIView):
                         status=outcome.response_status)
 
     def post(self, request):
-        outcome = ServiceOutcome(CreatePortTemplateService, request.data)
+        outcome = ServiceOutcome(CreatePortTemplateService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortTemplateListSerializer(outcome.result).data, status=outcome.response_status)
