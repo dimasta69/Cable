@@ -14,4 +14,5 @@ class AddingToPortSfpTemplateView(APIView):
         outcome = ServiceOutcome(AddToPortSfpService, request.data | kwargs | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
+        breakpoint()
         return Response(EquipmentListSerializer(outcome.result).data, status=outcome.response_status)
