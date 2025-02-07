@@ -55,6 +55,7 @@ class CreateEquipmentService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
+            breakpoint()
             return (Access.objects.filter(
                 Q(
                     object_type=self.scheme_content_type,
