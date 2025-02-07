@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from core_api.services.sfp_template.adding_to_ports import AddToPortSfpService
-from core_api.serializers.equipment.list import EquipmentListSerializer
+from core_api.serializers.port.resource import PortListSerializer
 from utils.services import ServiceOutcome
 
 
@@ -14,5 +14,4 @@ class AddingToPortSfpTemplateView(APIView):
         outcome = ServiceOutcome(AddToPortSfpService, request.data | kwargs | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        breakpoint()
-        return Response(EquipmentListSerializer(outcome.result).data, status=outcome.response_status)
+        return Response(PortListSerializer(outcome.result, many=True).data, status=outcome.response_status)

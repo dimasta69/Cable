@@ -30,15 +30,17 @@ class AddToPortSfpService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self._add_sfp()
+            self.result = self._add_sfp
             self.response_status = status.HTTP_200_OK
         return self
 
-    def _add_sfp(self) -> None:
+    @property
+    def _add_sfp(self) -> List[Port]:
         for port in self._port_list:
             port.sfp = self._sfp_template
 
         Port.objects.bulk_update(self._port_list, ['sfp'])
+        return self._port_list
 
     @property
     @lru_cache()
