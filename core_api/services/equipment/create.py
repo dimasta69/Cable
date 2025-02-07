@@ -55,7 +55,7 @@ class CreateEquipmentService(ServiceWithResult):
             return None
 
     @property
-    def _access(self) -> List[Access] | None:
+    def _access(self) -> List[Access] :
         try:
             return (Access.objects.filter(
                 Q(
@@ -96,6 +96,7 @@ class CreateEquipmentService(ServiceWithResult):
 
     def access_presence(self) -> None:
         if self._scheme:
+            breakpoint()
             if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._scheme.id} is not granted'))
