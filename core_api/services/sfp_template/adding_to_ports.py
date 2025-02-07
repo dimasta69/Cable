@@ -47,7 +47,7 @@ class AddToPortSfpService(ServiceWithResult):
             return Port.objects.filter(
                 id__in=self.cleaned_data["port_list"],
                 sfp__isnun=True,
-                connection__isnun=True,
+                fron_side__isnun=True,
                 port_template__modular=True,
             ).select_related(
                 "equipment",
