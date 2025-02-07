@@ -119,8 +119,8 @@ class AddEquipmentUnitService(ServiceWithResult):
 
     def power_presence(self) -> None:
         if self._unit_list_int and self._equipment:
-            if self._unit_list_int[0]._server_rack.free_power and self._equipment.template.power:
-                if self._unit_list_int[0]._server_rack.free_power < self._equipment.template.power:
+            if self._unit_list_int[0].server_rack.free_power and self._equipment.template.power:
+                if self._unit_list_int[0].server_rack.free_power < self._equipment.template.power:
                     self.add_error('unit_list_id', ValidationError('Not enough power'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -128,6 +128,6 @@ class AddEquipmentUnitService(ServiceWithResult):
         if self._unit_list_int and self._equipment:
             if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._unit_list_int[0]._server_rack._room.building.scheme.id} '
+                                                                f'{self._unit_list_int[0].server_rack.room.building.scheme.id} '
                                                                 'is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
