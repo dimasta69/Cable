@@ -5,6 +5,7 @@ from core_api.serializers.vlan.device.resource import VlanDeviceSerializer
 from models_app.models import Port, Line, VlanDevice, PortMode
 from core_api.serializers.port_template.resource import SpeedSerializer
 from core_api.serializers.vlan.resource import VlanSerializer
+from core_api.serializers.sfp_template.resource import SfpTemplateListSerializer
 
 from typing import Union, Dict, List
 
@@ -38,7 +39,7 @@ class PortListSerializer(serializers.Serializer):
     uid = serializers.IntegerField(required=True)
     type = serializers.CharField(source="port_template.type_port.name", default=None)
     modular = serializers.BooleanField(source="port_template.modular")
-    # sfp = serializers.SerializerMethodField()
+    sfp = SfpTemplateListSerializer()
     speed = serializers.SerializerMethodField()
     line_type = serializers.CharField(source="line.line_type.name", default=None)
     vlan = serializers.SerializerMethodField()
@@ -50,19 +51,6 @@ class PortListSerializer(serializers.Serializer):
 
     def get_speed(self, obj: Port) -> List[int]:
         return SpeedSerializer(obj.port_template.speed, many=True).data
-
-    def get_sfp(self, obj: Port) -> Dict[str, Union[str, id, list[int]]] | None:
-        if obj.sfp:
-            return {
-                'id': obj.sfp.id,
-                'manufacturer': obj.sfp.manufacturer.name,
-                'name': obj.sfp.name,
-                'type_port': obj.sfp.type_port.name,
-                'speed': obj.sfp.speed,
-                'line_type': obj.sfp.line_type
-            }
-        else:
-            return None
 
     def get_vlan(self, obj: Port) -> VlanSerializer:
         return VlanDeviceSerializer(
