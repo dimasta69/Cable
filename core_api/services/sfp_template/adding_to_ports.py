@@ -96,11 +96,11 @@ class AddToPortSfpService(ServiceWithResult):
                         Access.objects.filter(
                             Q(
                                 object_type=self.building_content_type,
-                                object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.building.id
+                                object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
                                 object_type=self.room_content_type,
-                                object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.id
+                                object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.room.id
                             ),
                         ) | access_list
                 ).filter(
