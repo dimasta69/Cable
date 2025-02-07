@@ -79,7 +79,7 @@ class CreateEquipmentService(ServiceWithResult):
                 role__in=['Change', 'Creator'],
             ))
         except Access.DoesNotExist:
-            return None
+            return Access.objects.none()
 
     def equipment_template_presence(self) -> None:
         if not self._equipment_template:
