@@ -153,8 +153,7 @@ class AddToPortSfpService(ServiceWithResult):
             item["port_template__line_type"] for item in self._port_list.values("port_template__line_type")
         }
 
-        breakpoint()
-        if not set(line_types) & set(self._sfp_template.line_type.all()):
+        if not set(line_types) & set(self._sfp_template.line_type.values_list("id", flat=True)):
             self.add_error(
                 "id",
                 ValidationError(
