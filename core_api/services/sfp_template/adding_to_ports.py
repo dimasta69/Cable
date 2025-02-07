@@ -139,6 +139,7 @@ class AddToPortSfpService(ServiceWithResult):
         if self._port_list and self._sfp_template:
             sfp_speeds = self._sfp_template.speed
             for port in self._port_list:
+                breakpoint()
                 speed_set = set(port.port_template.speed.all())
                 if not speed_set & set(sfp_speeds):
                     self.add_error(
