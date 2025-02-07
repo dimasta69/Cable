@@ -39,10 +39,10 @@ class AddEquipmentUnitService(ServiceWithResult):
         for unit in self._unit_list_int:
             unit.equipment = self._equipment
             unit.save()
-        return self._unit_list_int[0]._server_rack
+        return self._unit_list_int[0].server_rack
 
     def _remove_equipment(self) -> None:
-        unit_equipment = self.unit_list.filter(equipment=self._equipment)
+        unit_equipment = self._unit_list.filter(equipment=self._equipment)
         if unit_equipment:
             unit_equipment.equipment = None
             unit_equipment.save()
