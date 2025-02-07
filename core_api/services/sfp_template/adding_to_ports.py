@@ -149,7 +149,11 @@ class AddToPortSfpService(ServiceWithResult):
                     )
 
     def line_type_control(self):
-        if not set(self._port_list.values("port_template__line_type")).issubset(set(self._sfp_template.line_type)):
+        line_types = {
+            item["port_template__line_type"] for item in self._port_list.values("port_template__line_type")
+        }
+
+        if not line_types.issubset(set(self._sfp_template.line_type)):
             self.add_error(
                 "id",
                 ValidationError(
