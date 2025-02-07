@@ -159,7 +159,7 @@ class AddToPortSfpService(ServiceWithResult):
 
     def access_port_presence(self) -> None:
         if self._port_list:
-            ports = list(map(self._access_port, self._port_list.values()))
+            ports = list(map(self._access_port, self._port_list.values_list('id', flat=True)))
             if any(port is None for port in ports):
                 self.add_error(
                     "front_port_list",
