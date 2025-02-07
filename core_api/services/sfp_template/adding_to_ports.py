@@ -114,7 +114,7 @@ class AddToPortSfpService(ServiceWithResult):
     @lru_cache()
     def _sfp_template(self) -> SfpTemplate | None:
         try:
-            return SfpTemplate.objects.get(id=self.cleaned_data['id'])
+            return SfpTemplate.objects.perfetch_related("speed").get(id=self.cleaned_data['id'])
         except SfpTemplate.DoesNotExist:
             return None
 
@@ -137,7 +137,7 @@ class AddToPortSfpService(ServiceWithResult):
 
     def speed_control(self) -> None:
         if self._port_list and self._sfp_template:
-            sfp_speeds = self._sfp_template.speeds
+            sfp_speeds = self._sfp_template.speed
             for port in self._port_list:
                 if not set(port.speeds) & set(sfp_speeds):
                     self.add_error(
