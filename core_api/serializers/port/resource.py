@@ -37,6 +37,7 @@ class PortListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     uid = serializers.IntegerField(required=True)
     type = serializers.CharField(source="port_template.type_port.name", default=None)
+    modular = serializers.BooleanField(source="port_template.modular")
     sfp = serializers.SerializerMethodField()
     speed = serializers.SerializerMethodField()
     line_type = serializers.CharField(source="line.line_type.name", default=None)
