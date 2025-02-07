@@ -114,7 +114,7 @@ class AddToPortSfpService(ServiceWithResult):
     @lru_cache()
     def _sfp_template(self) -> SfpTemplate | None:
         try:
-            return SfpTemplate.objects.perfetch_related("speed").get(id=self.cleaned_data['id'])
+            return SfpTemplate.objects.prefetch_related("speed").get(id=self.cleaned_data['id'])
         except SfpTemplate.DoesNotExist:
             return None
 
