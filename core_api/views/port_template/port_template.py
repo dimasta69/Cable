@@ -43,7 +43,7 @@ class ConnectionPortShipView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, **kwargs):
-        outcome = ServiceOutcome(ConnectionPortShipService, request.data)
+        outcome = ServiceOutcome(ConnectionPortShipService, request.data | {"current_user": request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(PortShipSerializer(outcome.result).data, status=status.HTTP_201_CREATED)

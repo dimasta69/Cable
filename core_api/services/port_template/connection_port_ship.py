@@ -4,9 +4,9 @@ from functools import lru_cache
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 
 from utils.errors import ValidationError
-from utils.fields import ListIntegerField
+from utils.fields import ListIntegerField, ModelField
 from utils.services import ServiceWithResult
-from models_app.models import EquipmentTemplate, PortTemplate, PortShip
+from models_app.models import EquipmentTemplate, PortTemplate, PortShip, User
 
 
 class ConnectionPortShipService(ServiceWithResult):
@@ -15,6 +15,7 @@ class ConnectionPortShipService(ServiceWithResult):
     count = forms.IntegerField(required=True)
     unit = ListIntegerField()
     lines = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
     custom_validations = [
         'lines_presence', 'count_unit', 'unit_max', 'port_presence', 'equipment_presence', 'is_superuser',
