@@ -67,11 +67,11 @@ class CreateEquipmentService(ServiceWithResult):
                 )|
                 Q(
                     object_type=self.room_content_type,
-                    object_id=self._scheme.buildings.rooms.values("id"),
+                    object_id=self._scheme.buildings.values("room"),
                 )|
                 Q(
                     object_type=self.server_rack_content_type,
-                    object_id=self._scheme.buildings.rooms.server_racks.values("id"),
+                    object_id=self._scheme.buildings.rooms.server_racks.values("room__server_rack"),
                 ),
             ).filter(
                 user=self.cleaned_data['current_user'],
