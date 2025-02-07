@@ -1,3 +1,5 @@
+from typing import List
+
 from django import forms
 from django.db.models import Q
 from django.contrib.contenttypes.models import ContentType
@@ -53,7 +55,7 @@ class CreateEquipmentService(ServiceWithResult):
             return None
 
     @property
-    def _access(self) -> Access | None:
+    def _access(self) -> List[Access] | None:
         try:
             return (Access.objects.filter(
                 Q(
