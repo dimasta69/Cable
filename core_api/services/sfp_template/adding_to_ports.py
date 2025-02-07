@@ -159,7 +159,7 @@ class AddToPortSfpService(ServiceWithResult):
 
     def access_port_presence(self) -> None:
         if self._port_list:
-            if any(port is None for port in map(self._access_port, self._port_list.iterator(chunk_size=1000))):
+            if any(port is None for port in map(self._access_port, self._port_list.values("id").iterator(chunk_size=1000))):
                 self.add_error(
                     "front_port_list",
                     PermissionError(
