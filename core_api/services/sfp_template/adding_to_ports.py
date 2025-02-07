@@ -30,6 +30,7 @@ class AddToPortSfpService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
+            breakpoint()
             self._add_sfp()
             self.response_status = status.HTTP_200_OK
         return self
