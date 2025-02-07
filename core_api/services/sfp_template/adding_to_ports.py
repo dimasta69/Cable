@@ -46,8 +46,8 @@ class AddToPortSfpService(ServiceWithResult):
         try:
             return Port.objects.filter(
                 id__in=self.cleaned_data["port_list"],
-                sfp__isnun=True,
-                front_side__isnun=True,
+                sfp__isnull=True,
+                front_side__isnull=True,
                 port_template__modular=True,
             ).select_related(
                 "equipment",
