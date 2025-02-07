@@ -38,7 +38,7 @@ class PortListSerializer(serializers.Serializer):
     uid = serializers.IntegerField(required=True)
     type = serializers.CharField(source="port_template.type_port.name", default=None)
     modular = serializers.BooleanField(source="port_template.modular")
-    sfp = serializers.SerializerMethodField()
+    # sfp = serializers.SerializerMethodField()
     speed = serializers.SerializerMethodField()
     line_type = serializers.CharField(source="line.line_type.name", default=None)
     vlan = serializers.SerializerMethodField()
@@ -51,7 +51,7 @@ class PortListSerializer(serializers.Serializer):
     def get_speed(self, obj: Port) -> List[int]:
         return SpeedSerializer(obj.port_template.speed, many=True).data
 
-    def get_sfp(self, obj: Port) -> Dict[str, Union[str, id, list[int]]]:
+    def get_sfp(self, obj: Port) -> Dict[str, Union[str, id, list[int]]] | None:
         if obj.sfp:
             return {
                 'id': obj.sfp.id,
