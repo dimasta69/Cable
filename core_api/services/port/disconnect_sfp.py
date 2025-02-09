@@ -39,7 +39,7 @@ class DisconnectSfpService(ServiceWithResult):
         try:
             return Port.objects.filter(
                 id__in=self.cleaned_data['port_list'],
-                connection__isnull=True,
+                front_side__isnull=True,
             )
         except Port.DoesNotExist:
             return Port.objects.none()
