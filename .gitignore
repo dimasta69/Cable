@@ -4,3 +4,4 @@ debug.log
 __pycache__
 .DS_Store
 cabel/static/
+.DS_Store

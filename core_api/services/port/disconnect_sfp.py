@@ -99,7 +99,7 @@ class DisconnectSfpService(ServiceWithResult):
 
     def access_port_presence(self) -> None:
         if self._ports:
-            if any(port is None for port in map(self._access_port, self._ports.iterator())):
+            if any(port is None for port in map(self._access_port, self._ports.values_list("id", flat=True)))):
                 self.add_error(
                     "front_port_list",
                     PermissionError(
