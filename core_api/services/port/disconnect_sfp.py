@@ -98,8 +98,9 @@ class DisconnectSfpService(ServiceWithResult):
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_port_presence(self) -> None:
-        if self._ports:
-            if any(port is None for port in map(self._access_port, self._ports.values_list("id", flat=True))):
+        if self._port_list:
+            ports = list(map(self._access_port,  range(len(self._port_list))))
+            if any(port is None for port in ports):
                 self.add_error(
                     "front_port_list",
                     PermissionError(
