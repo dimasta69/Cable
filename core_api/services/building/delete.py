@@ -38,8 +38,12 @@ class DeleteBuildingService(ServiceWithResult):
     @property
     def _access(self) -> Access | None:
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self._building.scheme,
-                                      role__in=['Change', 'Creator'])
+            return Access.objects.get(
+                user=self.cleaned_data['current_user'],
+                object_id=self._building.scheme,
+                role__in=['Change', 'Creator'],
+                object_type=self.scheme_content_type,
+            )
         except Access.DoesNotExist:
             return None
 
