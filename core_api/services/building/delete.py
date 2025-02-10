@@ -42,7 +42,7 @@ class DeleteBuildingService(ServiceWithResult):
         try:
             return Access.objects.get(
                 user=self.cleaned_data["current_user"],
-                object_id=self._building.scheme,
+                object_id=self._building.scheme.id,
                 role__in=["Change", "Creator"],
                 object_type=self.scheme_content_type,
             )
