@@ -1,5 +1,5 @@
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from functools import lru_cache
 from typing import List
@@ -96,7 +96,7 @@ class DisconnectSfpService(ServiceWithResult):
         except Access.DoesNotExist:
             return None
 
-    def port_presence(self):
+    def port_presence(self) -> None:
         if len(self.cleaned_data['port_list']) != len(self._ports):
             if not self._ports:
                 self.add_error('port_list', ObjectDoesNotExist('Port list does not exist'))

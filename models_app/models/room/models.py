@@ -7,7 +7,9 @@ class Room(BaseModel):
         "Building", related_name='rooms', on_delete=models.CASCADE, null=False, verbose_name='Корпус',
         related_query_name='room',
     )
-    number = models.CharField(null=False, verbose_name='Номер комнаты', max_length=100)
+    number = models.CharField(
+            null=False, verbose_name='Номер комнаты', max_length=100
+        )
     is_server_room = models.BooleanField(null=False, blank=False)
     floor = models.IntegerField(null=False, blank=False)
 
