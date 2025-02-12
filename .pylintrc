@@ -648,4 +648,4 @@ init-import=no
 redefining-builtins-modules=six.moves,past.builtins,future.builtins,builtins,io
 
 [MESSAGES CONTROL]
-disable=[C0115, C0114]
+disable=[C0115, C0114, E303]

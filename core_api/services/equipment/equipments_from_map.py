@@ -10,10 +10,12 @@ from typing import List
 from rest_framework.exceptions import PermissionDenied
 
 from cabel.settings import REST_FRAMEWORK
-from utils.fields import ModelField
+from utils.errors import NotFound
+from utils.fields import ListIntegerField, ModelField
 from utils.services import ServiceWithResult
 from models_app.models import (
-    Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, Access, User
+    Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, Access, User, Vlan,
+    Segment,
 )
 
 
@@ -27,10 +29,13 @@ class EquipmentsFromMapListService(ServiceWithResult):
     filter_scheme_id = forms.IntegerField(required=True)
     filter_room_id = forms.IntegerField(required=False)
     filter_server_rack_id = forms.IntegerField(required=False)
+    filter_segment_id = forms.IntegerField(required=False)
+    filter_vlan_list_id = ListIntegerField(required=False)
     map_id = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    equipment_content_type = ContentType.objects.get_for_model(Equipment)
 
     custom_validations = [
         'order_presence',
@@ -40,6 +45,8 @@ class EquipmentsFromMapListService(ServiceWithResult):
         'room_presence',
         'type_presence',
         'access_presence',
+        'segment_presence',
+        'vlan_presence',
     ]
 
     def process(self):
@@ -62,6 +69,12 @@ class EquipmentsFromMapListService(ServiceWithResult):
     @property
     def _equipment_filter_list(self) -> List[Equipment]:
         equipment_list = self._equipment_list.exclude(id__in=self._equipment_scheme_id)
+        if self.cleaned_data['filter_segment_id']:
+            equipment_list = equipment_list.filter(scheme__segments__in=[self._segment])
+        if self.cleaned_data['filter_vlan_list_id']:
+            equipment_list = equipment_list.filter(
+                id__in=self._vlan.filter(device_type=self.equipment_content_type).values("id")
+            )
         if self.cleaned_data['filter_manufacturer_id']:
             equipment_list = equipment_list.filter(template__manufacturer=self._manufacturer)
         if self.cleaned_data['filter_type_id']:
@@ -152,6 +165,22 @@ class EquipmentsFromMapListService(ServiceWithResult):
         except Access.DoesNotExist:
             return None
 
+    @property
+    @lru_cache
+    def _segment(self) -> Segment | None:
+        try:
+            return Segment.objects.get(id=self.cleaned_data["filter_scheme_id"])
+        except Segment.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache
+    def _vlan(self) -> List[Vlan]:
+        try:
+            return Vlan.objects.get(id__in=self.cleaned_data["filter_vlan_list_id"], segment=self._segment)
+        except Vlan.DoesNotExist:
+            return Vlan.objects.none()
+
     def order_presence(self) -> None:
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['template__power', '-template__power', 'template__number_of_units',
@@ -201,3 +230,24 @@ class EquipmentsFromMapListService(ServiceWithResult):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
+
+    def segment_presence(self) -> None:
+        if self.cleaned_data['filter_segment_id'] and not self._segment:
+            self.add_error(
+                "filter_segment_id",
+                NotFound(
+                    f"Segment id={self.cleaned_data['filter_segment_id']} not found"
+                )
+            )
+            self.response_status = status.HTTP_404_NOT_FOUND
+
+    def vlan_presence(self) -> None:
+        if self.cleaned_data["filter_vlan_list_id"]:
+            if len(self.cleaned_data['filter_vlan_list_id']) != self._vlans or not self._segment:
+                self.add_error(
+                    "filter_segment_id",
+                    NotFound(
+                        f"Segment id={self.cleaned_data['filter_segment_id']} not found"
+                    )
+                )
+                self.response_status = status.HTTP_404_NOT_FOUND

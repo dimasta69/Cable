@@ -11,7 +11,14 @@ from utils.errors import ValidationError
 
 
 class VlanDevice(BaseModel):
-    vlan = models.ForeignKey('Vlan', on_delete=models.CASCADE, null=False, blank=False)
+    vlan = models.ForeignKey(
+            'Vlan',
+            on_delete=models.CASCADE,
+            null=False,
+            blank=False,
+            related_name="devices",
+            related_query_name="device",
+        )
     ip = models.GenericIPAddressField(verbose_name='IP адрес', null=True, blank=True)
     device_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, null=True, blank=True,

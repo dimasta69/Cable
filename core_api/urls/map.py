@@ -7,8 +7,6 @@ from core_api.views.map.equipment_list import EquipmentListView as EquipmentList
 from core_api.views.map.equipment import EquipmentView as EquipmentMapView
 
 
-
-
 urlpatterns = [
     path("", MapListView.as_view()),
     path("refresh/<int:id>/", MapRefreshView.as_view()),

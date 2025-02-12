@@ -12,6 +12,7 @@ from utils.services import ServiceWithResult
 from models_app.models import User, Access, Scheme, SchemeMap
 
 
+
 class MapListService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     search_filter = forms.CharField(required=False)
@@ -19,7 +20,7 @@ class MapListService(ServiceWithResult):
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
-    custom_validations = ['scheme_presence', 'access_presence']
+    custom_validations = ['scheme_presence', 'access_presence',]
 
     def process(self):
         self.run_custom_validations()
@@ -79,3 +80,4 @@ class MapListService(ServiceWithResult):
                     f"Scheme with id = {self.cleaned_data['scheme_id']} not found"
                 )
             )
+            self.response_status = status.HTTP_404_NOT_FOUND

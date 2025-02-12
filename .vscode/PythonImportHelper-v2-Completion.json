@@ -1,11 +1,37 @@
 [
     {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
         "label": "os",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "os",
         "description": "os",
         "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "site",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "site",
+        "description": "site",
+        "detail": "site",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
         "documentation": {}
     },
     {
@@ -2346,6 +2372,22 @@
     },
     {
         "label": "User",
+        "importPath": "models_app.models",
+        "description": "models_app.models",
+        "isExtraImport": true,
+        "detail": "models_app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Vlan",
+        "importPath": "models_app.models",
+        "description": "models_app.models",
+        "isExtraImport": true,
+        "detail": "models_app.models",
+        "documentation": {}
+    },
+    {
+        "label": "Segment",
         "importPath": "models_app.models",
         "description": "models_app.models",
         "isExtraImport": true,
@@ -7979,6 +8021,14 @@
         "documentation": {}
     },
     {
+        "label": "ListIntegerField",
+        "importPath": "utils.fields",
+        "description": "utils.fields",
+        "isExtraImport": true,
+        "detail": "utils.fields",
+        "documentation": {}
+    },
+    {
         "label": "ModelField",
         "importPath": "utils.fields",
         "description": "utils.fields",
@@ -10267,6 +10317,62 @@
         "documentation": {}
     },
     {
+        "label": "NotFound",
+        "importPath": "utils.errors",
+        "description": "utils.errors",
+        "isExtraImport": true,
+        "detail": "utils.errors",
+        "documentation": {}
+    },
+    {
+        "label": "ValidationError",
+        "importPath": "utils.errors",
+        "description": "utils.errors",
+        "isExtraImport": true,
+        "detail": "utils.errors",
+        "documentation": {}
+    },
+    {
+        "label": "ValidationError",
+        "importPath": "utils.errors",
+        "description": "utils.errors",
+        "isExtraImport": true,
+        "detail": "utils.errors",
+        "documentation": {}
+    },
+    {
+        "label": "ValidationError",
+        "importPath": "utils.errors",
+        "description": "utils.errors",
+        "isExtraImport": true,
+        "detail": "utils.errors",
+        "documentation": {}
+    },
+    {
+        "label": "NotFound",
+        "importPath": "utils.errors",
+        "description": "utils.errors",
+        "isExtraImport": true,
+        "detail": "utils.errors",
+        "documentation": {}
+    },
+    {
+        "label": "ValidationError",
+        "importPath": "utils.errors",
+        "description": "utils.errors",
+        "isExtraImport": true,
+        "detail": "utils.errors",
+        "documentation": {}
+    },
+    {
+        "label": "ValidationError",
+        "importPath": "utils.errors",
+        "description": "utils.errors",
+        "isExtraImport": true,
+        "detail": "utils.errors",
+        "documentation": {}
+    },
+    {
         "label": "delete_port_from_connection",
         "importPath": "core_api.utils.connection",
         "description": "core_api.utils.connection",
@@ -10691,6 +10797,22 @@
         "documentation": {}
     },
     {
+        "label": "migrations",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
+        "label": "models",
+        "importPath": "django.db",
+        "description": "django.db",
+        "isExtraImport": true,
+        "detail": "django.db",
+        "documentation": {}
+    },
+    {
         "label": "models",
         "importPath": "django.db",
         "description": "django.db",
@@ -10912,54 +11034,6 @@
         "description": "django.db",
         "isExtraImport": true,
         "detail": "django.db",
-        "documentation": {}
-    },
-    {
-        "label": "ValidationError",
-        "importPath": "utils.errors",
-        "description": "utils.errors",
-        "isExtraImport": true,
-        "detail": "utils.errors",
-        "documentation": {}
-    },
-    {
-        "label": "ValidationError",
-        "importPath": "utils.errors",
-        "description": "utils.errors",
-        "isExtraImport": true,
-        "detail": "utils.errors",
-        "documentation": {}
-    },
-    {
-        "label": "ValidationError",
-        "importPath": "utils.errors",
-        "description": "utils.errors",
-        "isExtraImport": true,
-        "detail": "utils.errors",
-        "documentation": {}
-    },
-    {
-        "label": "NotFound",
-        "importPath": "utils.errors",
-        "description": "utils.errors",
-        "isExtraImport": true,
-        "detail": "utils.errors",
-        "documentation": {}
-    },
-    {
-        "label": "ValidationError",
-        "importPath": "utils.errors",
-        "description": "utils.errors",
-        "isExtraImport": true,
-        "detail": "utils.errors",
-        "documentation": {}
-    },
-    {
-        "label": "ValidationError",
-        "importPath": "utils.errors",
-        "description": "utils.errors",
-        "isExtraImport": true,
-        "detail": "utils.errors",
         "documentation": {}
     },
     {
@@ -14058,15 +14132,6 @@
         "documentation": {}
     },
     {
-        "label": "sys",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "sys",
-        "description": "sys",
-        "detail": "sys",
-        "documentation": {}
-    },
-    {
         "label": "traceback",
         "kind": 6,
         "isExtraImport": true,
@@ -14230,6 +14295,87 @@
         "description": "django.contrib.auth",
         "isExtraImport": true,
         "detail": "django.contrib.auth",
+        "documentation": {}
+    },
+    {
+        "label": "bin_dir",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "bin_dir = os.path.dirname(abs_file)\nbase = bin_dir[: -len(\"Scripts\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "base",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "base = bin_dir[: -len(\"Scripts\") - 1]  # strip away the bin part from the __file__, plus the path separator\n# prepend bin to PATH (this file is inside the bin directory)\nos.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"PATH\"]",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"PATH\"] = os.pathsep.join([bin_dir, *os.environ.get(\"PATH\", \"\").split(os.pathsep)])\nos.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"VIRTUAL_ENV\"]",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"VIRTUAL_ENV\"] = base  # virtual env is right above bin directory\nos.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"VIRTUAL_ENV_PROMPT\"]",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "os.environ[\"VIRTUAL_ENV_PROMPT\"] = \"\" or os.path.basename(base)  # noqa: SIM222\n# add the virtual environments libraries to the host python import mechanism\nprev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "prev_length",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "prev_length = len(sys.path)\nfor lib in \"..\\\\Lib\\\\site-packages\".split(os.pathsep):\n    path = os.path.realpath(os.path.join(bin_dir, lib))\n    site.addsitedir(path.decode(\"utf-8\") if \"\" else path)\nsys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.path[:]",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]\nsys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.real_prefix",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "sys.real_prefix = sys.prefix\nsys.prefix = base",
+        "detail": ".venv.Scripts.activate_this",
+        "documentation": {}
+    },
+    {
+        "label": "sys.prefix",
+        "kind": 5,
+        "importPath": ".venv.Scripts.activate_this",
+        "description": ".venv.Scripts.activate_this",
+        "peekOfCode": "sys.prefix = base",
+        "detail": ".venv.Scripts.activate_this",
         "documentation": {}
     },
     {
@@ -15110,7 +15256,7 @@
         "kind": 6,
         "importPath": "core_api.services.map.list",
         "description": "core_api.services.map.list",
-        "peekOfCode": "class MapListService(ServiceWithResult):\n    scheme_id = forms.IntegerField(required=True)\n    search_filter = forms.CharField(required=False)\n    current_user = ModelField(User)\n    scheme_content_type = ContentType.objects.get_for_model(Scheme)\n    custom_validations = ['scheme_presence', 'access_presence']\n    def process(self):\n        self.run_custom_validations()\n        if self.is_valid():\n            self.result = self._maps_filter",
+        "peekOfCode": "class MapListService(ServiceWithResult):\n    scheme_id = forms.IntegerField(required=True)\n    search_filter = forms.CharField(required=False)\n    current_user = ModelField(User)\n    scheme_content_type = ContentType.objects.get_for_model(Scheme)\n    custom_validations = ['scheme_presence', 'access_presence',]\n    def process(self):\n        self.run_custom_validations()\n        if self.is_valid():\n            self.result = self._maps_filter",
         "detail": "core_api.services.map.list",
         "documentation": {}
     },
@@ -16816,6 +16962,15 @@
         "documentation": {}
     },
     {
+        "label": "Migration",
+        "kind": 6,
+        "importPath": "models_app.migrations.0020_alter_vlandevice_vlan",
+        "description": "models_app.migrations.0020_alter_vlandevice_vlan",
+        "peekOfCode": "class Migration(migrations.Migration):\n    dependencies = [\n        (\"models_app\", \"0019_alter_portmode_alfa_alter_portmode_blue_and_more\"),\n    ]\n    operations = [\n        migrations.AlterField(\n            model_name=\"vlandevice\",\n            name=\"vlan\",\n            field=models.ForeignKey(\n                on_delete=django.db.models.deletion.CASCADE,",
+        "detail": "models_app.migrations.0020_alter_vlandevice_vlan",
+        "documentation": {}
+    },
+    {
         "label": "Access",
         "kind": 6,
         "importPath": "models_app.models.access.models",
@@ -17162,7 +17317,7 @@
         "kind": 6,
         "importPath": "models_app.models.vlan.device.models",
         "description": "models_app.models.vlan.device.models",
-        "peekOfCode": "class VlanDevice(BaseModel):\n    vlan = models.ForeignKey('Vlan', on_delete=models.CASCADE, null=False, blank=False)\n    ip = models.GenericIPAddressField(verbose_name='IP адрес', null=True, blank=True)\n    device_type = models.ForeignKey(\n        ContentType, on_delete=models.CASCADE, null=True, blank=True,\n    )\n    device_id = models.PositiveIntegerField(null=True, blank=True)\n    device = GenericForeignKey(\"device_type\", \"device_id\")\n    def __str__(self):\n        return f'{self.vlan}_f{self.device.__class__.__name__}_f{self.device_id}'",
+        "peekOfCode": "class VlanDevice(BaseModel):\n    vlan = models.ForeignKey(\n            'Vlan',\n            on_delete=models.CASCADE,\n            null=False,\n            blank=False,\n            related_name=\"devices\",\n            related_query_name=\"device\",\n        )\n    ip = models.GenericIPAddressField(verbose_name='IP адрес', null=True, blank=True)",
         "detail": "models_app.models.vlan.device.models",
         "documentation": {}
     },
