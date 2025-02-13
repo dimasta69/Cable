@@ -21,10 +21,11 @@ class EquipmentView(APIView):
             filter_vlan_list_id = None
         outcome: ServiceOutcome = ServiceOutcome(
             EquipmentListService,
+            dict(request.GET.items()) |
             {
                 "current_user": request.user,
                 "filter_vlan_list_id": filter_vlan_list_id
-            } | kwargs | dict(request.GET.items())
+            } | kwargs
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
