@@ -6,7 +6,7 @@ from rest_framework import status
 
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
-from models_app.models import User, Map, Access
+from models_app.models import User, SchemeMap, Access
 
 
 class DeleteMapService(ServiceWithResult):
@@ -26,10 +26,10 @@ class DeleteMapService(ServiceWithResult):
 
     @property
     @lru_cache
-    def _map(self) -> Map | None:
+    def _map(self) -> SchemeMap | None:
         try:
-            return Map.objects.get(id=self.cleaned_data['id'])
-        except Map.DoesNotExist:
+            return SchemeMap.objects.get(id=self.cleaned_data['id'])
+        except SchemeMap.DoesNotExist:
             return None
 
     @property
