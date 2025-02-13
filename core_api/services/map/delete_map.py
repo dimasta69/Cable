@@ -3,15 +3,18 @@ from django.db.models import Q
 from functools import lru_cache
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework import status
+from django.contrib.contenttypes.models import ContentType
 
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
-from models_app.models import User, SchemeMap, Access
+from models_app.models import User, SchemeMap, Access, Scheme
 
 
 class DeleteMapService(ServiceWithResult):
     id = forms.IntegerField(required=False)
     current_user = ModelField(User)
+
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = ["map_presence", "access_presence",]
 
