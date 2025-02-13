@@ -75,10 +75,11 @@ class EquipmentsFromMapListService(ServiceWithResult):
                     segment=self._segment, device__device_type=self.equipment_content_type
                 ).values_list("device__device_id", flat=True)
             )
-        breakpoint()
         if self.cleaned_data['filter_vlan_list_id']:
             equipment_list = equipment_list.filter(
-                id__in=self._vlan.filter(device_type=self.equipment_content_type).values_list("device_id", flat=True)
+                id__in=self._vlan.filter(
+                    device__device_type=self.equipment_content_type
+                ).values_list("device__device_id", flat=True)
             )
         if self.cleaned_data['filter_manufacturer_id']:
             equipment_list = equipment_list.filter(template__manufacturer=self._manufacturer)
