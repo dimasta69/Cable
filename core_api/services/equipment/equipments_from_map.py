@@ -183,7 +183,7 @@ class EquipmentsFromMapListService(ServiceWithResult):
     @lru_cache
     def _vlan(self) -> List[Vlan]:
         try:
-            return Vlan.objects.get(id__in=self.cleaned_data["filter_vlan_list_id"], segment=self._segment)
+            return Vlan.objects.filter(id__in=self.cleaned_data["filter_vlan_list_id"], segment=self._segment)
         except Vlan.DoesNotExist:
             return Vlan.objects.none()
 
@@ -249,11 +249,11 @@ class EquipmentsFromMapListService(ServiceWithResult):
 
     def vlan_presence(self) -> None:
         if self.cleaned_data["filter_vlan_list_id"]:
-            if len(self.cleaned_data['filter_vlan_list_id']) != self._vlans or not self._segment:
+            if len(self.cleaned_data['filter_vlan_list_id']) != len(self._vlan) or not self._segment:
                 self.add_error(
-                    "filter_segment_id",
+                    "filter_vlan_list_id",
                     NotFound(
-                        f"Segment id={self.cleaned_data['filter_segment_id']} not found"
+                        f"Vlan id={self.cleaned_data['filter_vlan_list_id']} not found"
                     )
                 )
                 self.response_status = status.HTTP_404_NOT_FOUND
