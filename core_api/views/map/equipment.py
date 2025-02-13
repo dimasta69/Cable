@@ -24,7 +24,7 @@ class EquipmentView(APIView):
             {
                 "current_user": request.user,
                 "filter_vlan_list_id": filter_vlan_list_id
-            } | kwargs
+            } | kwargs | dict(request.GET.items())
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
