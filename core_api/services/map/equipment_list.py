@@ -89,7 +89,7 @@ class EquipmentListService(ServiceWithResult):
     @lru_cache
     def _segment(self) -> Segment | None:
         try:
-            return Segment.objects.get(id=self.cleaned_data["filter_scheme_id"])
+            return Segment.objects.get(id=self.cleaned_data["filter_segment_id"])
         except Segment.DoesNotExist:
             return None
 
