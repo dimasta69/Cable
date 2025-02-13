@@ -110,3 +110,24 @@ class EquipmentListService(ServiceWithResult):
                 self.add_error('current_user', PermissionDenied('Access to the map id = '
                                                                 f'{self.cleaned_data["id"]} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
+
+        def segment_presence(self) -> None:
+        if self.cleaned_data['filter_segment_id'] and not self._segment:
+            self.add_error(
+                "filter_segment_id",
+                NotFound(
+                    f"Segment id={self.cleaned_data['filter_segment_id']} not found"
+                )
+            )
+            self.response_status = status.HTTP_404_NOT_FOUND
+
+    def vlan_presence(self) -> None:
+        if self.cleaned_data["filter_vlan_list_id"]:
+            if len(self.cleaned_data['filter_vlan_list_id']) != self._vlans or not self._segment:
+                self.add_error(
+                    "filter_segment_id",
+                    NotFound(
+                        f"Segment id={self.cleaned_data['filter_segment_id']} not found"
+                    )
+                )
+                self.response_status = status.HTTP_404_NOT_FOUND
