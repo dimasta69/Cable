@@ -48,7 +48,6 @@ class EquipmentListService(ServiceWithResult):
     @property
     def _equipment_list(self) -> List[EquipmentScheme]:
         try:
-            breakpoint()
             return EquipmentScheme.objects.filter(
                 schemes=self._map
             ).select_related("equipment__scheme").prefetch_related(
