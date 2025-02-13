@@ -1,3 +1,4 @@
+import json
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -14,9 +15,16 @@ class EquipmentView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, **kwargs) -> Response:
+        if "filter_vlan_list_id" in dict(request.GET.items()):
+            filter_vlan_list_id = json.loads(dict(request.GET.items())['filter_vlan_list_id'])
+        else:
+            filter_vlan_list_id = None
         outcome: ServiceOutcome = ServiceOutcome(
             EquipmentListService,
-            {"current_user": request.user} | kwargs
+            {
+                "current_user": request.user,
+                "filter_vlan_list_id": filter_vlan_list_id
+            } | kwargs
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)

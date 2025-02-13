@@ -39,10 +39,16 @@ class EquipmentListService(ServiceWithResult):
     def _equipment_filter(self) -> List[EquipmentScheme]:
         equipments = self._equipment_list
         if self.cleaned_data['filter_segment_id']:
-            equipments = equipments.filter(equipment__scheme__segment=self._segment)
+            equipments = equipments.filter(
+                equipment_id__in=Vlan.objects.filter(
+                    segment=self._segment, device__device_type=self.equipment_content_type
+                ).values_list("device__device_id", flat=True)
+            )
         if self.cleaned_data['filter_vlan_list_id']:
             equipments = equipments.filter(
-                equipment__in=self._vlan.filter(device_type=self.equipment_content_type).values("id")
+                equipment_id__in=self._vlan.filter(
+                    device__device_type=self.equipment_content_type
+                ).values_list("device__device_id", flat=True)
             )
         return equipments
 
