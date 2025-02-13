@@ -6,6 +6,7 @@ from rest_framework import status
 from utils.services import ServiceOutcome
 from core_api.serializers.map.equipment.resource import EquipmentIsActiveMapSerializer
 from core_api.services.map.resfresh import RefreshEquipmentMapService
+from core_api.services.map.delete_map import DeleteMapService
 
 
 class MapRefreshView(APIView):
@@ -27,3 +28,14 @@ class MapRefreshView(APIView):
             ).data,
             status=status.HTTP_200_OK,
         )
+
+    def delete(self, request, **kwargs) -> Response:
+        outcome: ServiceOutcome = ServiceOutcome(
+            DeleteMapService,
+            {
+                "current_user": request.user,
+            } | kwargs,
+        )
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response({}, status=status.HTTP_200_OK)

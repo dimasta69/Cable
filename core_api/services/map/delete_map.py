@@ -1,40 +1,35 @@
 from django import forms
-from functools import lru_cache
-
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
+from functools import lru_cache
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, NotFound
 
-from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import User, EquipmentScheme, Access, Scheme
+from utils.fields import ModelField
+from models_app.models import User, Map, Access
 
 
-class DeleteEquipmentSchemeService(ServiceWithResult):
-    id = forms.IntegerField(required=True)
+class DeleteMapService(ServiceWithResult):
+    id = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
-    custom_validations = ['access_presence', 'equipment_presence']
+    custom_validations = ["map_presence", "access_presence",]
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self._delete_equipment()
+            self._delete_map()
         return self
 
-    def _delete_equipment(self) -> None:
-        equipment = self._equipment
-        equipment.delete()
+    def _delete_map(self) -> None:
+        self._map.delete()
 
     @property
-    @lru_cache()
-    def _equipment(self) -> EquipmentScheme | None:
+    @lru_cache
+    def _map(self) -> Map | None:
         try:
-            return EquipmentScheme.objects.select_related("schemes", "schemes__scheme").get(id=self.cleaned_data['id'])
-        except EquipmentScheme.DoesNotExsist:
+            return Map.objects.get(id=self.cleaned_data['id'])
+        except Map.DoesNotExist:
             return None
 
     @property
@@ -59,12 +54,12 @@ class DeleteEquipmentSchemeService(ServiceWithResult):
                                                                 f'{self.cleaned_data["id"]} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
 
-    def equipment_presence(self) -> None:
-        if not self._equipment:
+    def map_presence(self) -> None:
+        if self.cleaned_data['id'] and not self._map:
             self.add_error(
                 "id",
                 NotFound(
-                    f"Equipment map with id={self.cleaned_data['id']} not fund"
+                    f"Map id={self.cleaned_data['id']} not found"
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
