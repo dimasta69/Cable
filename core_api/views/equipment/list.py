@@ -37,12 +37,12 @@ class EquipmentListView(APIView):
 class EquipmentsFromMapListView(APIView):
     def get(self, request):
         if "filter_vlan_list_id" in dict(request.GET.items()):
-            filter_vlan_list_id = json.loads(dict(request.GET.items())['filter_speed'])
+            filter_vlan_list_id = json.loads(dict(request.GET.items())['filter_vlan_list_id'])
         else:
             filter_vlan_list_id = None
         outcome = ServiceOutcome(
             EquipmentsFromMapListService, dict(request.GET.items()) | {
-                "current_user": request.user, 
+                "current_user": request.user,
                 "filter_vlan_list_id": filter_vlan_list_id,
             },
         )
