@@ -41,7 +41,7 @@ class DeleteMapService(ServiceWithResult):
             return Access.objects.filter(
                 Q(
                     object_type=self.scheme_content_type,
-                    object_id=self._equipment.schemes.scheme.id,
+                    object_id=self._map.scheme.id,
                 ),
             ).filter(
                 user=self.cleaned_data['current_user'],
