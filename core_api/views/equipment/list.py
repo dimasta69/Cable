@@ -1,3 +1,4 @@
+import json
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -35,8 +36,15 @@ class EquipmentListView(APIView):
 
 class EquipmentsFromMapListView(APIView):
     def get(self, request):
+        if "filter_vlan_list_id" in dict(request.GET.items()):
+            filter_vlan_list_id = json.loads(dict(request.GET.items())['filter_speed'])
+        else:
+            filter_vlan_list_id = None
         outcome = ServiceOutcome(
-            EquipmentsFromMapListService, dict(request.GET.items()) | {"current_user": request.user},
+            EquipmentsFromMapListService, dict(request.GET.items()) | {
+                "current_user": request.user, 
+                "filter_vlan_list_id": filter_vlan_list_id,
+            },
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)

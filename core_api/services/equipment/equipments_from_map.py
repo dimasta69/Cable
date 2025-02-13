@@ -76,7 +76,6 @@ class EquipmentsFromMapListService(ServiceWithResult):
                 ).values_list("device__device_id", flat=True)
             )
         if self.cleaned_data['filter_vlan_list_id']:
-            breakpoint()
             equipment_list = equipment_list.filter(
                 id__in=self._vlan.filter(
                     device__device_type=self.equipment_content_type
