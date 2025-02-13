@@ -70,7 +70,6 @@ class EquipmentsFromMapListService(ServiceWithResult):
     def _equipment_filter_list(self) -> List[Equipment]:
         equipment_list = self._equipment_list.exclude(id__in=self._equipment_scheme_id)
         if self.cleaned_data['filter_segment_id']:
-            breakpoint()
             equipment_list = equipment_list.filter(scheme__segment__in=[self._segment])
         if self.cleaned_data['filter_vlan_list_id']:
             equipment_list = equipment_list.filter(
