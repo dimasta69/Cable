@@ -130,7 +130,7 @@ class EquipmentListService(ServiceWithResult):
 
     def vlan_presence(self) -> None:
         if self.cleaned_data["filter_vlan_list_id"]:
-            if len(self.cleaned_data['filter_vlan_list_id']) != self._vlans or not self._segment:
+            if len(self.cleaned_data['filter_vlan_list_id']) != self._vlan or not self._segment:
                 self.add_error(
                     "filter_segment_id",
                     NotFound(
