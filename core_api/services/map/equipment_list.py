@@ -32,18 +32,19 @@ class EquipmentListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._equipment_list
+            self.result = self._equipment_filter
         return self
 
     @property
     def _equipment_filter(self) -> List[EquipmentScheme]:
         equipments = self._equipment_list
-        if self.cleaned_data['filter_segment_id']: 
-            equipments = equipments.filter(equipment__scheme__segment__in=[self._segment])
+        if self.cleaned_data['filter_segment_id']:
+            equipments = equipments.filter(equipment__scheme__segment=self._segment)
         if self.cleaned_data['filter_vlan_list_id']:
             equipments = equipments.filter(
                 equipment__in=self._vlan.filter(device_type=self.equipment_content_type).values("id")
             )
+        return equipments
 
     @property
     def _equipment_list(self) -> List[EquipmentScheme]:
