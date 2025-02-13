@@ -111,7 +111,7 @@ class EquipmentListService(ServiceWithResult):
                                                                 f'{self.cleaned_data["id"]} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
 
-        def segment_presence(self) -> None:
+    def segment_presence(self) -> None:
         if self.cleaned_data['filter_segment_id'] and not self._segment:
             self.add_error(
                 "filter_segment_id",
