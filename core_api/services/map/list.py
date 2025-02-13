@@ -12,7 +12,6 @@ from utils.services import ServiceWithResult
 from models_app.models import User, Access, Scheme, SchemeMap
 
 
-
 class MapListService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     search_filter = forms.CharField(required=False)

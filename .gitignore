@@ -4,3 +4,4 @@ debug.log
 __pycache__
 cabel/static/
 .DS_Store
+.vscode/PythonImportHelper-v2-Completion.json

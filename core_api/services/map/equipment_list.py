@@ -8,18 +8,26 @@ from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
 
-from utils.fields import ModelField
+from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
-from models_app.models import EquipmentScheme, SchemeMap, Access, User, Scheme
+from models_app.models import EquipmentScheme, SchemeMap, Access, User, Scheme, Vlan, Segment, Equipment
 
 
 class EquipmentListService(ServiceWithResult):
     id = forms.IntegerField(required=True)
+    filter_segment_id = forms.IntegerField(required=False)
+    filter_vlan_list_id = ListIntegerField(required=False)
     current_user = ModelField(User)
 
     scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    equipment_content_type = ContentType.objects.get_for_model(Equipment)
 
-    custom_validations = ['map_presence', 'access_presence']
+    custom_validations = [
+        'map_presence',
+        'access_presence',
+        'segment_presence',
+        'vlan_presence',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -28,9 +36,23 @@ class EquipmentListService(ServiceWithResult):
         return self
 
     @property
+    def _equipment_filter(self) -> List[EquipmentScheme]:
+        equipments = self._equipment_list
+        if self.cleaned_data['filter_segment_id']: 
+            equipments = equipments.filter(equipment__scheme__segment__in=[self._segment])
+        if self.cleaned_data['filter_vlan_list_id']:
+            equipments = equipments.filter(
+                equipment__in=self._vlan.filter(device_type=self.equipment_content_type).values("id")
+            )
+
+    @property
     def _equipment_list(self) -> List[EquipmentScheme]:
         try:
-            return EquipmentScheme.objects.filter(schemes=self._map)
+            return EquipmentScheme.objects.filter(
+                schemes=self._map
+            ).select_related("equipment__scheme").prefetch_related(
+                "equipment__scheme__segment",
+            )
         except EquipmentScheme.DoesNotExist:
             return EquipmentScheme.objects.none()
 
@@ -55,6 +77,22 @@ class EquipmentListService(ServiceWithResult):
             )
         except Access.DoesNotExist:
             return None
+
+    @property
+    @lru_cache
+    def _segment(self) -> Segment | None:
+        try:
+            return Segment.objects.get(id=self.cleaned_data["filter_scheme_id"])
+        except Segment.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache
+    def _vlan(self) -> List[Vlan]:
+        try:
+            return Vlan.objects.get(id__in=self.cleaned_data["filter_vlan_list_id"], segment=self._segment)
+        except Vlan.DoesNotExist:
+            return Vlan.objects.none()
 
     def map_presence(self) -> None:
         if not self._map:
