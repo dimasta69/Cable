@@ -15,7 +15,7 @@ from utils.fields import ListIntegerField, ModelField
 from utils.services import ServiceWithResult
 from models_app.models import (
     Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, Access, User, Vlan,
-    Segment,
+    Segment, VlanDevice
 )
 
 
@@ -94,7 +94,10 @@ class EquipmentsFromMapListService(ServiceWithResult):
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
-                Q(template__manufacturer__name__icontains=self.cleaned_data['search_filter'])
+                Q(template__manufacturer__name__icontains=self.cleaned_data['search_filter']) |
+                Q(id__in=VlanDevice.objects.filter(vlan__scheme=self._scheme).filter(
+                    Q(ip__icontaince=self.cleaned_data['search_filter'])
+                    ).values_list('device_id', flat=True))
             )
         if self.cleaned_data['order_by']:
             equipment_list = equipment_list.order_by(self.cleaned_data['order_by'])
