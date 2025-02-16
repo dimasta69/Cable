@@ -90,8 +90,8 @@ class EquipmentListService(ServiceWithResult):
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
                 Q(template__manufacturer__name__icontains=self.cleaned_data['search_filter']) | 
-                Q(id__in=VlanDevice.objects.filter(vlan__scheme=self._scheme).filter(
-                    Q(ip__icontaince=self.cleaned_data['search_filter'])
+                Q(id__in=VlanDevice.objects.filter(vlan__segment__scheme=self._scheme).filter(
+                    Q(ip__icontains=self.cleaned_data['search_filter'])
                     ).values_list('device_id', flat=True))
             )
         if self.cleaned_data['order_by']:
