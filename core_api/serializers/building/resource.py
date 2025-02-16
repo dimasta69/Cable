@@ -10,6 +10,7 @@ class BuildingListSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     coord_x = serializers.FloatField(required=False)
     coord_y = serializers.FloatField(required=False)
+    connection = serializers.ListField(required=False)
 
     def get_scheme(self, obj: Building) -> Set[str]:
         return {

@@ -1,5 +1,3 @@
-import json
-
 from models_app.models import EquipmentScheme, Port
 
 

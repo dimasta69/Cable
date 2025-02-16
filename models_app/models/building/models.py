@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
+from django.contrib.postgres.fields import ArrayField
 
 from models_app.models.base_model import BaseModel
 
@@ -13,6 +14,7 @@ class Building(BaseModel):
     name = models.CharField(null=False, blank=False, verbose_name='Номер корпуса', max_length=255)
     coord_x = models.IntegerField(null=True, blank=True, verbose_name='Координата X на схеме')
     coord_y = models.IntegerField(null=True, blank=True, verbose_name='Координата Y на схеме')
+    connection = ArrayField(models.IntegerField(), blank=True, default=list, verbose_name='Подключенные строения')
 
     class Meta:
         db_table = 'building'
