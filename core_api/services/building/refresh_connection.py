@@ -2,6 +2,7 @@ from django import forms
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 from django.core.exceptions import PermissionDenied
+from django.contrib.contenttypes.models import ContentType
 
 from functools import lru_cache
 from utils.services import ServiceWithResult
@@ -14,6 +15,8 @@ class RefreshBuildingConnectionService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
+    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+
     custom_validations = ["access_presence", "scheme_presence"]
 
     def process(self):
@@ -23,7 +26,7 @@ class RefreshBuildingConnectionService(ServiceWithResult):
         return self
 
     def _refresh_connection_buildings(self) -> None:
-        list(map(refresh_connection_building, self._scheme.buildings))
+        refresh_connection_building(self._scheme)
         return None
 
     @property
@@ -44,7 +47,7 @@ class RefreshBuildingConnectionService(ServiceWithResult):
             )
         except Access.DoesNotExist:
             return None
-  
+
     def scheme_presence(self) -> None:
         if not self._scheme:
             self.add_error(
