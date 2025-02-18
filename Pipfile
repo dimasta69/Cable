@@ -31,6 +31,7 @@ django-cors-headers = "*"
 djoser = "*"
 psycopg2-binary = "*"
 gunicorn = "*"
+django-querycount = "*"
 
 [requires]
 python_version = "3.11"
