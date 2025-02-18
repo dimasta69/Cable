@@ -10,6 +10,10 @@ def refresh_connection_building(scheme: Scheme) -> None:
         Building.objects.bulk_update(building_to_update, ['connection'])
 
 
+def delete_connection_build(scheme: Scheme) -> None:
+    Building.objects.filter(scheme=scheme).connection = None
+
+
 def prepared_building_to_update(scheme: Scheme) -> List[Building]:
     ports = port_list(scheme)
     building_connection = set_building_connection(ports)

@@ -18,7 +18,6 @@ class DeleteVlanService(ServiceWithResult):
     segment_content_type = ContentType.objects.get_for_model(Segment)
     vlan_content_type = ContentType.objects.get_for_model(Vlan)
 
-
     custom_validations = ['vlan_presence', 'access_presence', ]
 
     def process(self):
