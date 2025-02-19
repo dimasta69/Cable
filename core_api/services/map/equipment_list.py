@@ -19,9 +19,6 @@ class EquipmentListService(ServiceWithResult):
     filter_vlan_list_id = ListIntegerField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    equipment_content_type = ContentType.objects.get_for_model(Equipment)
-
     custom_validations = [
         'map_presence',
         'access_presence',
@@ -38,16 +35,17 @@ class EquipmentListService(ServiceWithResult):
     @property
     def _equipment_filter(self) -> List[EquipmentScheme]:
         equipments = self._equipment_list
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         if self.cleaned_data['filter_segment_id']:
             equipments = equipments.filter(
                 equipment_id__in=Vlan.objects.filter(
-                    segment=self._segment, device__device_type=self.equipment_content_type
+                    segment=self._segment, device__device_type=equipment_content_type
                 ).values_list("device__device_id", flat=True)
             )
         if self.cleaned_data['filter_vlan_list_id']:
             equipments = equipments.filter(
                 equipment_id__in=self._vlan.filter(
-                    device__device_type=self.equipment_content_type
+                    device__device_type=equipment_content_type
                 ).values_list("device__device_id", flat=True)
             )
         return equipments
@@ -73,10 +71,11 @@ class EquipmentListService(ServiceWithResult):
 
     @property
     def _access(self):
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._map.scheme.pk,
                 ),
             ).filter(

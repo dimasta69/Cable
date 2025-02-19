@@ -19,8 +19,6 @@ class AccessListService(ServiceWithResult):
     filter_role = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['scheme_presence', 'access_owner_or_superuser', 'filter_role_presence']
 
     def process(self):
@@ -48,8 +46,9 @@ class AccessListService(ServiceWithResult):
     @property
     @lru_cache()
     def _access(self) -> List[Access]:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
-            return Access.objects.filter(object_type=self.scheme_content_type, object_id=self._scheme.pk)
+            return Access.objects.filter(object_type=scheme_content_type, object_id=self._scheme.pk)
         except Access.DoesNotExist:
             return Access.objects.none()
 

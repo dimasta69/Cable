@@ -18,9 +18,6 @@ class CreateRoomService(ServiceWithResult):
     floor = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-
     custom_validations = ['building_presence', 'access_presence']
 
     def process(self):
@@ -48,14 +45,16 @@ class CreateRoomService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
         try:
             return (Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._building.scheme.id,
                 )|
                 Q(
-                    object_type=self.building_content_type,
+                    object_type=building_content_type,
                     object_id=self._building.id,
                 )
             ).filter(

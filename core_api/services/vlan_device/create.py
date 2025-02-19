@@ -20,13 +20,6 @@ class CreateVlanDeviceService(ServiceWithResult):
     device_id = forms.IntegerField(required=True)
     ip = forms.GenericIPAddressField(required=False)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-    room_content_type = ContentType.objects.get_for_model(Room)
-    server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-    equipment_content_type = ContentType.objects.get_for_model(Equipment)
-    port_content_type = ContentType.objects.get_for_model(Port)
-
     custom_validations = [
         'device_type_presence', 'equipment_presence', 'port_presence', 'vlan_presence', 'access_port_presence',
     ]
@@ -39,11 +32,13 @@ class CreateVlanDeviceService(ServiceWithResult):
 
     @property
     def _device_type(self) -> ContentType:
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
+        port_content_type = ContentType.objects.get_for_model(Port)
         match self.cleaned_data['device_type']:
             case "equipment":
-                return self.equipment_content_type
+                return equipment_content_type
             case "port":
-                return self.port_content_type
+                return port_content_type
             case _:
                 assert False, "Тип объкта, который не может быть"
 
@@ -91,14 +86,19 @@ class CreateVlanDeviceService(ServiceWithResult):
 
     @property
     def _access_port(self) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         try:
             access_list = Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._port.equipment.scheme.id,
                 ) |
                 Q(
-                    object_type=self.equipment_content_type,
+                    object_type=equipment_content_type,
                     object_id=self._port.equipment.id
                 )
             )
@@ -106,11 +106,11 @@ class CreateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._port.equipment.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._port.equipment.room.id
                             ),
                         ) | access_list
@@ -122,15 +122,15 @@ class CreateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._port.equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._port.equipment.units.all()[0].server_rack.room.id
                             ) |
                             Q(
-                                object_type=self.server_rack_content_type,
+                                object_type=server_rack_content_type,
                                 object_id=self._port.equipment.units.all()[0].server_rack.id
                             ),
                         ) | access_list

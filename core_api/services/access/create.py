@@ -25,8 +25,6 @@ class CreateAccessService(ServiceWithResult):
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = [
         'scheme_presence',
         'role_presence',
@@ -212,7 +210,6 @@ class CreateAccessService(ServiceWithResult):
                                                                    f'{self.cleaned_data["map_id"]} '
                                                                    'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
-
 
     def user_presence(self) -> None:
         if not self._user:

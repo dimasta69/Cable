@@ -34,9 +34,6 @@ class EquipmentsFromMapListService(ServiceWithResult):
     map_id = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    equipment_content_type = ContentType.objects.get_for_model(Equipment)
-
     custom_validations = [
         'order_presence',
         'manufacturer_presence',
@@ -68,17 +65,18 @@ class EquipmentsFromMapListService(ServiceWithResult):
 
     @property
     def _equipment_filter_list(self) -> List[Equipment]:
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         equipment_list = self._equipment_list.exclude(id__in=self._equipment_scheme_id)
         if self.cleaned_data['filter_segment_id']:
             equipment_list = equipment_list.filter(
                 id__in=Vlan.objects.filter(
-                    segment=self._segment, device__device_type=self.equipment_content_type
+                    segment=self._segment, device__device_type=equipment_content_type
                 ).values_list("device__device_id", flat=True)
             )
         if self.cleaned_data['filter_vlan_list_id']:
             equipment_list = equipment_list.filter(
                 id__in=self._vlan.filter(
-                    device__device_type=self.equipment_content_type
+                    device__device_type=equipment_content_type
                 ).values_list("device__device_id", flat=True)
             )
         if self.cleaned_data['filter_manufacturer_id']:
@@ -164,11 +162,12 @@ class EquipmentsFromMapListService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
                 user=self.cleaned_data['current_user'],
                 role__in=['Change', 'Creator'],
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
                 object_id=self._scheme.id,
             )
         except Access.DoesNotExist:

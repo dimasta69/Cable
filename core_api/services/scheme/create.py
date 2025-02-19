@@ -14,7 +14,7 @@ class CreateScheme(ServiceWithResult):
     current_user = ModelField(User)
     title = forms.CharField(max_length=100, required=True)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    # scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     def process(self):
         if self.is_valid():
@@ -37,6 +37,6 @@ class CreateScheme(ServiceWithResult):
         Access.objects.create(
             user=self.cleaned_data['current_user'],
             role='Creator',
-            object_type=self.scheme_content_type,
+            # object_type=self.scheme_content_type,
             object_id=scheme.pk,
         )

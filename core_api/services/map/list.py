@@ -17,8 +17,6 @@ class MapListService(ServiceWithResult):
     search_filter = forms.CharField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['scheme_presence', 'access_presence',]
 
     def process(self):
@@ -51,10 +49,11 @@ class MapListService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._scheme.pk,
                 ),
             ).filter(

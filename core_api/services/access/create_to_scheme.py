@@ -18,8 +18,6 @@ class CreateAccessService(ServiceWithResult):
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['scheme_presence', 'role_presence', 'user_presence', 'access_owner_or_superuser']
 
     def process(self):
@@ -31,10 +29,11 @@ class CreateAccessService(ServiceWithResult):
 
     @property
     def _create_access(self) -> Access:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         return Access.objects.create(
             user=self._user,
             role=self.cleaned_data['role'],
-            object_type=self.scheme_content_type,
+            object_type=scheme_content_type,
             object_id=self.cleaned_data['scheme_id'],
         )
 

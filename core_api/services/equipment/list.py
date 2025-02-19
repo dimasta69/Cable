@@ -28,8 +28,6 @@ class EquipmentListService(ServiceWithResult):
     filter_server_rack_id = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = [
         'order_presence',
         'manufacturer_presence',
@@ -147,10 +145,11 @@ class EquipmentListService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
                 user=self.cleaned_data['current_user'],
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
                 object_id=self._scheme.id,
             )
         except Access.DoesNotExist:

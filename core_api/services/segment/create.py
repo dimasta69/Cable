@@ -16,8 +16,6 @@ class CreateSegmentService(ServiceWithResult):
     name = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ["scheme_presence", "access_presence"]
 
     def process(self):
@@ -44,10 +42,11 @@ class CreateSegmentService(ServiceWithResult):
 
     @property
     def _access(self):
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._scheme.pk,
                 ),
             ).filter(

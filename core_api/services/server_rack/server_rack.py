@@ -14,8 +14,6 @@ class ServerRackService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['server_rack_presence', 'access_presence']
 
     def process(self):
@@ -35,10 +33,11 @@ class ServerRackService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.get(
                 user=self.cleaned_data['current_user'],
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
                 object_id=self._server_rack.room.building.scheme.pk,
             )
         except Access.DoesNotExist:

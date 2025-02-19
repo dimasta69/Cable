@@ -15,7 +15,7 @@ class SchemeListService(ServiceWithResult):
     current_user = ModelField(User)
     search_filter = forms.CharField(required=False)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
+    # scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     def process(self):
         if self.is_valid():
@@ -43,7 +43,7 @@ class SchemeListService(ServiceWithResult):
         try:
             return Access.objects.filter(
                 user=self.cleaned_data['current_user'],
-                object_type=self.scheme_content_type,
+                # object_type=self.scheme_content_type,
             ).values_list('object_id', flat=True)
         except Access.DoesNotExist:
             return []

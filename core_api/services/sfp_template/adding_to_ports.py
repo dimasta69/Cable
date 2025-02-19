@@ -18,11 +18,6 @@ class AddToPortSfpService(ServiceWithResult):
     port_list = ListIntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-    room_content_type = ContentType.objects.get_for_model(Room)
-    equipment_content_type = ContentType.objects.get_for_model(Equipment)
-
     custom_validations = [
         'sfp_template_presence', 'speed_control', 'check_ports', 'access_port_presence', 'line_type_control',
     ]
@@ -66,14 +61,18 @@ class AddToPortSfpService(ServiceWithResult):
             return Port.objects.none()
 
     def _access_port(self, port_id: int) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         try:
             access_list = Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._port_list[port_id].equipment.scheme.id,
                 ) |
                 Q(
-                    object_type=self.equipment_content_type,
+                    object_type=equipment_content_type,
                     object_id=self._port_list[port_id].equipment.id
                 )
             )
@@ -81,11 +80,11 @@ class AddToPortSfpService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._port_list[port_id].equipment.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._port_list[port_id].equipment.room.id
                             ),
                         ) | access_list
@@ -97,11 +96,11 @@ class AddToPortSfpService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.room.id
                             ),
                         ) | access_list

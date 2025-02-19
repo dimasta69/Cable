@@ -14,12 +14,6 @@ class DisconnectSfpService(ServiceWithResult):
     port_list = ListIntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-    room_content_type = ContentType.objects.get_for_model(Room)
-    server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-    equipment_content_type = ContentType.objects.get_for_model(Equipment)
-
     custom_validations = ['port_presence', 'access_port_presence']
 
     def process(self):
@@ -46,14 +40,19 @@ class DisconnectSfpService(ServiceWithResult):
             return Port.objects.none()
 
     def _access_port(self, port_id: int) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         try:
             access_list = Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._ports[port_id].equipment.scheme.id,
                 ) |
                 Q(
-                    object_type=self.equipment_content_type,
+                    object_type=equipment_content_type,
                     object_id=self._ports[port_id].equipment.id
                 )
             )
@@ -61,11 +60,11 @@ class DisconnectSfpService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._ports[port_id].equipment.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._ports[port_id].equipment.room.id
                             ),
                         ) | access_list
@@ -77,15 +76,15 @@ class DisconnectSfpService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._ports[port_id].equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._ports[port_id].equipment.units.all()[0].server_rack.room.id
                             ),
                             Q(
-                                object_type=self.server_rack_content_type,
+                                object_type=server_rack_content_type,
                                 object_id=self._ports[port_id].equipment.units.all()[0].server_rack.id
                             ),
                         ) | access_list

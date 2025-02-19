@@ -18,9 +18,6 @@ class AddEquipmentMapService(ServiceWithResult):
     coord_x = forms.IntegerField(required=True)
     coord_y = forms.IntegerField(required=True)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    map_content_type = ContentType.objects.get_for_model(SchemeMap)
-
     custom_validations = ['equipment_presence', 'map_presence', 'access_presence']
 
     def process(self):
@@ -60,14 +57,16 @@ class AddEquipmentMapService(ServiceWithResult):
 
     @property
     def _access(self):
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        map_content_type = ContentType.objects.get_for_model(SchemeMap)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.map_content_type,
+                    object_type=map_content_type,
                     object_id=self._map.pk,
                 )|
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._map.scheme.pk,
                 ),
             ).filter(

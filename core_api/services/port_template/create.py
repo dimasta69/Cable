@@ -3,12 +3,11 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist, Permissi
 from rest_framework import status
 from functools import lru_cache
 
-from create_superuser import User
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField, ModelField
 from models_app.models.port.port_template.models import PortTemplate
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
-from models_app.models import TypePort, Speed, LineType
+from models_app.models import TypePort, Speed, LineType, User
 
 
 class CreatePortTemplateService(ServiceWithResult):
