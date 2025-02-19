@@ -18,10 +18,6 @@ class VlanListService(ServiceWithResult):
     segment_id = forms.IntegerField(required=True)
     search_field = forms.CharField(required=False)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    segment_content_type = ContentType.objects.get_for_model(Segment)
-    vlan_content_type = ContentType.objects.get_for_model(Vlan)
-
     custom_validations = ['access_presence', 'segment_presence']
 
     def process(self):
@@ -67,14 +63,16 @@ class VlanListService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        segment_content_type = ContentType.objects.get_for_model(Segment)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._segment.scheme.pk,
                 ) |
                 Q(
-                    object_type=self.segment_content_type,
+                    object_type=segment_content_type,
                     object_id=self._segment.pk,
                 )
             ).filter(
@@ -85,10 +83,11 @@ class VlanListService(ServiceWithResult):
 
     @property
     def _access_vlan(self) -> Access | None:
+        vlan_content_type = ContentType.objects.get_for_model(Vlan)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.vlan_content_type,
+                    object_type=vlan_content_type,
                     object_id__in=self._segment.vlan.values('id'),
                 ),
             ).filter(

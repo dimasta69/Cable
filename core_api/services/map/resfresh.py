@@ -17,9 +17,6 @@ class RefreshEquipmentMapService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    map_content_type = ContentType.objects.get_for_model(SchemeMap)
-
     custom_validations = ["access_presence"]
 
     def process(self):
@@ -52,14 +49,16 @@ class RefreshEquipmentMapService(ServiceWithResult):
 
     @property
     def _access(self):
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        map_content_type = ContentType.objects.get_for_model(SchemeMap)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.map_content_type,
+                    object_type=map_content_type,
                     object_id=self._map.pk,
                 )|
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._map.scheme.pk,
                 ),
             ).filter(

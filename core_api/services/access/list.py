@@ -22,6 +22,7 @@ def _access(object_type: ContentType, uid: int) -> List[Access]:
     except Access.DoesNotExist:
         return Access.objects.none()
 
+
 class AccessListService(ServiceWithResult):
     current_user = ModelField(User)
     page = forms.IntegerField(required=False)
@@ -35,8 +36,6 @@ class AccessListService(ServiceWithResult):
     filter_segment_id = forms.IntegerField(required=False)
     filter_vlan_id = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
-
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
     custom_validations = [
         'scheme_presence',
@@ -60,13 +59,14 @@ class AccessListService(ServiceWithResult):
     @property
     def _access_filter_list(self) -> List[Access]:
         access_list = self._list_acc
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
 
         if self.cleaned_data["filter_building_id"]:
             access_filter = _access(
                 ContentType.objects.get_for_model(Building), self._building.pk,
             )
             access_list = access_filter | access_list.exclude(
-                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+                role="Read", object_type=scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
 
         if self.cleaned_data["filter_room_id"]:
@@ -74,7 +74,7 @@ class AccessListService(ServiceWithResult):
                 ContentType.objects.get_for_model(Room), self._room.pk,
             )
             access_list = access_filter | access_list.exclude(
-                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+                role="Read", object_type=scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
 
         if self.cleaned_data["filter_map_id"]:
@@ -82,7 +82,7 @@ class AccessListService(ServiceWithResult):
                 ContentType.objects.get_for_model(SchemeMap), self._map.pk,
             )
             access_list = access_filter | access_list.exclude(
-                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+                role="Read", object_type=scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
 
         if self.cleaned_data["filter_server_rack_id"]:
@@ -90,7 +90,7 @@ class AccessListService(ServiceWithResult):
                 ContentType.objects.get_for_model(ServerRack), self._server_rack.pk,
             )
             access_list = access_filter | access_list.exclude(
-                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+                role="Read", object_type=scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
 
         if self.cleaned_data["filter_equipment_id"]:
@@ -98,7 +98,7 @@ class AccessListService(ServiceWithResult):
                 ContentType.objects.get_for_model(Equipment), self._equipment.pk,
             )
             access_list = access_filter | access_list.exclude(
-                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+                role="Read", object_type=scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
 
         if self.cleaned_data["filter_segment_id"]:
@@ -106,7 +106,7 @@ class AccessListService(ServiceWithResult):
                 ContentType.objects.get_for_model(Segment), self._segment.pk,
             )
             access_list = access_filter | access_list.exclude(
-                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+                role="Read", object_type=scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
 
         if self.cleaned_data["filter_vlan_id"]:
@@ -114,7 +114,7 @@ class AccessListService(ServiceWithResult):
                 ContentType.objects.get_for_model(Vlan), self._vlan.pk,
             )
             access_list = access_filter | access_list.exclude(
-                role="Read", object_type=self.scheme_content_type, user__id__in=access_list.values("user__id")
+                role="Read", object_type=scheme_content_type, user__id__in=access_list.values("user__id")
             ) if access_filter else access_list
 
         if self.cleaned_data['search_filter']:
@@ -126,9 +126,10 @@ class AccessListService(ServiceWithResult):
     @property
     @lru_cache()
     def _list_acc(self) -> List[Access]:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
                 object_id=self._scheme.id,
                 role="Read",
             )

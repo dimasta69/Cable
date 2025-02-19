@@ -18,8 +18,6 @@ class BuildingListService(ServiceWithResult):
     filter_scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['access_presence', 'scheme_presence']
 
     def process(self):
@@ -46,10 +44,12 @@ class BuildingListService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+
         try:
             return Access.objects.get(
                 user=self.cleaned_data['current_user'],
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
                 object_id=self._scheme.pk,
             )
         except Access.DoesNotExist:

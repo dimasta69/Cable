@@ -17,9 +17,6 @@ class UpdateEquipmentService(ServiceWithResult):
     coord_y = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    map_content_type = ContentType.objects.get_for_model(SchemeMap)
-
     custom_validations = ['equipment_presence', 'access_presence']
 
     def process(self):
@@ -48,14 +45,16 @@ class UpdateEquipmentService(ServiceWithResult):
 
     @property
     def _access(self):
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        map_content_type = ContentType.objects.get_for_model(SchemeMap)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.map_content_type,
+                    object_type=map_content_type,
                     object_id=self._equipment.schemes.pk,
                 )|
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._equipment.schemes.scheme.pk,
                 ),
             ).filter(

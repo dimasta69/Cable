@@ -15,9 +15,6 @@ class CreateVlanService(ServiceWithResult):
     segment_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    segment_content_type = ContentType.objects.get_for_model(Segment)
-
     custom_validations = ['segment_presence', 'access_presence', ]
 
     def process(self):
@@ -43,14 +40,16 @@ class CreateVlanService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        segment_content_type = ContentType.objects.get_for_model(Segment)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._segment.scheme.pk,
                 ) |
                 Q(
-                    object_type=self.segment_content_type,
+                    object_type=segment_content_type,
                     object_id=self._segment.pk,
                 )
             ).filter(

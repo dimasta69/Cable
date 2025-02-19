@@ -17,9 +17,6 @@ class DeleteRoomService(ServiceWithResult):
 
     custom_validations = ['room_presence', 'access_presence']
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
@@ -40,14 +37,16 @@ class DeleteRoomService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
         try:
             return (Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._room.building.scheme.id,
                 )|
                 Q(
-                    object_type=self.building_content_type,
+                    object_type=building_content_type,
                     object_id=self._room.building.id,
                 )
             ).filter(

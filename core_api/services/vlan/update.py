@@ -15,11 +15,6 @@ class UpdateVlanService(ServiceWithResult):
     name = forms.CharField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    segment_content_type = ContentType.objects.get_for_model(Segment)
-    vlan_content_type = ContentType.objects.get_for_model(Vlan)
-
-
     custom_validations = ['vlan_presence', 'access_presence', ]
 
     def process(self):
@@ -45,18 +40,21 @@ class UpdateVlanService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        segment_content_type = ContentType.objects.get_for_model(Segment)
+        vlan_content_type = ContentType.objects.get_for_model(Vlan)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._vlan.segment.scheme.pk,
                 ) |
                 Q(
-                    object_type=self.segment_content_type,
+                    object_type=segment_content_type,
                     object_id=self._vlan.segment.pk,
                 ) |
                 Q(
-                    object_type=self.vlan_content_type,
+                    object_type=vlan_content_type,
                     object_id=self._vlan.pk,
                 )
             ).filter(

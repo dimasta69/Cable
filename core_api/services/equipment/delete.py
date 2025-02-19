@@ -16,11 +16,6 @@ class DeleteEquipmentService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-    room_content_type = ContentType.objects.get_for_model(Room)
-    server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-
     custom_validations = ['equipment_presence', 'server_rack_presence', 'access_presence']
 
     def process(self):
@@ -50,22 +45,26 @@ class DeleteEquipmentService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
         try:
             return (Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._equipment.scheme.id,
                 )|
                 Q(
-                    object_type=self.building_content_type,
+                    object_type=building_content_type,
                     object_id__in=self._equipment.scheme.buildings.values("id")
                 )|
                 Q(
-                    object_type=self.room_content_type,
+                    object_type=room_content_type,
                     object_id__in=self._equipment.scheme.buildings.rooms.values("id"),
                 )|
                 Q(
-                    object_type=self.server_rack_content_type,
+                    object_type=server_rack_content_type,
                     object_id__in=self._equipment.scheme.buildings.rooms.server_racks.values("id"),
                 ),
             ).filter(

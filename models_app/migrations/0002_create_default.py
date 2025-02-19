@@ -46,8 +46,8 @@ def create_default(apps, schema_editor):
 
     PortMode.objects.bulk_create(
         [
-            PortMode(name='Access', is_only_one_vlan=True),
-            PortMode(name='Trunk', is_only_one_vlan=False),
+            PortMode(name='Access', is_only_one_vlan=True, red=0, green=100, blue=0, alfa=50),
+            PortMode(name='Trunk', is_only_one_vlan=False, red=100, green=0, blue=0, alfa=50),
         ]
     )
 

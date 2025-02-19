@@ -14,8 +14,6 @@ class DeleteBuildingService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ["building_presence", "access_presence"]
 
     def process(self):
@@ -39,12 +37,13 @@ class DeleteBuildingService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.get(
                 user=self.cleaned_data["current_user"],
                 object_id=self._building.scheme.id,
                 role__in=["Change", "Creator"],
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
             )
         except Access.DoesNotExist:
             return None

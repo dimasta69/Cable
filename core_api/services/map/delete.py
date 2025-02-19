@@ -15,8 +15,6 @@ class DeleteEquipmentSchemeService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['access_presence', 'equipment_presence']
 
     def process(self):
@@ -39,10 +37,11 @@ class DeleteEquipmentSchemeService(ServiceWithResult):
 
     @property
     def _access(self):
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._equipment.schemes.scheme.id,
                 ),
             ).filter(

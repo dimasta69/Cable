@@ -14,8 +14,6 @@ class RoomService(ServiceWithResult):
     current_user = ModelField(User)
     id = forms.IntegerField(required=True)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['room_presence', 'access_presence']
 
     def process(self):
@@ -35,10 +33,11 @@ class RoomService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.get(
                 user=self.cleaned_data['current_user'],
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
                 object_id=self._room.building.scheme.pk,
             )
         except Access.DoesNotExist:

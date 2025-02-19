@@ -18,13 +18,6 @@ class UpdateVlanDeviceService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     ip = forms.GenericIPAddressField(required=False)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-    room_content_type = ContentType.objects.get_for_model(Room)
-    server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-    equipment_content_type = ContentType.objects.get_for_model(Equipment)
-    port_content_type = ContentType.objects.get_for_model(Port)
-
     custom_validations = ['equipment_presence', 'port_presence', 'vlan_device_presence', 'access_port_presence']
 
     def process(self):
@@ -67,14 +60,18 @@ class UpdateVlanDeviceService(ServiceWithResult):
 
     @property
     def _access_port(self) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         try:
             access_list = Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._port.equipment.scheme.id,
                 ) |
                 Q(
-                    object_type=self.equipment_content_type,
+                    object_type=equipment_content_type,
                     object_id=self._port.equipment.id
                 )
             )
@@ -82,11 +79,11 @@ class UpdateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._port.equipment.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._port.equipment.room.id
                             ),
                         ) | access_list
@@ -98,11 +95,11 @@ class UpdateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._port.equipment.units[0].server_rack.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._port.equipment.units[0].server_rack.id
                             ),
                         ) | access_list
@@ -115,14 +112,18 @@ class UpdateVlanDeviceService(ServiceWithResult):
 
     @property
     def _access_equipment(self) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         try:
             access_list = Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._equipment.scheme.id,
                 ) |
                 Q(
-                    object_type=self.equipment_content_type,
+                    object_type=equipment_content_type,
                     object_id=self._equipment.id
                 )
             )
@@ -130,11 +131,11 @@ class UpdateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._equipment.room.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._equipment.room.id
                             ),
                         ) | access_list
@@ -146,11 +147,11 @@ class UpdateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._equipment.units[0].server_rack.building.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._equipment.units[0].server_rack.id
                             ),
                         ) | access_list
@@ -162,7 +163,8 @@ class UpdateVlanDeviceService(ServiceWithResult):
             return None
 
     def equipment_presence(self) -> None:
-        if self._vlan_device.device_type == self.equipment_content_type and not self._equipment:
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
+        if self._vlan_device.device_type == equipment_content_type and not self._equipment:
             self.add_error(
                 'device_id',
                 NotFound(
@@ -172,7 +174,8 @@ class UpdateVlanDeviceService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def port_presence(self) -> None:
-        if self._vlan_device.device_type == self.port_content_type and not self._port:
+        port_content_type = ContentType.objects.get_for_model(Port)
+        if self._vlan_device.device_type == port_content_type and not self._port:
             self.add_error(
                 'device_id',
                 NotFound(
@@ -192,7 +195,9 @@ class UpdateVlanDeviceService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_port_presence(self) -> None:
-        if self._vlan_device.device_type == self.port_content_type and self._port and not self._access_port:
+        port_content_type = ContentType.objects.get_for_model(Port)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
+        if self._vlan_device.device_type == port_content_type and self._port and not self._access_port:
             self.add_error(
                 "device_id",
                 PermissionError(
@@ -201,7 +206,7 @@ class UpdateVlanDeviceService(ServiceWithResult):
             )
             self.response_status = status.HTTP_403_FORBIDDEN
 
-        if (self._vlan_device.device_type == self.equipment_content_type and self._equipment
+        if (self._vlan_device.device_type == equipment_content_type and self._equipment
                 and not self._access_equipment):
             self.add_error(
                 "device_id",

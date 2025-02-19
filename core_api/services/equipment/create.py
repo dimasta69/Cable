@@ -19,11 +19,6 @@ class CreateEquipmentService(ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-    room_content_type = ContentType.objects.get_for_model(Room)
-    server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-
     custom_validations = ["equipment_template_presence", "scheme_presence", "access_presence"]
 
     def process(self):
@@ -55,23 +50,27 @@ class CreateEquipmentService(ServiceWithResult):
             return None
 
     @property
-    def _access(self) -> List[Access] :
+    def _access(self) -> List[Access]:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
         try:
             return (Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._scheme.id,
                 )|
                 Q(
-                    object_type=self.building_content_type,
+                    object_type=building_content_type,
                     object_id__in=self._scheme.buildings.values("id")
                 )|
                 Q(
-                    object_type=self.room_content_type,
+                    object_type=room_content_type,
                     object_id__in=self._scheme.buildings.values("room"),
                 )|
                 Q(
-                    object_type=self.server_rack_content_type,
+                    object_type=server_rack_content_type,
                     object_id__in=self._scheme.buildings.values("room__server_rack"),
                 ),
             ).filter(

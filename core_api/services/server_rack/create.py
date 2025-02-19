@@ -18,10 +18,6 @@ class CreateServerRackService(ServiceWithResult):
     max_power = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-    room_content_type = ContentType.objects.get_for_model(Room)
-
     custom_validations = ['room_presence', 'room_server_presence', 'access_presence']
 
     def process(self):
@@ -54,18 +50,21 @@ class CreateServerRackService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
         try:
             return (Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._room.building.scheme.id,
                 )|
                 Q(
-                    object_type=self.building_content_type,
+                    object_type=building_content_type,
                     object_id=self._room.building.id,
                 )|
                 Q(
-                    object_type=self.room_content_type,
+                    object_type=room_content_type,
                     object_id=self._room.id,
                 ),
             ).filter(

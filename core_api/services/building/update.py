@@ -19,9 +19,6 @@ class UpdateBuildingService(ServiceWithResult):
     coord_x = forms.FloatField(required=False)
     coord_y = forms.FloatField(required=False)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-    building_content_type = ContentType.objects.get_for_model(Building)
-
     custom_validations = ['building_presence', 'number_presence', 'access_presence']
 
     def process(self):
@@ -64,10 +61,12 @@ class UpdateBuildingService(ServiceWithResult):
 
     @property
     def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
         try:
             return Access.objects.filter(
-                Q(object_type=self.scheme_content_type, object_id=self._building.scheme.id) |
-                Q(object_type=self.building_content_type, object_id=self._building.id)
+                Q(object_type=scheme_content_type, object_id=self._building.scheme.id) |
+                Q(object_type=building_content_type, object_id=self._building.id)
             ).filter(
                 user=self.cleaned_data['current_user'],
                 role__in=['Change', 'Creator'],

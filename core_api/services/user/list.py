@@ -21,8 +21,6 @@ class UsersListServices(ServiceWithResult):
     order_by = forms.CharField(required=False)
     scheme_id = forms.IntegerField(required=True)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ['scheme_presence', 'order_presence']
 
     def process(self):
@@ -60,9 +58,10 @@ class UsersListServices(ServiceWithResult):
 
     @property
     def _access(self) -> List[Access]:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
-                object_type=self.scheme_content_type,
+                object_type=scheme_content_type,
                 object_id=self._scheme.pk,
             ).values_list('user__id', flat=True)
         except Access.DoesNotExist:

@@ -14,8 +14,6 @@ class DeleteMapService(ServiceWithResult):
     id = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
-    scheme_content_type = ContentType.objects.get_for_model(Scheme)
-
     custom_validations = ["map_presence", "access_presence",]
 
     def process(self):
@@ -37,10 +35,11 @@ class DeleteMapService(ServiceWithResult):
 
     @property
     def _access(self):
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
             return Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._map.scheme.id,
                 ),
             ).filter(
