@@ -24,6 +24,7 @@ class Scheme(BaseModel):
 @receiver(post_delete, sender=Scheme)
 def delete_access(sender, instance, **kwargs):
     from models_app.models import Access
+    
     from django.contrib.contenttypes.models import ContentType
     content_type = ContentType.objects.get_for_model(Scheme)
     Access.objects.filter(object_type=content_type, object_id=instance.id).delete()
