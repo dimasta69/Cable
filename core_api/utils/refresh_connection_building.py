@@ -5,7 +5,7 @@ from typing import List, Dict
 
 
 def refresh_connection_building(scheme: Scheme) -> None:
-    building_to_update = prepared_building_to_update()
+    building_to_update = prepared_building_to_update(scheme)
     with transaction.atomic():
         Building.objects.bulk_update(building_to_update, ['connection'])
 
