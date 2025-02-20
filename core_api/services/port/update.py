@@ -10,8 +10,7 @@ from django.db.models import Q
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
 from core_api.utils.change_mode_port import change_mode_port
-from models_app.models import Port, User, LineType, PortMode, Access, Scheme, Building, Room, Equipment
-
+from models_app.models import Port, User, LineType, PortMode, Access, Scheme, Building, Room, Equipment, ServerRack
 
 class UpdatePortService(ServiceWithResult):
     id = forms.IntegerField(required=True)
@@ -76,6 +75,7 @@ class UpdatePortService(ServiceWithResult):
         building_content_type = ContentType.objects.get_for_model(Building)
         room_content_type = ContentType.objects.get_for_model(Room)
         equipment_content_type = ContentType.objects.get_for_model(Equipment)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
         try:
             access_list = Access.objects.filter(
                 Q(
@@ -85,7 +85,9 @@ class UpdatePortService(ServiceWithResult):
                 Q(
                     object_type=equipment_content_type,
                     object_id=self._port.equipment.id
-                )
+                ),
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
             )
             if self._port.equipment.room:
                 return (
@@ -98,10 +100,10 @@ class UpdatePortService(ServiceWithResult):
                                 object_type=room_content_type,
                                 object_id=self._port.equipment.room.id
                             ),
+                            user=self.cleaned_data['current_user'],
+                            role__in=['Change', 'Creator'],
                         ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
+
                 )
             if self._port.equipment.units:
                 return (
@@ -114,10 +116,13 @@ class UpdatePortService(ServiceWithResult):
                                 object_type=room_content_type,
                                 object_id=self._port.equipment.units.all()[0].server_rack.room.id
                             ),
+                            Q(
+                                object_type=server_rack_content_type,
+                                object_id=self._port.equipment.units.all()[0].server_rack.id
+                            ),
+                            user=self.cleaned_data['current_user'],
+                            role__in=['Change', 'Creator'],
                         ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
                 )
         except Access.DoesNotExist:
             return None
@@ -148,7 +153,7 @@ class UpdatePortService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_port_presence(self) -> None:
-        if not self._access_port:
+        if not self._access_port and not self.cleaned_data['current_user'].is_superuser:
             self.add_error(
                 "front_port_list",
                 PermissionError(
