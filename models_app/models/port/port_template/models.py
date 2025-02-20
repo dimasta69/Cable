@@ -1,7 +1,5 @@
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 from models_app.models.base_model import BaseModel
 
@@ -42,22 +40,3 @@ class PortShip(BaseModel):
         db_table = 'port_ship'
         verbose_name = 'Промежуточная таблица портов'
         verbose_name_plural = 'Промежуточная таблица портов'
-
-
-@receiver(post_save, sender=PortShip)
-def create_port(sender, instance, created, **kwargs):
-    if created:
-        port_create = []
-        from models_app.models import Port
-
-        count_port = instance.equipment_template.count_port if instance.equipment_template.count_port else 0
-
-        for uid in range(instance.count):
-            port_create.append(
-                Port(
-                    uid=count_port+uid+1,
-                    equipment=instance.equipment_template,
-                    port_template=instance.port_template,
-                )
-            )
-        Port.objects.bulk_create(port_create)
