@@ -29,5 +29,5 @@ class EquipmentTemplateSerializer(serializers.Serializer):
             "name": obj.type.name,
         }
 
-    def get_count_port(self, obj: EquipmentTemplate) ->  int:
+    def get_count_port(self, obj: EquipmentTemplate) -> int:
         return sum(PortShip.objects.filter(equipment_template=obj).values_list('count', flat=True))
