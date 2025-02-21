@@ -12,7 +12,7 @@ from models_app.models import Manufacturer, EquipmentTemplateType, User
 class CreateEquipmentTemplateService(ServiceWithResult):
     manufacturer_id = forms.IntegerField(required=False)
     type_id = forms.IntegerField(required=True)
-    model = forms.CharField(required=True)
+    model = forms.CharField(required=False)
     number_of_units = forms.IntegerField(required=False)
     power = forms.IntegerField(required=False)
     current_user = ModelField(User)
