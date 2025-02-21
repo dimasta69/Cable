@@ -69,11 +69,11 @@ class VlanListService(ServiceWithResult):
             return Access.objects.filter(
                 Q(
                     object_type=scheme_content_type,
-                    object_id=self._segment.scheme.pk,
+                    object_id=self._segment.scheme.id,
                 ) |
                 Q(
                     object_type=segment_content_type,
-                    object_id=self._segment.pk,
+                    object_id=self._segment.id,
                 )
             ).filter(
                 user=self.cleaned_data['current_user'],
@@ -110,6 +110,6 @@ class VlanListService(ServiceWithResult):
         if self._segment:
             if not self._access and not self._access_vlan:
                 if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                    self.add_error('current_user', PermissionDenied('Access to the schem id = '
+                    self.add_error('current_user', PermissionDenied('Access to the scheme id = '
                                                                     f'{self._segment.id} is not granted'))
                     self.response_status = status.HTTP_403_FORBIDDEN
