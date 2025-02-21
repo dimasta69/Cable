@@ -18,7 +18,7 @@ class VlanListService(ServiceWithResult):
     segment_id = forms.IntegerField(required=True)
     search_field = forms.CharField(required=False)
 
-    custom_validations = ['access_presence', 'segment_presence']
+    custom_validations = ['segment_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -88,7 +88,7 @@ class VlanListService(ServiceWithResult):
             return Access.objects.filter(
                 Q(
                     object_type=vlan_content_type,
-                    object_id__in=self._segment.vlan.all().values_list('id', flat=True),
+                    object_id__in=self._segment.vlans.values_list('id', flat=True),
                 ),
             ).filter(
                 user=self.cleaned_data['current_user'],
@@ -107,8 +107,9 @@ class VlanListService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_presence(self) -> None:
-        if not self._access and not self._access_vlan:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schem id = '
-                                                                f'{self._segment.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN
+        if self._segment:
+            if not self._access and not self._access_vlan:
+                if not self._access and not self.cleaned_data['current_user'].is_superuser:
+                    self.add_error('current_user', PermissionDenied('Access to the schem id = '
+                                                                    f'{self._segment.id} is not granted'))
+                    self.response_status = status.HTTP_403_FORBIDDEN

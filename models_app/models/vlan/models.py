@@ -9,6 +9,7 @@ class Vlan(BaseModel):
         on_delete=models.CASCADE,
         null=False, blank=False,
         verbose_name="vlan",
+        related_name="vlans",
         related_query_name="vlan",
     )
 
