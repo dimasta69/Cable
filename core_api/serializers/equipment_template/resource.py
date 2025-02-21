@@ -14,10 +14,13 @@ class EquipmentTemplateSerializer(serializers.Serializer):
     count_port = serializers.SerializerMethodField()
 
     def get_manufacturer(self, obj: EquipmentTemplate) -> Dict[str, Union[int, str]]:
-        return {
-            'id': obj.manufacturer.id,
-            'name': obj.manufacturer.name,
-        }
+        if obj.manufacturer:
+            return {
+                'id': obj.manufacturer.id,
+                'name': obj.manufacturer.name,
+            }
+        else:
+            return None
 
     def get_type(self, obj: EquipmentTemplate) -> Dict[str, Union[int, bool, str]]:
         return {
