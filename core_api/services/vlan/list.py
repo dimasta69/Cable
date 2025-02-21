@@ -29,6 +29,7 @@ class VlanListService(ServiceWithResult):
     @property
     def _vlan_list(self) -> List[Vlan]:
         vlan_list = None
+        breakpoint()
         if self._access:
             vlan_list = self._vlan_list_access_segment
         elif self._access_vlan:
