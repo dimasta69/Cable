@@ -57,7 +57,7 @@ class VlanListService(ServiceWithResult):
     @lru_cache()
     def _segment(self) -> Segment | None:
         try:
-            return Segment.objects.get(id=self.cleaned_data["segment_id"]).prefetch_related("vlan")
+            return Segment.objects.get(id=self.cleaned_data["segment_id"])
         except Segment.DoesNotExist:
             return None
 
@@ -88,7 +88,7 @@ class VlanListService(ServiceWithResult):
             return Access.objects.filter(
                 Q(
                     object_type=vlan_content_type,
-                    object_id__in=self._segment.vlan.values('id'),
+                    object_id__in=self._segment.vlan.all().values_list('id', flat=True),
                 ),
             ).filter(
                 user=self.cleaned_data['current_user'],
