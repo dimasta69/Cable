@@ -74,7 +74,8 @@ class UpdateEquipmentService(ServiceWithResult):
             ).filter(
                 user=self.cleaned_data['current_user'],
                 role__in=['Change', 'Creator'],
-            ))
+            )
+            )
         except Access.DoesNotExist:
             return None
 
