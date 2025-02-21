@@ -29,9 +29,6 @@ class VlanListService(ServiceWithResult):
     @property
     def _vlan_list(self) -> List[Vlan]:
         vlan_list = None
-        print(123)
-        print(self._access_vlan)
-        print(123)
         if self._access:
             vlan_list = self._vlan_list_access_segment
         elif self._access_vlan:
@@ -69,10 +66,6 @@ class VlanListService(ServiceWithResult):
         scheme_content_type = ContentType.objects.get_for_model(Scheme)
         segment_content_type = ContentType.objects.get_for_model(Segment)
         try:
-            print(1)
-            print(self._segment.scheme.id)
-            print(Access.objects.filter(object_id=self._segment.scheme.id))
-            print(1)
             return Access.objects.filter(
                 Q(
                     object_type=scheme_content_type,

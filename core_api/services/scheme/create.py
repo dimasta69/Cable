@@ -37,6 +37,6 @@ class CreateScheme(ServiceWithResult):
         Access.objects.create(
             user=self.cleaned_data['current_user'],
             role='Creator',
-            # object_type=self.scheme_content_type,
+            object_type=self.scheme_content_type,
             object_id=scheme.pk,
         )
