@@ -147,6 +147,7 @@ class CreateVlanDeviceService(ServiceWithResult):
         building_content_type = ContentType.objects.get_for_model(Building)
         room_content_type = ContentType.objects.get_for_model(Room)
         server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         try:
             access_list = Access.objects.filter(
                 Q(
@@ -154,7 +155,7 @@ class CreateVlanDeviceService(ServiceWithResult):
                     object_id=self._equipment.scheme.id,
                 ) |
                 Q(
-                    object_type=self.equipment_content_type,
+                    object_type=equipment_content_type,
                     object_id=self._equipment.id
                 )
             )
