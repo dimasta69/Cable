@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import Q
 from rest_framework import status
 
-from models_app.models import Port, User, Scheme, Building, Room, Equipment, Access
+from models_app.models import Port, User, Scheme, Building, Room, Equipment, Access, ServerRack
 from utils.errors import ValidationError
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
@@ -74,6 +74,7 @@ class DisconnectPortService(ServiceWithResult):
             scheme_content_type = ContentType.objects.get_for_model(Scheme)
             building_content_type = ContentType.objects.get_for_model(Building)
             room_content_type = ContentType.objects.get_for_model(Room)
+            server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
             equipment_content_type = ContentType.objects.get_for_model(Equipment)
             access_list = Access.objects.filter(
                 Q(
@@ -106,12 +107,16 @@ class DisconnectPortService(ServiceWithResult):
                         Access.objects.filter(
                             Q(
                                 object_type=building_content_type,
-                                object_id=self._ports[port_id].equipment.units[0].server_rack.building.id
+                                object_id=self._ports[port_id].equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
                                 object_type=room_content_type,
-                                object_id=self._ports[port_id].equipment.units[0].server_rack.id
-                            ),
+                                object_id=self._ports[port_id].equipment.units.all()[0].server_rack.room.id
+                            ) | 
+                            Q(
+                                object_type=server_rack_content_type,
+                                object_id=self._ports[port_id].equipment.units.all()[0].server_rack.id
+                            )
                         ) | access_list
                 ).filter(
                     user=self.cleaned_data['current_user'],
