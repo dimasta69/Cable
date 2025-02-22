@@ -99,7 +99,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
                             ) |
                             Q(
                                 object_type=server_rack_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.id
+                                object_id=self._port.equipment.units.all()[0].server_rack.id
                             )
                         ) | access_list
                 ).filter(
