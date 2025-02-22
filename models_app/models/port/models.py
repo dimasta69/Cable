@@ -70,6 +70,6 @@ def delete_connection(sender, instance, **kwargs):
 @receiver(post_delete, sender=Port)
 def delete_device_vlan(sender, instance, **kwargs):
     from models_app.models import VlanDevice
-    from django.contrib.contenttypes import ContentType
+    from django.contrib.contenttypes.models import ContentType
     port_content_type = ContentType.objects.get_for_model(Port)
     VlanDevice.objects.filter(device_id=instance.id, device_type=port_content_type).delete()
