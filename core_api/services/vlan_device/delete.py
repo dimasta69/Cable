@@ -90,11 +90,11 @@ class DeleteVlanDeviceService(ServiceWithResult):
                         Access.objects.filter(
                             Q(
                                 object_type=building_content_type,
-                                object_id=self._port.equipment.units[0].server_rack.building.id
+                                object_id=self._port.equipment.units.all()[0].server_rack.building.id
                             ) |
                             Q(
                                 object_type=room_content_type,
-                                object_id=self._port.equipment.units[0].server_rack.id
+                                object_id=self._port.equipment.units.all()[0].server_rack.id
                             ),
                         ) | access_list
                 ).filter(
@@ -142,11 +142,11 @@ class DeleteVlanDeviceService(ServiceWithResult):
                         Access.objects.filter(
                             Q(
                                 object_type=building_content_type,
-                                object_id=self._equipment.units[0].server_rack.building.id
+                                object_id=self._equipment.units.all()[0].server_rack.building.id
                             ) |
                             Q(
                                 object_type=room_content_type,
-                                object_id=self._equipment.units[0].server_rack.id
+                                object_id=self._equipment.units.all()[0].server_rack.id
                             ),
                         ) | access_list
                 ).filter(
@@ -169,7 +169,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
 
     def port_presence(self) -> None:
         port_content_type = ContentType.objects.get_for_model(Port)
-        if self._vlan_device.device_type == port_content_type  and not self._port:
+        if self._vlan_device.device_type == port_content_type and not self._port:
             self.add_error(
                 'device_id',
                 NotFound(
