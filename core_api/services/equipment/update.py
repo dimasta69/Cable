@@ -1,5 +1,6 @@
 from django import forms
 from functools import lru_cache
+from typing import List
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
@@ -39,43 +40,59 @@ class UpdateEquipmentService(ServiceWithResult):
         try:
             return Equipment.objects.select_related(
                 "scheme",
-            ).prefetch_related(
-                "buildings",
-                "buildings__rooms",
-                "buildings__rooms__server_racks",
             ).get(id=self.cleaned_data['id'])
         except Equipment.DoesNotExist:
             return None
 
-    @property
-    def _access(self) -> Access | None:
+    def _access(self, port_id: int) -> List[Access] | None:
         scheme_content_type = ContentType.objects.get_for_model(Scheme)
         building_content_type = ContentType.objects.get_for_model(Building)
         room_content_type = ContentType.objects.get_for_model(Room)
         server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
+
         try:
-            return (Access.objects.filter(
+            access_list = Access.objects.filter(
                 Q(
                     object_type=scheme_content_type,
                     object_id=self._equipment.scheme.id,
-                )|
-                Q(
-                    object_type=building_content_type,
-                    object_id__in=self._equipment.scheme.buildings.values("id")
-                )|
-                Q(
-                    object_type=room_content_type,
-                    object_id__in=self._equipment.scheme.buildings.rooms.values("id"),
-                )|
-                Q(
-                    object_type=server_rack_content_type,
-                    object_id__in=self._equipment.scheme.buildings.rooms.server_racks.values("id"),
-                ),
-            ).filter(
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator'],
+                )
             )
-            )
+            if self._equipment.room:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=building_content_type,
+                                object_id=self._equipment.room.building.id
+                            ) |
+                            Q(
+                                object_type=room_content_type,
+                                object_id=self._equipment.room.id
+                            ),
+                        ) | access_list
+                ).filter(
+                    user=self.cleaned_data['current_user'],
+                    role__in=['Change', 'Creator'],
+                )
+            if self._equipment.units:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=building_content_type,
+                                object_id=self._equipment.units.all()[0].server_rack.room.building.id
+                            ) |
+                            Q(
+                                object_type=room_content_type,
+                                object_id=self._equipment.units.all()[0].server_rack.room.id
+                            ),
+                            Q(
+                                object_type=server_rack_content_type,
+                                object_id=self._equipment.units.all()[0].server_rack.id
+                            ),
+                        ) | access_list
+                ).filter(
+                    user=self.cleaned_data['current_user'],
+                    role__in=['Change', 'Creator'],
+                )
         except Access.DoesNotExist:
             return None
 
