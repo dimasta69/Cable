@@ -17,7 +17,7 @@ class DeleteEquipmentService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['equipment_presence', 'server_rack_presence', 'access_presence']
+    custom_validations = ['equipment_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
