@@ -154,7 +154,7 @@ class UpdateVlanDeviceService(ServiceWithResult):
                         Access.objects.filter(
                             Q(
                                 object_type=building_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.building.id
+                                object_id=self._equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
                                 object_type=room_content_type,
