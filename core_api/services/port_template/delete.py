@@ -3,13 +3,15 @@ from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
+from utils.fields import ModelField
 from django import forms
 
-from models_app.models.port.port_template.models import PortTemplate
+from models_app.models import PortTemplate, User
 
 
 class PortTemplateDeleteService(ServiceWithResult):
     id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
     custom_validations = ['port_template_presence', 'is_superuser',]
 
