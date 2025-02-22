@@ -143,10 +143,14 @@ class CreateVlanDeviceService(ServiceWithResult):
 
     @property
     def _access_equipment(self) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
         try:
             access_list = Access.objects.filter(
                 Q(
-                    object_type=self.scheme_content_type,
+                    object_type=scheme_content_type,
                     object_id=self._equipment.scheme.id,
                 ) |
                 Q(
@@ -158,7 +162,7 @@ class CreateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._equipment.room.building.id
                             ) |
                             Q(
@@ -174,15 +178,15 @@ class CreateVlanDeviceService(ServiceWithResult):
                 return (
                         Access.objects.filter(
                             Q(
-                                object_type=self.building_content_type,
+                                object_type=building_content_type,
                                 object_id=self._equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
-                                object_type=self.server_rack_content_type,
+                                object_type=server_rack_content_type,
                                 object_id=self._equipment.units.all()[0].server_rack.id
                             ) |
                             Q(
-                                object_type=self.room_content_type,
+                                object_type=room_content_type,
                                 object_id=self._equipment.units.all()[0].server_rack.room.id
                             ),
                         ) | access_list

@@ -1,4 +1,3 @@
-import django.contrib.contenttypes.models
 from django.core.exceptions import ValidationError
 from django.db import models
 from models_app.models.base_model import BaseModel
