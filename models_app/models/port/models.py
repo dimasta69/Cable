@@ -1,3 +1,4 @@
+import django.contrib.contenttypes.models
 from django.core.exceptions import ValidationError
 from django.db import models
 from models_app.models.base_model import BaseModel
@@ -69,4 +70,6 @@ def delete_connection(sender, instance, **kwargs):
 @receiver(post_delete, sender=Port)
 def delete_device_vlan(sender, instance, **kwargs):
     from models_app.models import VlanDevice
-    VlanDevice.objects.filter(device_id=instance.id, device_type="port").delete()
+    from django.contrib.contenttypes import ContentType
+    port_content_type = ContentType.objects.get_for_model(Port)
+    VlanDevice.objects.filter(device_id=instance.id, device_type=port_content_type).delete()
