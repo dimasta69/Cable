@@ -110,6 +110,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
         building_content_type = ContentType.objects.get_for_model(Building)
         room_content_type = ContentType.objects.get_for_model(Room)
         equipment_content_type = ContentType.objects.get_for_model(Equipment)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
         try:
             access_list = Access.objects.filter(
                 Q(
@@ -142,12 +143,16 @@ class DeleteVlanDeviceService(ServiceWithResult):
                         Access.objects.filter(
                             Q(
                                 object_type=building_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.building.id
+                                object_id=self._equipment.units.all()[0].server_rack.room.building.id
                             ) |
                             Q(
                                 object_type=room_content_type,
+                                object_id=self._equipment.units.all()[0].server_rack.room.id
+                            ) |
+                            Q(
+                                object_type=server_rack_content_type,
                                 object_id=self._equipment.units.all()[0].server_rack.id
-                            ),
+                            )
                         ) | access_list
                 ).filter(
                     user=self.cleaned_data['current_user'],
@@ -173,7 +178,7 @@ class DeleteVlanDeviceService(ServiceWithResult):
             self.add_error(
                 'device_id',
                 NotFound(
-                    f"Device id={self.cleaned_data['device_id']} not found"
+                    f"Device id={self.cleaned_data['device_id']} nota found"
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
