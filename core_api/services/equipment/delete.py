@@ -79,7 +79,7 @@ class DeleteEquipmentService(ServiceWithResult):
                             Q(
                                 object_type=room_content_type,
                                 object_id=self._equipment.units.all()[0].server_rack.room.id
-                            ),
+                            ) |
                             Q(
                                 object_type=server_rack_content_type,
                                 object_id=self._equipment.units.all()[0].server_rack.id
@@ -99,7 +99,7 @@ class DeleteEquipmentService(ServiceWithResult):
 
     def access_presence(self) -> None:
         if self._equipment:
-            if not self._access and len(self._access) < 1 and not self.cleaned_data['current_user'].is_superuser:
+            if (not self._access or len(self._access) < 1) and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._equipment.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
