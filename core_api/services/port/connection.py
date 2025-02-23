@@ -20,7 +20,9 @@ class ConnectionPortService(ServiceWithResult):
     back_port_list = SimpleArrayField(forms.IntegerField(), min_length=2, max_length=2, required=False)
     current_user = ModelField(User)
 
-    custom_validations = ['ports_presence', 'free_ports', 'backside_and_active_equipment', 'access_port_presence']
+    custom_validations = [
+        'ports_presence', 'free_ports', 'backside_and_active_equipment', 'access_port_presence', 'ports_modular',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -130,7 +132,7 @@ class ConnectionPortService(ServiceWithResult):
 
     def ports_presence(self) -> None:
         if self._ports is None or len(self._ports) != 2:
-            self.add_error('ports', ValidationError(f"Ports does not exist"))
+            self.add_error('ports', ValidationError("Ports does not exist"))
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def free_ports(self) -> None:
@@ -148,6 +150,21 @@ class ConnectionPortService(ServiceWithResult):
                     self.add_error('back_port_list', ValidationError('It is not possible to'
                                                                      ' connect to active equipment at "back_side"')
                                    )
+
+    def ports_modular(self) -> None:
+        if self._ports and len(self._ports) == 2:
+            if self._ports[0].port_template.modular and self._ports[0].sfp is None:
+                self.add_error(
+                    "front_port_list",
+                    ValidationError(f"SFP не поделючено в порт={self._ports[0].id}")
+                )
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+            if self._ports[1].port_template.modular and self._ports[0].sfp is None:
+                self.add_error(
+                    "front_port_list",
+                    ValidationError(f"SFP не поделючено в порт={self._ports[1].id}")
+                )
+                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
     def speed_match(self) -> None:
         if self._ports and len(self._ports) == 2:
