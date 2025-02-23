@@ -99,7 +99,7 @@ class DeleteEquipmentService(ServiceWithResult):
 
     def access_presence(self) -> None:
         if self._equipment:
-            if (not self._access or  not self._access.exists()) and not self.cleaned_data['current_user'].is_superuser:
+            if (not self._access or not self._access.exists()) and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._equipment.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDENas
