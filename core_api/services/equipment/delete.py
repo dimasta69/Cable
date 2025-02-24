@@ -11,6 +11,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from utils.fields import ModelField
 from core_api.utils.connection import disconnection
+from core_api.utils.connection import delete_port_from_connection
 from utils.services import ServiceWithResult
 from models_app.models import Equipment, ServerRack, Access, Scheme, Building, Room, User
 
@@ -35,9 +36,10 @@ class DeleteEquipmentService(ServiceWithResult):
 
     def _disconnect_port(self) -> None:
         ports = self._equipment.ports.filter(line__isnull=False)
-        list(map(lambda port: disconnection(port, port.front_side), filter(lambda port: port.front_side, ports)))
-        if not self._equipment.template.type.is_active:
-            list(map(lambda port: disconnection(port, port.back_side), filter(lambda port: port.back_side, ports)))
+        # list(map(lambda port: disconnection(port, port.front_side), filter(lambda port: port.front_side, ports)))
+        # if not self._equipment.template.type.is_active:
+        #     list(map(lambda port: disconnection(port, port.back_side), filter(lambda port: port.back_side, ports)))
+        list(map(delete_port_from_connection, ports))
 
     @property
     @lru_cache()
