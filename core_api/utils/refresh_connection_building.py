@@ -11,7 +11,7 @@ def refresh_connection_building(scheme: Scheme) -> None:
 
 
 def delete_connection_build(scheme: Scheme) -> None:
-    Building.objects.filter(scheme=scheme).connection = None
+    Building.objects.filter(scheme=scheme).update(connection=None)
 
 
 def prepared_building_to_update(scheme: Scheme) -> List[Building]:

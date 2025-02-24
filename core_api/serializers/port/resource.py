@@ -7,7 +7,8 @@ from core_api.serializers.port_template.resource import SpeedSerializer
 from core_api.serializers.vlan.resource import VlanSerializer
 from core_api.serializers.sfp_template.resource import SfpTemplateListSerializer
 
-from typing import Union, Dict, List
+from typing import List
+
 
 class PortModelSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,6 +22,7 @@ class PortModelSerializer(serializers.ModelSerializer):
             'alfa',
             'is_only_one_vlan',
         )
+
 
 class LineSerializer(serializers.ModelSerializer):
     line_type = serializers.CharField(source="line_type.name", default=None)

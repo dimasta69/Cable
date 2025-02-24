@@ -25,7 +25,6 @@ class RefreshBuildingConnectionService(ServiceWithResult):
 
     def _refresh_connection_buildings(self) -> None:
         refresh_connection_building(self._scheme)
-        return None
 
     @property
     @lru_cache()
