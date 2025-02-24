@@ -84,7 +84,7 @@ def create_line(port_1, port_2, side: Literal["front_side", "back_side"]) -> Lin
 
 
 def delete_past_line(port_1, port_2) -> None:
-    if port_1.line:
+    if port_1.line.pk:
         port_1.line.delete()
     try:
         port_2.line.delete()

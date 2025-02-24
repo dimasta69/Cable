@@ -39,7 +39,6 @@ class DeleteEquipmentService(ServiceWithResult):
         if not self._equipment.template.type.is_active:
             list(map(lambda port: disconnection(port, port.back_side), filter(lambda port: port.back_side, ports)))
 
-
     @property
     @lru_cache()
     def _equipment(self) -> Equipment | None:
