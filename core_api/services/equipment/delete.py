@@ -1,6 +1,7 @@
 from django import forms
 from typing import List
 from functools import lru_cache
+from django.db import transaction
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
@@ -9,6 +10,7 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 
 from utils.fields import ModelField
+from core_api.utils.connection import disconnection
 from utils.services import ServiceWithResult
 from models_app.models import Equipment, ServerRack, Access, Scheme, Building, Room, User
 
@@ -22,12 +24,20 @@ class DeleteEquipmentService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self._delete_equipment()
-            self.response_status = status.HTTP_204_NO_CONTENT
+            with transaction.atomic():
+                self._disconnect_port()
+                self._delete_equipment()
+                self.response_status = status.HTTP_204_NO_CONTENT
         return self
 
     def _delete_equipment(self) -> None:
         self._equipment.delete()
+
+    def _disconnect_port(self) -> None:
+        ports = self._equipment.ports.filter(ports__connection__isnull=False)
+        list(map(lambda port: disconnection(port, port.front_side), ports))
+        if not self._equipment.template.type.is_active:
+            list(map(lambda port: disconnection(port, port.back_side), ports))
 
     @property
     @lru_cache()
@@ -35,7 +45,7 @@ class DeleteEquipmentService(ServiceWithResult):
         try:
             return Equipment.objects.select_related(
                 "scheme",
-            ).get(id=self.cleaned_data['id'])
+            ).prefetch_related("ports").get(id=self.cleaned_data['id'])
         except Equipment.DoesNotExist:
             return None
 
