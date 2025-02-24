@@ -159,7 +159,7 @@ class ConnectionPortService(ServiceWithResult):
                     ValidationError(f"SFP не поделючено в порт={self._ports[0].id}")
                 )
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-            if self._ports[1].port_template.modular and self._ports[0].sfp is None:
+            if self._ports[1].port_template.modular and self._ports[1].sfp is None:
                 self.add_error(
                     "front_port_list",
                     ValidationError(f"SFP не поделючено в порт={self._ports[1].id}")
