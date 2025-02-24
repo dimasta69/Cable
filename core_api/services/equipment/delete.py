@@ -28,7 +28,6 @@ class DeleteEquipmentService(ServiceWithResult):
 
     def _delete_equipment(self) -> None:
         self._equipment.delete()
-        return None
 
     @property
     @lru_cache()
