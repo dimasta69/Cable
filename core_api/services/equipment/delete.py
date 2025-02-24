@@ -41,7 +41,7 @@ class DeleteEquipmentService(ServiceWithResult):
             return None
 
     @property
-    def _access(self, port_id: int) -> List[Access] | None:
+    def _access(self) -> List[Access] | None:
         scheme_content_type = ContentType.objects.get_for_model(Scheme)
         building_content_type = ContentType.objects.get_for_model(Building)
         room_content_type = ContentType.objects.get_for_model(Room)
