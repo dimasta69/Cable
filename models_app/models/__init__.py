@@ -23,6 +23,7 @@ from models_app.models.vlan.device.models import VlanDevice
 from models_app.models.port.port_template.models import PortShip
 from models_app.models.schemes.equipment.models import EquipmentScheme
 from models_app.models.schemes.schemes.models import SchemeMap
+from models_app.models.schemes.figure.models import Figure
 
 
 __all__ = [
@@ -51,4 +52,5 @@ __all__ = [
     'EquipmentScheme',
     'SchemeMap',
     'VlanDevice',
+    'Figure',
 ]
