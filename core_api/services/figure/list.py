@@ -12,34 +12,24 @@ from utils.fields import ModelField
 from models_app.models import Figure, User, Scheme, SchemeMap, Access
 
 
-class CreateFigureService(ServiceWithResult):
+class FigureListService(ServiceWithResult):
     current_user = ModelField(User)
-    map_id = forms.IntegerField(required=True)
-    title = forms.CharField(required=True)
-    type = forms.CharField(required=True)
-    x = forms.FloatField(required=True)
-    y = forms.FloatField(required=True)
-    width = forms.IntegerField(min_value=1)
-    height = forms.IntegerField(min_value=1)
+    filter_map_id = forms.IntegerField(required=True)
 
-    custom_validations = ["access_presence", "map_presence", "type_presence"]
+    custom_validations = ["access_presence", "map_presence"]
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._create_figure
+            self.result = self._figures
         return self
 
     @property
-    def _create_figure(self) -> Figure:
-        return Figure.objects.create(
-            schemes=self._map,
-            type_choice=self.cleaned_data['type'],
-            x=self.cleaned_data['x'],
-            y=self.cleaned_data['y'],
-            width=self.cleaned_data['width'],
-            height=self.cleaned_data['height'],
-        )
+    def _figures(self) -> List[Figure]:
+        try:
+            return Figure.objects.filter(schemes=self._map)
+        except Figure.DoesNotExist:
+            return Figure.objects.none()
 
     @property
     def _map(self) -> SchemeMap | None:
@@ -64,7 +54,6 @@ class CreateFigureService(ServiceWithResult):
                 ),
             ).filter(
                 user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator']
             )
         except Access.DoesNotExist:
             return None
@@ -81,17 +70,7 @@ class CreateFigureService(ServiceWithResult):
             self.add_error(
                 "map_id",
                 NotFound(
-                    f"Map id={self.cleaned_data['map_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def type_presence(self) -> None:
-        if any(t[0] == self.cleaned_data['type'] for t in Figure.type_choice):
-            self.add_error(
-                "map_id",
-                NotFound(
-                    f"Type ={self.cleaned_data['type']} not found"
+                    f"Map id={self.cleaned_data['filter_map_id']} not found"
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
