@@ -19,7 +19,7 @@ class FigureListView(APIView):
         )
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(FigureSerializer(outcome.result, many=True).data, status=status.HTTP_201_CREATED)
+        return Response(FigureSerializer(outcome.result, many=True).data, status=status.HTTP_200_OK)
 
     def post(self, request, **kwargs) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
