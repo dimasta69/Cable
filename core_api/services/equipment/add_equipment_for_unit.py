@@ -39,8 +39,7 @@ class AddEquipmentUnitService(ServiceWithResult):
     def _remove_equipment(self) -> None:
         unit_equipment = self._unit_list.filter(equipment=self._equipment)
         if unit_equipment:
-            unit_equipment.equipment = None
-            unit_equipment.save()
+            unit_equipment.update(equipment=None)
 
     @property
     @lru_cache()
