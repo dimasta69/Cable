@@ -34,6 +34,7 @@ class CreateFigureService(ServiceWithResult):
     @property
     def _create_figure(self) -> Figure:
         return Figure.objects.create(
+            title=self.cleaned_data['title'],
             schemes=self._map,
             type=self.cleaned_data['type'],
             x=self.cleaned_data['x'],
