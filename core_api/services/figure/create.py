@@ -10,6 +10,8 @@ from typing import List
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from models_app.models import Figure, User, Scheme, SchemeMap, Access
+from models_app.models.scheme.models import Scheme
+from models_app.models.schemes.figure.models import type_choice
 
 
 class CreateFigureService(ServiceWithResult):
@@ -87,7 +89,7 @@ class CreateFigureService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def type_presence(self) -> None:
-        if any(t[0] == self.cleaned_data['type'] for t in Figure.type_choice):
+        if any(t[0] == self.cleaned_data['type'] for t in type_choice):
             self.add_error(
                 "map_id",
                 NotFound(

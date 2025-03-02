@@ -34,7 +34,7 @@ class FigureListService(ServiceWithResult):
     @property
     def _map(self) -> SchemeMap | None:
         try:
-            return SchemeMap.objects.get(id=self.cleaned_data['map_id'])
+            return SchemeMap.objects.get(id=self.cleaned_data['filter_map_id'])
         except SchemeMap.DoesNotExist:
             return None
 

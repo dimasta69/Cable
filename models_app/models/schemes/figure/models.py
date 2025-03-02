@@ -1,6 +1,10 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
+type_choice = [
+        ("Rectangle", "Прямоугольник"),
+    ]
+
 
 class Figure(models.Model):
     title = models.CharField(max_length=255, null=True, blank=True)
@@ -16,9 +20,6 @@ class Figure(models.Model):
         null=False,
         blank=False,
     )
-    type_choice = [
-        ("Rectangle", "Прямоугольник"),
-    ]
     type = models.FloatField(choices=type_choice, max_length=255, null=False, blank=False)
 
     def clean(self):
