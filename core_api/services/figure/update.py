@@ -31,18 +31,19 @@ class UpdateFigureService(ServiceWithResult):
 
     @property
     def _update_figure(self) -> Figure:
+        figure = self._figure
         if self.cleaned_data['title']:
-            self._figure.title = self.cleaned_data['title']
+            figure.title = self.cleaned_data['title']
         if self.cleaned_data['x']:
-            self._figure.x = self.cleaned_data['x']
+            figure.x = self.cleaned_data['x']
         if self.cleaned_data['y']:
-            self._figure.y = self.cleaned_data['y']
+            figure.y = self.cleaned_data['y']
         if self.cleaned_data['width']:
-            self._figure.width = self.cleaned_data['width']
+            figure.width = self.cleaned_data['width']
         if self.cleaned_data['height']:
-            self._figure.height = self.changed_data['height']
-        self._figure.save()
-        return self._figure
+            figure.height = self.changed_data['height']
+        figure.save()
+        return figure
 
     @property
     def _figure(self) -> Figure | None:
