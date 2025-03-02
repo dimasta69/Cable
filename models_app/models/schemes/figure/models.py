@@ -20,7 +20,7 @@ class Figure(models.Model):
         null=False,
         blank=False,
     )
-    type = models.FloatField(choices=type_choice, max_length=255, null=False, blank=False)
+    type = models.CharField(choices=type_choice, max_length=255, null=False, blank=False)
 
     def clean(self):
         if self.width <= 0 or self.height <= 0:

@@ -35,7 +35,7 @@ class CreateFigureService(ServiceWithResult):
     def _create_figure(self) -> Figure:
         return Figure.objects.create(
             schemes=self._map,
-            type_choice=self.cleaned_data['type'],
+            type=self.cleaned_data['type'],
             x=self.cleaned_data['x'],
             y=self.cleaned_data['y'],
             width=self.cleaned_data['width'],
@@ -88,7 +88,7 @@ class CreateFigureService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def type_presence(self) -> None:
-        if any(t[0] == self.cleaned_data['type'] for t in type_choice[0]):
+        if not [t[0] for t in type_choice if t[0] == self.cleaned_data['type']]:
             self.add_error(
                 "map_id",
                 NotFound(
