@@ -7,6 +7,7 @@ class FigureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Figure
         fields = (
+            'id',
             'title',
             'x',
             'y',
