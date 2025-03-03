@@ -10,7 +10,6 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 
 from utils.fields import ModelField
-from core_api.utils.connection import disconnection
 from core_api.utils.connection import delete_port_from_connection
 from utils.services import ServiceWithResult
 from models_app.models import Equipment, ServerRack, Access, Scheme, Building, Room, User
