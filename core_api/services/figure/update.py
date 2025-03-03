@@ -41,7 +41,7 @@ class UpdateFigureService(ServiceWithResult):
         if self.cleaned_data['width']:
             figure.width = self.cleaned_data['width']
         if self.cleaned_data['height']:
-            figure.height = self.changed_data['height']
+            figure.height = self.cleaned_data['height']
         figure.save()
         return figure
 
