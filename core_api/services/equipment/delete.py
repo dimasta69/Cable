@@ -81,20 +81,20 @@ class DeleteEquipmentService(ServiceWithResult):
                     user=self.cleaned_data['current_user'],
                     role__in=['Change', 'Creator'],
                 )
-            if self._equipment.units:
+            if self._equipment.units.first():
                 return (
                         Access.objects.filter(
                             Q(
                                 object_type=building_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.room.building.id
+                                object_id=self._equipment.units.first().server_rack.room.building.id
                             ) |
                             Q(
                                 object_type=room_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.room.id
+                                object_id=self._equipment.units.first().server_rack.room.id
                             ) |
                             Q(
                                 object_type=server_rack_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.id
+                                object_id=self._equipment.units.first().server_rack.id
                             ),
                         ) | access_list
                 ).filter(
