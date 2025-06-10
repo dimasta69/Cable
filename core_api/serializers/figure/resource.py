@@ -15,3 +15,4 @@ class FigureSerializer(serializers.ModelSerializer):
             'height',
             'type',
         )
+    
