@@ -1,5 +1,3 @@
-import json
-
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 from models_app.models.base_model import BaseModel

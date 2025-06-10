@@ -34,8 +34,7 @@ class Equipment(BaseModel):
 
     def __str__(self):
         return str(
-            str(self.id) + " " + self.template.manufacturer.name + ' ' + self.template.model) if self.template.manufacturer and self.template.model else (
-                str(self.pk) + " " + str(self.template.type))
+            str(self.id) + " " + self.template.manufacturer.name + ' ' + self.template.model) if self.template.manufacturer and self.template.model else (str(self.pk) + " " + str(self.template.type))
 
 
 @receiver(post_save, sender=Equipment)
