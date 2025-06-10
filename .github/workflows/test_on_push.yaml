@@ -15,6 +15,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
           private_key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host_fingerprint: ${{ secrets.HOST_FINGERPRINT }}
           command: |
             echo '--- START WORK ON REMOTE SERVER ---';
             cd ${{ secrets.PROJECT_FOLDER }};
