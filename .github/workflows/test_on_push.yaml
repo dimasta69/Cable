@@ -35,6 +35,7 @@ jobs:
 
           # Подключаемся к удаленному серверу
           # ssh -vvv -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
+          echo ~/.ssh/id_rsa
           ssh -T -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
             echo '--- START WORK ON REMOTE SERVER ---'
             cd "$PROJECT_FOLDER" || exit
