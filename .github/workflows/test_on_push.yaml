@@ -9,9 +9,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout  
+        uses: actions/checkout@v2
       - name: Run command and remote server
         uses: D3rHase/ssh-command-action@latest
-        #uses: actions/checkout@v2
         with:
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
