@@ -28,7 +28,7 @@ services:
       DB_PORT: ${DB_PORT}
       DB_HOST: ${DB_HOST}
     volumes:
-      - static_volume:/app/cabel/static
+      - static_volume:/opt/www/cs/cable_journal/
     networks:
       - app-network
 
