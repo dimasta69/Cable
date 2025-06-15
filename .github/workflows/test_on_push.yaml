@@ -21,6 +21,7 @@ jobs:
         run: |
           echo '--- SSH CONNECTION ---'
           # Создаем временный файл для ключа
+          echo "$SSH_PRIVATE_KEY"
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
 
@@ -74,4 +75,3 @@ jobs:
       #       echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
       #       docker-compose up -d --build web
       #       echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
-      
