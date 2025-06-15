@@ -12,7 +12,7 @@ jobs:
       - name: Checkout  
         uses: actions/checkout@v2
       - name: Run command and remote server
-        uses: D3rHase/ssh-command-action@latest
+        uses: D3rHase/ssh-command-action@v0.2.2
         with:
           host: ${{ secrets.SSH_HOST }}
           user: ${{ secrets.SSH_USER }}
