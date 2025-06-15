@@ -13,14 +13,35 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Deploy code
-        script: |
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          PROJECT_FOLDER: ${{ secrets.PROJECT_FOLDER }}
+        run: |
           echo '--- SSH CONNECTION ---'
-          ssh -i "${{ secrets.SSH_PRIVATE_KEY }}" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}
-          echo '--- START WORK ON REMOTE SERVER ---'
-          cd cd ${{ secrets.PROJECT_FOLDER }}
-          echo '--- LIST OF FILES ---'
-          ls -la
-          echo '--- GIT ---'
+          # Создаем временный файл для ключа
+          echo "$SSH_PRIVATE_KEY" > private_key
+          chmod 600 private_key
+
+          # Подключаемся к удаленному серверу
+          ssh -i private_key -o StrictHostKeyChecking=no "$SSH_USERNAME@$SSH_HOST" << EOF
+            echo '--- START WORK ON REMOTE SERVER ---'
+            cd "$PROJECT_FOLDER" || exit
+            echo '--- LIST OF FILES ---'
+            ls -la
+            echo '--- GIT ---'
+            git checkout testing
+            git pull
+            cp .env-example .env
+            echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
+            docker-compose up -d --build web
+            echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
+            docker ps -a
+          EOF
+
+          # Удаляем временный файл с ключом
+          rm private_key
 
       # - name: Check SSH key length
       #   run: echo "${{ secrets.SSH_PRIVATE_KEY }}" | wc -c
