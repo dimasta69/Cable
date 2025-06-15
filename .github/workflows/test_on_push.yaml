@@ -74,3 +74,4 @@ jobs:
       #       echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
       #       docker-compose up -d --build web
       #       echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
+      
