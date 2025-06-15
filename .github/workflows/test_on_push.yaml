@@ -12,7 +12,7 @@ jobs:
       - name: Checkout  
         uses: actions/checkout@v3
       - name: Run command and remote server
-        uses: appleboy/ssh-action@v0.1.0
+        uses: webfactory/ssh-agent@v0.5.3
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
