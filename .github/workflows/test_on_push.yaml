@@ -26,7 +26,7 @@ jobs:
           port: 22
           script: |
             echo '--- START WORK ON REMOTE SERVER ---'
-            cd "$PROJECT_FOLDER" || exit
+            cd "$PROJECT_FOLDER" 
             echo '--- LIST OF FILES ---'
             ls -la
             echo '--- GIT ---'
@@ -37,37 +37,3 @@ jobs:
             docker-compose up -d --build web
             echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
             docker ps -a
-
-
-      # - name: Check SSH key length
-      #   run: echo "${{ secrets.SSH_PRIVATE_KEY }}" | wc -c
-
-      # - name: Set up SSH
-      #   uses: webfactory/ssh-agent@v0.5.3
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_USERNAME }}
-      #     password: EKrQMRmUxFLCQ6zr1
-      #     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # - name: List SSH keys
-      #   run: ssh-add -l || echo "No keys added"
-
-      # - name: Run command on remote server
-      #   uses: appleboy/ssh-action@v0.1.4
-      #   with:
-      #     host: ${{ secrets.SSH_HOST }}
-      #     username: ${{ secrets.SSH_USER }}
-      #     port: 22
-      #     script: |
-      #       echo '--- START WORK ON REMOTE SERVER ---'
-      #       cd ${{ secrets.PROJECT_FOLDER }}
-      #       echo '--- LIST OF FILES ---'
-      #       git checkout testing
-      #       git pull
-      #       cp .env-example .env
-      #       ls -a
-      #       echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
-      #       docker-compose up -d --build web
-      #       echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
-      
