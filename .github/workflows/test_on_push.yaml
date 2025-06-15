@@ -27,7 +27,7 @@ jobs:
    
 
           # Подключаемся к удаленному серверу
-          ssh -i private_key -o StrictHostKeyChecking=no "$SSH_USERNAME@$SSH_HOST" << EOF
+          ssh -i private_key -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
             echo '--- START WORK ON REMOTE SERVER ---'
             cd "$PROJECT_FOLDER" || exit
             echo '--- LIST OF FILES ---'
