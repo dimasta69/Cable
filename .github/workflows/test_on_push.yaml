@@ -28,14 +28,12 @@ jobs:
         run: |
           echo '--- SSH CONNECTION ---'
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa1
-          chmod 600 ~/.ssh/id_rsa1
-          echo 4546 
-   
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 45.10.110.191 >> ~/.ssh/known_hosts   
 
           # Подключаемся к удаленному серверу
-          # ssh -vvv -i ~/.ssh/private_key -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
-          ssh -vvv -T -i ~/.ssh/id_rsa1 -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
+]          ssh -vvv -T -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
 
             echo '--- START WORK ON REMOTE SERVER ---'
             cd "$PROJECT_FOLDER" || exit
