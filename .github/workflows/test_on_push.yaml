@@ -18,6 +18,9 @@ jobs:
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          #password: ${{ secrets.SSH_PASSWORD }}
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: List SSH keys
@@ -40,4 +43,3 @@ jobs:
             echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
             docker-compose up -d --build web
             echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
-            
