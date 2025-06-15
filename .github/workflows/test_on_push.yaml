@@ -32,7 +32,9 @@ jobs:
           chmod 600 private_key
           ls -l private_key
    
-
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           # Подключаемся к удаленному серверу
           # ssh -vvv -i ~/.ssh/private_key -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
           ssh -T -i ~/.ssh/private_key -o StrictHostKeyChecking=no root@45.10.110.191 << EOF
