@@ -26,8 +26,7 @@ jobs:
           port: 22
           script: |
             echo '--- START WORK ON REMOTE SERVER ---'
-            # cd "$PROJECT_FOLDER" 
-            cd /opt/www/ss/Cable/
+            cd "$secrets.PROJECT_FOLDER" 
             pwd
             echo '--- LIST OF FILES ---'
             ls -la
