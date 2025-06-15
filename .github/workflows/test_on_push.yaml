@@ -24,7 +24,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
           echo 1
-          echo private_key
+          cat private_key
           echo 2
 
           # Подключаемся к удаленному серверу
