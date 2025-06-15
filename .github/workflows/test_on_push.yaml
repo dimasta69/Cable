@@ -12,34 +12,44 @@ jobs:
       - name: Checkout  
         uses: actions/checkout@v3
 
-      - name: Check SSH key length
-        run: echo "${{ secrets.SSH_PRIVATE_KEY }}" | wc -c
+      - name: Deploy code
+        script: |
+          echo '--- SSH CONNECTION ---'
+          ssh -i "${{ secrets.SSH_PRIVATE_KEY }}" ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}
+          echo '--- START WORK ON REMOTE SERVER ---'
+          cd cd ${{ secrets.PROJECT_FOLDER }}
+          echo '--- LIST OF FILES ---'
+          ls -la
+          echo '--- GIT ---'
 
-      - name: Set up SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          password: EKrQMRmUxFLCQ6zr1
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      # - name: Check SSH key length
+      #   run: echo "${{ secrets.SSH_PRIVATE_KEY }}" | wc -c
 
-      - name: List SSH keys
-        run: ssh-add -l || echo "No keys added"
+      # - name: Set up SSH
+      #   uses: webfactory/ssh-agent@v0.5.3
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USERNAME }}
+      #     password: EKrQMRmUxFLCQ6zr1
+      #     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run command on remote server
-        uses: appleboy/ssh-action@v0.1.4
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          port: 22
-          script: |
-            echo '--- START WORK ON REMOTE SERVER ---'
-            cd ${{ secrets.PROJECT_FOLDER }}
-            echo '--- LIST OF FILES ---'
-            git checkout testing
-            git pull
-            cp .env-example .env
-            ls -a
-            echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
-            docker-compose up -d --build web
-            echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
+      # - name: List SSH keys
+      #   run: ssh-add -l || echo "No keys added"
+
+      # - name: Run command on remote server
+      #   uses: appleboy/ssh-action@v0.1.4
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     port: 22
+      #     script: |
+      #       echo '--- START WORK ON REMOTE SERVER ---'
+      #       cd ${{ secrets.PROJECT_FOLDER }}
+      #       echo '--- LIST OF FILES ---'
+      #       git checkout testing
+      #       git pull
+      #       cp .env-example .env
+      #       ls -a
+      #       echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
+      #       docker-compose up -d --build web
+      #       echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
