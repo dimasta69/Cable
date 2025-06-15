@@ -28,13 +28,13 @@ services:
       DB_PORT: ${DB_PORT}
       DB_HOST: ${DB_HOST}
     volumes:
-      - static_volume:/opt/www/cs/cable_journal
+      - static_volume:/app/cabel/static
     networks:
       - app-network
 
   front:
     build:
-      context: /var/www/cs/current/startup/
+      context: /opt/www/cs/cable_journal
     depends_on:
       - web
     ports:
