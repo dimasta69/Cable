@@ -27,6 +27,7 @@ jobs:
           script: |
             echo '--- START WORK ON REMOTE SERVER ---'
             cd "$PROJECT_FOLDER" 
+            pwd
             echo '--- LIST OF FILES ---'
             ls -la
             echo '--- GIT ---'
