@@ -12,12 +12,12 @@ jobs:
       - name: Checkout  
         uses: actions/checkout@v3
       - name: Run command and remote server
-        uses: D3rHase/ssh-command-action@v0.2.2
+        uses: appleboy/ssh-action@v0.1.0
         with:
           host: ${{ secrets.SSH_HOST }}
-          user: ${{ secrets.SSH_USER }}
-          private_key: ${{ secrets.SSH_PRIVATE_KEY }}
-          host_fingerprint: ${{ secrets.HOST_FINGERPRINT }}
+          username: ${{ secrets.SSH_USER }}
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # host_fingerprint: ${{ secrets.HOST_FINGERPRINT }}
           command: 
             echo '--- START WORK ON REMOTE SERVER ---';
             cd ${{ secrets.PROJECT_FOLDER }};
