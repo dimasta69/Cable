@@ -12,13 +12,19 @@ jobs:
       - name: Checkout  
         uses: actions/checkout@v3
 
+      - name: Check SSH key length
+        run: echo "${{ secrets.SSH_PRIVATE_KEY }}" | wc -c
+
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+      - name: List SSH keys
+        run: ssh-add -l || echo "No keys added"
+
       - name: Run command on remote server
-        uses: appleboy/ssh-action@v0.1.0
+        uses: appleboy/ssh-action@v0.1.4
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
@@ -34,4 +40,3 @@ jobs:
             echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
             docker-compose up -d --build web
             echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
-            docker ps
