@@ -12,27 +12,13 @@ jobs:
       - name: Checkout  
         uses: actions/checkout@v3
 
-      - name: Set up SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo 4546 
-
       - name: Deploy code
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          PROJECT_FOLDER: ${{ secrets.PROJECT_FOLDER }}
         run: |
           echo '--- SSH CONNECTION ---'
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 45.10.110.191 >> ~/.ssh/known_hosts
-
-   
 
           ssh root@45.10.110.191 << 'EOF'
             echo '--- START WORK ON REMOTE SERVER ---'
