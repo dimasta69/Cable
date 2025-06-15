@@ -21,9 +21,9 @@ jobs:
         run: |
           echo '--- SSH CONNECTION ---'
           # Создаем временный файл для ключа
-          echo "$SSH_PRIVATE_KEY"
           echo "$SSH_PRIVATE_KEY" > private_key
           chmod 600 private_key
+          cat private_key
 
           # Подключаемся к удаленному серверу
           ssh -i private_key -o StrictHostKeyChecking=no "$SSH_USERNAME@$SSH_HOST" << EOF
