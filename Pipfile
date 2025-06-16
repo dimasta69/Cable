@@ -32,6 +32,9 @@ djoser = "*"
 psycopg2-binary = "*"
 gunicorn = "*"
 django-querycount = "*"
+drf-spectacular = "*"
+rest-framework-simplejwt = "*"
+decouple = "*"
 
 [requires]
 python_version = "3.11"

@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'models_app.apps.ModelsAppConfig',
     'core_api.apps.CoreApiConfig',
     'rest_framework',
-    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
     'drf_yasg',
     'corsheaders',
 ]
