@@ -35,12 +35,12 @@ class UpdateBuildingService(ServiceWithResult):
             building.name = self.cleaned_data['name']
         if self.cleaned_data['coord_x']:
             building.coord_x = self.cleaned_data['coord_x']
-        else:
-            building.coord_x = None
+        # else:
+        #     building.coord_x = None 
         if self.cleaned_data['coord_y']:
             building.coord_y = self.cleaned_data['coord_y']
-        else:
-            building.coord_y = None
+        # else:
+        #     building.coord_y = None
         building.save()
         return building
 
