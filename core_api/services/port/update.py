@@ -1,62 +1,53 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import RegexValidator
 from rest_framework import status
 from functools import lru_cache
+from typing import List
+from django.db.models import Q
 
+from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
-from models_app.models.port import Port
-
+from core_api.utils.change_mode_port import change_mode_port
+from models_app.models import Port, User, LineType, PortMode, Access, Scheme, Building, Room, Equipment, ServerRack
 
 class UpdatePortService(ServiceWithResult):
     id = forms.IntegerField(required=True)
-    line_type = forms.CharField(required=False)
-    vlan_type = forms.CharField(required=False)
-    vlan = forms.IntegerField(required=False)
-    ip = forms.CharField(required=False, validators=[RegexValidator(
-        regex='^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|'
-              '[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$',
-        message='Введите корректный IP адрес',
-        code='invalid_ip'
-    )])
+    line_type_id = ListIntegerField(required=False)
+    mode_id = forms.IntegerField(required=False)
     mac = forms.CharField(max_length=17, validators=[RegexValidator(
         regex=r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$',
         message='Введите корректный MAC-адрес.',
         code='invalid_mac_address'
     )], required=False)
-    connection_id = forms.IntegerField(required=False)
 
-    custom_validations = ['port_presence', 'port_connection_presence', 'vlan_presence', 'line_presence', 'port_modular',
-                          'port_connection_modular']
+    custom_validations = ['port_presence', 'line_type_presence', 'port_mode_presence', 'access_port_presence']
+    current_user = ModelField(User)
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.update_port
+            self.result = self._update_port
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def update_port(self):
-        port = self.port
-        if self.cleaned_data['line_type']:
-            port.line_type = self.cleaned_data['line_type']
-        if self.cleaned_data['vlan_type']:
-            port.vlan_type = self.cleaned_data['vlan_type']
-        if self.cleaned_data['vlan']:
-            port.vlan = self.cleaned_data['vlan']
-        if self.cleaned_data['ip']:
-            port.ip = self.cleaned_data['ip']
+    def _update_port(self) -> Port:
+        port = self._port
+        if self.cleaned_data['line_type_id']:
+            port.line_type = self._line_type
+        if self.cleaned_data['mode_id']:
+            change_mode_port(port.pk)
+            port.mode = self._mode
         if self.cleaned_data['mac']:
-            port.mac_address = self.cleaned_data['mac']
-        if self.cleaned_data['connection_id']:
-            port.set_connection(self.port_connection)
+            port.mac = self.cleaned_data['mac']
         port.save()
         return port
 
     @property
     @lru_cache()
-    def port(self):
+    def _port(self) -> Port | None:
         try:
             return Port.objects.get(id=self.cleaned_data['id'])
         except Port.DoesNotExist:
@@ -64,105 +55,109 @@ class UpdatePortService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def port_connection(self):
+    def _line_type(self) -> List[LineType]:
         try:
-            return Port.objects.get(id=self.cleaned_data['connection_id'])
-        except Port.DoesNotExist:
+            return LineType.objects.filter(id__in=self.cleaned_data['line_type_id'])
+        except LineType.DoesNotExist:
+            return LineType.objects.none()
+
+    @property
+    @lru_cache()
+    def _mode(self) -> PortMode | None:
+        try:
+            return PortMode.objects.get(id=self.cleaned_data['mode_id'])
+        except PortMode.DoesNotExist:
             return None
 
-    def port_presence(self):
-        if not self.port:
+    @property
+    def _access_port(self) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
+        try:
+            access_list = Access.objects.filter(
+                Q(
+                    object_type=scheme_content_type,
+                    object_id=self._port.equipment.scheme.id,
+                ) |
+                Q(
+                    object_type=equipment_content_type,
+                    object_id=self._port.equipment.id
+                ),
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            )
+            if self._port.equipment.room:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=building_content_type,
+                                object_id=self._port.equipment.room.building.id
+                            ) |
+                            Q(
+                                object_type=room_content_type,
+                                object_id=self._port.equipment.room.id
+                            ),
+                            user=self.cleaned_data['current_user'],
+                            role__in=['Change', 'Creator'],
+                        ) | access_list
+
+                )
+            if self._port.equipment.units:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=building_content_type,
+                                object_id=self._port.equipment.units.all()[0].server_rack.room.building.id
+                            ) |
+                            Q(
+                                object_type=room_content_type,
+                                object_id=self._port.equipment.units.all()[0].server_rack.room.id
+                            ),
+                            Q(
+                                object_type=server_rack_content_type,
+                                object_id=self._port.equipment.units.all()[0].server_rack.id
+                            ),
+                            user=self.cleaned_data['current_user'],
+                            role__in=['Change', 'Creator'],
+                        ) | access_list
+                )
+        except Access.DoesNotExist:
+            return None
+
+    def port_mode_presence(self) -> None:
+        if self.cleaned_data['mode_id'] and not self._mode:
+            self.add_error(
+                'mode_id',
+                ObjectDoesNotExist(
+                    f"Port mode id={self.cleaned_data['mode_id']} not found"
+                )
+            )
+
+    def line_type_presence(self) -> None:
+        if self.cleaned_data['line_type_id']:
+            if len(self._line_type) != len(self.cleaned_data['line_type_id']):
+                self.add_error(
+                    'line_type_id',
+                    ObjectDoesNotExist(
+                        "Line type ids not found"
+                    )
+                )
+                self.response_status = status.HTTP_404_NOT_FOUND
+
+    def port_presence(self) -> None:
+        if not self._port:
             self.add_error('id', ObjectDoesNotExist(f"Port id ={self.cleaned_data['id']} not found"))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def port_connection_presence(self):
-        if not self.port:
-            return
-
-        port_template = self.port.port_template
-        connection_id = self.cleaned_data.get('connection_id')
-
-        if not port_template.modular:
-            if not connection_id:
-                self.add_error('id', ObjectDoesNotExist(f"Port connection id={connection_id} not found"))
-                self.response_status = status.HTTP_404_NOT_FOUND
-                return
-
-            if not self.port_connection:
-                self.add_error('id', ObjectDoesNotExist(f"Port connection id={connection_id} not found"))
-                self.response_status = status.HTTP_404_NOT_FOUND
-                return
-
-            if self.port_connection.connection != self.port and self.port_connection.connection is not None:
-                self.add_error('id', SuspiciousOperation(f"Port connection {connection_id} connected to another port"))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-                return
-
-            if not self.port_connection.port_template.modular:
-                if not set(self.port_connection.port_template.speed) & set(port_template.speed):
-                    self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"))
-                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-                    return
-
-            if self.port_connection.port_template.modular and self.port_connection.sfp:
-                if not set(self.port_connection.sfp.speed) & set(port_template.speed):
-                    self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"))
-                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-                if self.port.sfp.line_type != self.port_connection.sfp.line_type:
-                    self.add_error('connection_id', SuspiciousOperation("The line type on the SFP does not match"))
-                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def port_modular(self):
-        if self.port and self.port.port_template.modular and not self.port.sfp:
-            self.add_error('id', SuspiciousOperation("SFP module required"))
-            self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def port_connection_modular(self):
-        if not self.port or not self.cleaned_data.get('connection_id'):
-            return
-
-        if not self.port.port_template.modular:
-            return
-
-        if not self.port_connection:
-            self.add_error('id',
-                           ObjectDoesNotExist(f"Port connection id ={self.cleaned_data['connection_id']} not found"))
-            self.response_status = status.HTTP_404_NOT_FOUND
-            return
-
-        if self.port_connection.port_template.modular and not self.port_connection.sfp:
-            self.add_error('id', SuspiciousOperation("SFP module required"))
-            self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-            return
-
-        if self.port_connection.connection != self.port and self.port_connection.connection is not None:
-            self.add_error('id', SuspiciousOperation(
-                f"Port connection = {self.cleaned_data['connection_id']} connected to another port"))
-            self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-            return
-
-        if not self.port_connection.port_template.modular:
-            if not set(self.port_connection.port_template.speed) & set(self.port.sfp.speed):
-                self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-            return
-
-        if self.port.port_template.modular and self.port.sfp:
-            if not set(self.port_connection.sfp.speed) & set(self.port.sfp.speed):
-                self.add_error('connection_id', SuspiciousOperation("Cannot be connected due to speed mismatch"))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-            if self.port.sfp.line_type != self.port_connection.sfp.line_type:
-                self.add_error('connection_id', SuspiciousOperation("The line type on the SFP does not match"))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def vlan_presence(self):
-        if self.cleaned_data['vlan_type']:
-            if not any(type_tuple[1] == self.cleaned_data['vlan_type'] for type_tuple in Port.VLAN_CHOICES):
-                self.add_error('vlan_type', ObjectDoesNotExist(f'Type {self.cleaned_data["vlan_type"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def line_presence(self):
-        if self.cleaned_data['line_type']:
-            if not any(type_tuple[1] == self.cleaned_data['line_type'] for type_tuple in Port.LINE_CHOICES):
-                self.add_error('line_type', ObjectDoesNotExist(f'Type {self.cleaned_data["line_type"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
+    def access_port_presence(self) -> None:
+        if not self._access_port and not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "front_port_list",
+                PermissionError(
+                    f"Access with port id={self._port.id} not found"
+                )
+            )
+            self.response_status = status.HTTP_403_FORBIDDEN

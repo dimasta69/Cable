@@ -1,0 +1,40 @@
+name: CICD
+
+on:
+  push:
+    branches:
+      - testing
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout  
+        uses: actions/checkout@v3
+
+      - name: Deploy code
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }} 
+          username: ${{ secrets.SSH_USER }}
+          key: "${{ secrets.SSH_PRIVATE_KEY }}"
+          port: 22
+          script: |
+            echo '--- START WORK ON REMOTE SERVER ---'
+            cd ${{ secrets.PROJECT_FOLDER }}
+            pwd
+            echo '--- LIST OF FILES ---'
+            ls -la
+            echo '--- GIT ---'
+            git checkout testing
+            git pull
+            cp .env-example .env
+            echo '--- RESTARTING AND REBUILDING CONTAINER web ---'
+            docker-compose up -d --build web
+            echo '--- LIST OF DOCKER CONTAINERS AFTER RESTARTING web CONTAINER ---'
+            docker ps -a

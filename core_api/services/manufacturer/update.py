@@ -1,19 +1,20 @@
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 
+from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from django import forms
 from functools import lru_cache
 
-from models_app.models.manufacturer import Manufacturer
+from models_app.models import Manufacturer, User
 
 
 class ManufacturerUpdateService(ServiceWithResult):
     name = forms.CharField(required=True)
     id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
-    custom_validations = ['name_presence', 'manufacture_presence']
+    custom_validations = ['name_presence', 'is_superuser']
 
     def process(self):
         self.run_custom_validations()
@@ -22,36 +23,30 @@ class ManufacturerUpdateService(ServiceWithResult):
             self.response_status = status.HTTP_200_OK
         return self
 
-    def _update_scheme(self):
-        manufacturer = self.manufacturer
+    def _update_scheme(self) -> Manufacturer:
+        manufacturer = self._manufacturer
         manufacturer.name = self.cleaned_data['name']
         manufacturer.save()
         return manufacturer
 
     @property
     @lru_cache()
-    def manufacturer(self):
+    def _manufacturer(self) -> Manufacturer | None:
         try:
             return Manufacturer.objects.get(id=self.cleaned_data['id'])
         except Manufacturer.DoesNotExist:
             return None
 
-    @property
-    def manufacturer_list(self):
-        try:
-            return Manufacturer.objects.all()
-        except Manufacturer.DoesNotExist:
-            return Manufacturer.objects.none()
-
-    def name_presence(self):
-        if self.manufacturer:
-            for scheme in self.manufacturer_list:
-                if scheme.name.lower() == self.cleaned_data['name'].lower():
-                    self.add_error('name', ValidationError("Name="
-                                                           f"{self.cleaned_data['name']} already exists"))
-                    self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def manufacture_presence(self):
-        if not self.manufacturer:
+    def manufacture_presence(self) -> None:
+        if not self._manufacturer:
             self.add_error('id', ObjectDoesNotExist(f'Manufacture id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )

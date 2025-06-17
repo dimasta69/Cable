@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 django = "*"
 psycopg = "*"
+python-dotenv = "*"
+djangorestframework = "*"
 
 [dev-packages]
 pre-commit = "*"
@@ -29,6 +31,10 @@ django-cors-headers = "*"
 djoser = "*"
 psycopg2-binary = "*"
 gunicorn = "*"
+django-querycount = "*"
+drf-spectacular = "*"
+rest-framework-simplejwt = "*"
+decouple = "*"
 
 [requires]
 python_version = "3.11"

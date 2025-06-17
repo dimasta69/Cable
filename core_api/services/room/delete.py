@@ -1,12 +1,14 @@
 from functools import lru_cache
 from django import forms
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db.models import Q
 from rest_framework import status
 
-from models_app.models import User, Access
+from models_app.models import User, Access, Scheme, Building
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.room import Room
+from models_app.models import Room
 
 
 class DeleteRoomService(ServiceWithResult):
@@ -18,39 +20,50 @@ class DeleteRoomService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.delete_room
+            self._delete_room()
             self.response_status = status.HTTP_204_NO_CONTENT
         return self
 
-    @property
-    def delete_room(self):
-        self.room.delete()
-        return None
+    def _delete_room(self) -> None:
+        self._room.delete()
 
     @property
     @lru_cache()
-    def room(self):
+    def _room(self) -> Room | None:
         try:
-            return Room.objects.get(id=self.cleaned_data['id'])
+            return Room.objects.select_related("building").get(id=self.cleaned_data['id'])
         except Room.DoesNotExist:
             return None
 
     @property
-    def access(self):
+    def _access(self) -> Access | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
         try:
-            return Access.objects.get(user=self.cleaned_data['current_user'], scheme=self.room.building.scheme,
-                                      role__in=['Change', 'Creator'])
+            return (Access.objects.filter(
+                Q(
+                    object_type=scheme_content_type,
+                    object_id=self._room.building.scheme.id,
+                )|
+                Q(
+                    object_type=building_content_type,
+                    object_id=self._room.building.id,
+                )
+            ).filter(
+                user=self.cleaned_data['current_user'],
+                role__in=['Change', 'Creator'],
+            ))
         except Access.DoesNotExist:
             return None
 
-    def room_presence(self):
-        if not self.room:
+    def room_presence(self) -> None:
+        if not self._room:
             self.add_error('id', ObjectDoesNotExist(f'Room id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_presence(self):
-        if self.room:
-            if not self.access and not self.cleaned_data['current_user'].is_superuser:
+    def access_presence(self) -> None:
+        if self._room:
+            if not self._access and not self.cleaned_data['current_user'].is_superuser:
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.room.building.scheme.id} is not granted'))
+                                                                f'{self._room.building.scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN

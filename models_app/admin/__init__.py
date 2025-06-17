@@ -1,14 +1,24 @@
-from .scheme import SchemeAdmin
-from .access import AccessAdmin
-from .user import UserAdmin
-from .building import BuildingAdmin
-from .room import RoomAdmin
-from .server_rack import ServerRackAdmin
-from .unit import UnitAdmin
-from .type_port import TypePortAdmin
-from .manufacturer import ManufacturerAdmin
-from .sfp_template import SfpTemplateAdmin
-from .equipment_template import EquipmentTemplateAdmin
-from .port_template import PortTemplateAdmin
-from .equipment import EquipmentAdmin
-from .port import PortAdmin
+from models_app.admin.access.resources import AccessAdmin
+from models_app.admin.scheme.resources import SchemeAdmin
+from models_app.admin.building.resources import BuildingAdmin
+from models_app.admin.room.resources import RoomAdmin
+from models_app.admin.equipment.resources import EquipmentAdmin
+from models_app.admin.server_rack.resources import ServerRackAdmin
+from models_app.admin.type_port.resources import TypePortAdmin
+from models_app.admin.equipment_template.resources import EquipmentTemplateAdmin
+from models_app.admin.manufacturer.resources import ManufacturerAdmin
+from models_app.admin.equipment_template_type.resources import EquipmentTemplateTypeAdmin
+from models_app.admin.port_template.resources import PortTemplateAdmin
+from models_app.admin.speed.resources import SpeedAdmin
+from models_app.admin.line_type.resources import LineTypeAdmin
+from models_app.admin.sfp_template.resources import SfpTemplateAdmin
+from models_app.admin.user.resources import UserAdmin
+from models_app.admin.vlan.resources import VlanAdmin
+from models_app.admin.segment.resources import SegmentAdmin
+from models_app.admin.port_mode.resources import PortModeAdmin
+
+from django.contrib import admin
+from django.contrib.auth.models import Group
+
+
+admin.site.unregister(Group)

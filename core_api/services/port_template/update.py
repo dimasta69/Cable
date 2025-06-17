@@ -2,12 +2,12 @@ from django import forms
 from rest_framework import status
 from functools import lru_cache
 
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 
 from utils.errors import ValidationError
 from utils.services import ServiceWithResult
-from utils.fields import ListIntegerField
-from models_app.models.port_template import PortTemplate
+from utils.fields import ListIntegerField, ModelField
+from models_app.models import PortTemplate, User, Speed
 
 
 class UpdatePortTemplateService(ServiceWithResult):
@@ -15,9 +15,12 @@ class UpdatePortTemplateService(ServiceWithResult):
     name = forms.CharField(required=False)
     unit = ListIntegerField(required=False)
     lines = forms.IntegerField(required=False)
+    speed_list = ListIntegerField(required=False)
+    current_user = ModelField(User)
 
-    custom_validations = ['name_presence', 'port_template_presence', 'count_unit',
-                          'lines_presence']
+    custom_validations = [
+        'name_presence', 'port_template_presence', 'count_unit', 'lines_presence', 'is_superuser',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -54,6 +57,14 @@ class UpdatePortTemplateService(ServiceWithResult):
         except PortTemplate.DoesNotExist:
             return None
 
+    @property
+    @lru_cache()
+    def speeds(self):
+        try:
+            return Speed.objects.filter(id__in=self.cleaned_data['speed_list']).only('id')
+        except Speed.DoesNotExist:
+            return None
+
     def name_presence(self):
         if self.port_template:
             for port in self.port_template_list:
@@ -79,3 +90,12 @@ class UpdatePortTemplateService(ServiceWithResult):
                                                                                self.port_template.lines)) < 0.5:
                 self.add_error('unit', ValidationError('Еhe number of lines per unit should not exceed 2'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )

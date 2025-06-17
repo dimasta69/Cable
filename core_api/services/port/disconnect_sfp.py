@@ -1,76 +1,114 @@
-from django.core.exceptions import ObjectDoesNotExist, SuspiciousOperation
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from functools import lru_cache
-from django import forms
+from typing import List
+from django.db.models import Q
 
 from utils.services import ServiceWithResult
-from utils.fields import ListIntegerField
-from models_app.models.port import Port
-from models_app.models.equipment import Equipment
+from utils.fields import ListIntegerField, ModelField
+from models_app.models import Port, User, Equipment, Access, Scheme, Building, Room, ServerRack
 
 
 class DisconnectSfpService(ServiceWithResult):
     port_list = ListIntegerField(required=True)
-    equipment_id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
-    custom_validations = ['port_presence', 'port_already', 'equipment_presence']
+    custom_validations = ['port_presence', 'access_port_presence']
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.disconnect_sfp
+            self._disconnect_sfp()
             self.response_status = status.HTTP_200_OK
         return self
 
-    @property
-    def disconnect_sfp(self):
-        for port in self.port_list_dict:
+    def _disconnect_sfp(self) -> None:
+        for port in self._ports:
             port.sfp = None
-            port.save()
-        return self.port_list_int.filter(equipment=self.equipment).order_by('uid')
+        Port.objects.bulk_update(self._ports, ['sfp'])
 
     @property
     @lru_cache()
-    def port_list_int(self):
+    def _ports(self) -> List[Port]:
         try:
-            return Port.objects.all()
+            return Port.objects.filter(
+                id__in=self.cleaned_data['port_list'],
+                front_side__isnull=True,
+            )
         except Port.DoesNotExist:
             return Port.objects.none()
 
-    @property
-    @lru_cache()
-    def equipment(self):
+    def _access_port(self, port_id: int) -> List[Access] | None:
+        scheme_content_type = ContentType.objects.get_for_model(Scheme)
+        building_content_type = ContentType.objects.get_for_model(Building)
+        room_content_type = ContentType.objects.get_for_model(Room)
+        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
+        equipment_content_type = ContentType.objects.get_for_model(Equipment)
         try:
-            return Equipment.objects.get(id=self.cleaned_data['equipment_id'])
-        except Equipment.DoesNotExist:
+            access_list = Access.objects.filter(
+                Q(
+                    object_type=scheme_content_type,
+                    object_id=self._ports[port_id].equipment.scheme.id,
+                ) |
+                Q(
+                    object_type=equipment_content_type,
+                    object_id=self._ports[port_id].equipment.id
+                )
+            )
+            if self._ports[port_id].equipment.room:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=building_content_type,
+                                object_id=self._ports[port_id].equipment.room.building.id
+                            ) |
+                            Q(
+                                object_type=room_content_type,
+                                object_id=self._ports[port_id].equipment.room.id
+                            ),
+                        ) | access_list
+                ).filter(
+                    user=self.cleaned_data['current_user'],
+                    role__in=['Change', 'Creator'],
+                )
+            if self._ports[port_id].equipment.units:
+                return (
+                        Access.objects.filter(
+                            Q(
+                                object_type=building_content_type,
+                                object_id=self._ports[port_id].equipment.units.all()[0].server_rack.room.building.id
+                            ) |
+                            Q(
+                                object_type=room_content_type,
+                                object_id=self._ports[port_id].equipment.units.all()[0].server_rack.room.id
+                            ),
+                            Q(
+                                object_type=server_rack_content_type,
+                                object_id=self._ports[port_id].equipment.units.all()[0].server_rack.id
+                            ),
+                        ) | access_list
+                ).filter(
+                    user=self.cleaned_data['current_user'],
+                    role__in=['Change', 'Creator'],
+                )
+        except Access.DoesNotExist:
             return None
 
-    @property
-    @lru_cache()
-    def port_list_dict(self):
-        port_list_dict = []
-        for uid in self.cleaned_data['port_list']:
-            try:
-                port_list_dict.append(self.port_list_int.get(id=uid))
-            except Port.DoesNotExist:
-                return None
-        return port_list_dict
-
-    def port_presence(self):
-        if self.cleaned_data['port_list']:
-            if not self.port_list_dict:
-                self.add_error('port_list_dict', ObjectDoesNotExist('Port list does not exist'))
+    def port_presence(self) -> None:
+        if len(self.cleaned_data['port_list']) != len(self._ports):
+            if not self._ports:
+                self.add_error('port_list', ObjectDoesNotExist('Port list does not exist'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def equipment_presence(self):
-        if not self.equipment:
-            self.add_error('equipment_id', ObjectDoesNotExist(f'Equipment id = {self.cleaned_data["equipment_id"]}'
-                                                              ' does not exist'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def port_already(self):
-        if self.port_list_dict:
-            port_list = [port for port in self.port_list_dict if port.connection is not None]
-            if port_list:
-                self.add_error('pigtail_list', SuspiciousOperation('Port is already connected'))
-                self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+    def access_port_presence(self) -> None:
+        if self._ports:
+            ports = list(map(self._access_port,  range(len(self._ports))))
+            if any(port is None for port in ports):
+                self.add_error(
+                    "front_port_list",
+                    PermissionError(
+                        f"Access with port id={self._ports[0].id} not found"
+                    )
+                )
+                self.response_status = status.HTTP_403_FORBIDDEN

@@ -1,0 +1,55 @@
+import json
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from core_api.services.equipment.equipments_from_map import EquipmentsFromMapListService
+from core_api.services.equipment.create import CreateEquipmentService
+from core_api.services.equipment.list import EquipmentListService
+from core_api.serializers.equipment.list import EquipmentListSerializer
+from utils.pagination import CustomPagination
+from utils.services import ServiceOutcome
+
+
+class EquipmentListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        outcome = ServiceOutcome(
+            EquipmentListService, dict(request.GET.items()) | {"current_user": request.user}
+        )
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response({'pagination': CustomPagination(outcome.result,
+                                                        current_page=outcome.service.cleaned_data['page'],
+                                                        per_page=outcome.service.cleaned_data['per_page']).to_json(),
+                         'results': EquipmentListSerializer(outcome.result, many=True).data},
+                        status=outcome.response_status)
+
+    def post(self, request):
+        outcome = ServiceOutcome(CreateEquipmentService, request.data | {"current_user": request.user})
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response(EquipmentListSerializer(outcome.result).data, status=status.HTTP_201_CREATED)
+
+
+class EquipmentsFromMapListView(APIView):
+    def get(self, request):
+        if "filter_vlan_list_id" in dict(request.GET.items()):
+            filter_vlan_list_id = json.loads(dict(request.GET.items())['filter_vlan_list_id'])
+        else:
+            filter_vlan_list_id = None
+        outcome = ServiceOutcome(
+            EquipmentsFromMapListService, dict(request.GET.items()) | {
+                "current_user": request.user,
+                "filter_vlan_list_id": filter_vlan_list_id,
+            },
+        )
+        if bool(outcome.errors):
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response({'pagination': CustomPagination(outcome.result,
+                                                        current_page=outcome.service.cleaned_data['page'],
+                                                        per_page=outcome.service.cleaned_data['per_page']).to_json(),
+                         'results': EquipmentListSerializer(outcome.result, many=True).data},
+                        status=outcome.response_status)

@@ -6,8 +6,8 @@ from rest_framework import status
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models.user import User
-from models_app.models.access import Access
+from models_app.models import User
+from models_app.models import Access
 
 
 class UpdateAccessService(ServiceWithResult):
@@ -15,18 +15,18 @@ class UpdateAccessService(ServiceWithResult):
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['access_creator', 'access_presence', 'access_role', 'role_presence']
+    custom_validations = ['access_creator', 'access_presence', 'access_owner_or_superuser', 'role_presence']
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.update_access
+            self.result = self._update_access
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def update_access(self):
-        access = self.access
+    def _update_access(self) -> Access:
+        access = self._access
         if self.cleaned_data['role']:
             access.role = self.cleaned_data['role']
         access.save()
@@ -34,32 +34,32 @@ class UpdateAccessService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def access(self):
+    def _access(self) -> Access | None:
         try:
             return Access.objects.get(id=self.cleaned_data['id'])
         except Access.DoesNotExist:
             return None
 
-    def access_creator(self):
-        if self.access:
-            if self.access.role == 'Creator':
+    def access_creator(self) -> None:
+        if self._access:
+            if self._access.role == 'Creator':
                 self.add_error('id', PermissionDenied("You can't delete the creator"))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def access_presence(self):
-        if not self.access:
+    def access_presence(self) -> None:
+        if not self._access:
             self.add_error('id', ObjectDoesNotExist(f'Access id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def access_role(self):
-        if self.access:
-            if (self.access.scheme.creator != self.cleaned_data['current_user']
+    def access_owner_or_superuser(self) -> None:
+        if self._access:
+            if (self._access.object.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.access.scheme.id} is not granted'))
+                                                                f'{self._access.object.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
 
-    def role_presence(self):
+    def role_presence(self) -> None:
         if self.cleaned_data['role']:
             if not self.cleaned_data.get('role') in ['Change', 'Read']:
                 self.add_error('filter_role', ObjectDoesNotExist(f"Field in model with "

@@ -1,17 +1,19 @@
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
 from functools import lru_cache
 
 from utils.services import ServiceWithResult
+from utils.fields import ModelField
 from django import forms
 
-from models_app.models.port_template import PortTemplate
+from models_app.models import PortTemplate, User
 
 
 class PortTemplateDeleteService(ServiceWithResult):
     id = forms.IntegerField(required=True)
+    current_user = ModelField(User)
 
-    custom_validations = ['port_template_presence']
+    custom_validations = ['port_template_presence', 'is_superuser',]
 
     def process(self):
         self.run_custom_validations()
@@ -37,3 +39,12 @@ class PortTemplateDeleteService(ServiceWithResult):
         if not self.port_template:
             self.add_error('id', ObjectDoesNotExist(f'Port template id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )

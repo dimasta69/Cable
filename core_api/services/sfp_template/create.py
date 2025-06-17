@@ -3,50 +3,44 @@ from functools import lru_cache
 
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
+from rest_framework.exceptions import PermissionDenied
+from typing import List
 
 from utils.services import ServiceWithResult
-from utils.fields import ListIntegerField
-from models_app.models.manufacturer import Manufacturer
-from models_app.models.type_port import TypePort
-from models_app.models.sfp_template import SfpTemplate
+from utils.fields import ListIntegerField, ModelField
+from models_app.models import TypePort, SfpTemplate, Manufacturer, User, LineType, Speed
 
 
 class CreateSfpTemplateService(ServiceWithResult):
     manufacturer_id = forms.IntegerField(required=True)
     name = forms.CharField(required=False)
     type_port_id = forms.IntegerField(required=False)
-    line_type = forms.CharField(required=True)
-    speed = ListIntegerField()
+    line_type_id = ListIntegerField()
+    speeds_id = ListIntegerField()
+    current_user = ModelField(User)
 
-    custom_validations = ['type_port_presence', 'manufacturer_presence', 'line_type_presence']
+    custom_validations = [
+        'type_port_presence', 'manufacturer_presence', 'line_type_presence', 'is_superuser', 'speed_presence',
+    ]
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self.create_sfp_template
+            self.result = self._create_sfp_template
             self.response_status = status.HTTP_201_CREATED
         return self
 
     @property
-    def create_sfp_template(self):
-        return SfpTemplate.objects.create(manufacturer=self.manufacturer,
-                                          name=self.cleaned_data['name'],
-                                          type_port=self.type_port,
-                                          line_type=self.cleaned_data['line_type'],
-                                          speed=self.cleaned_data['speed'])
-
-    def add_equipment(self):
-        self.remove_equipment()
-        for unit in self.unit_list_int:
-            unit.equipment = self.equipment
-            unit.save()
-            unit.server_rack.check_free_power()
-            unit.server_rack.check_free_units()
-        return self.equipment
+    def _create_sfp_template(self) -> SfpTemplate:
+        sfp = SfpTemplate.objects.create(
+            manufacturer=self._manufacturer, name=self.cleaned_data['name'], type_port=self._type_port)
+        sfp.line_type.set(self._line_type)
+        sfp.speed.set(self._speeds)
+        return sfp
 
     @property
     @lru_cache()
-    def manufacturer(self):
+    def _manufacturer(self):
         try:
             return Manufacturer.objects.get(id=self.cleaned_data['manufacturer_id'])
         except Manufacturer.DoesNotExist:
@@ -54,33 +48,68 @@ class CreateSfpTemplateService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def type_port(self):
+    def _type_port(self):
         try:
             return TypePort.objects.get(id=self.cleaned_data['type_port_id'])
         except TypePort.DoesNotExist:
             return None
 
-    def line_type_presence(self):
-        if self.cleaned_data['line_type']:
-            if not any(
-                    type_tuple[1] == self.cleaned_data['line_type'] for type_tuple in SfpTemplate.LINE_CHOICES):
-                self.add_error('filter_line_type', ObjectDoesNotExist('Line type id='
-                                                                      f'{self.cleaned_data["line_type"]} '
-                                                                      f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
+    @property
+    @lru_cache()
+    def _line_type(self) -> List[LineType]:
+        try:
+            return LineType.objects.filter(id__in=self.cleaned_data['line_type_id'])
+        except LineType.DoesNotExist:
+            return LineType.objects.none()
 
-    def manufacturer_presence(self):
+    @property
+    @lru_cache()
+    def _speeds(self) -> List[Speed]:
+        try:
+            return Speed.objects.filter(id__in=self.cleaned_data['speeds_id'])
+        except Speed.DoesNotExist:
+            return Speed.objects.none()
+
+    def line_type_presence(self) -> None:
+        if self.cleaned_data['line_type_id'] and len(self._line_type) != len(self.cleaned_data['line_type_id']):
+            self.add_error(
+                "line_type_id",
+                ObjectDoesNotExist(
+                    f"Line type with id={self.cleaned_data['line_type_id']} not found"
+                )
+            )
+            self.response_status = status.HTTP_404_NOT_FOUND
+
+    def speed_presence(self) -> None:
+        if len(self._speeds) != len(self.cleaned_data['speeds_id']):
+            self.add_error(
+                "speeds_id",
+                ObjectDoesNotExist(
+                    f"Speeds not found"
+                )
+            )
+
+    def manufacturer_presence(self) -> None:
         if self.cleaned_data['manufacturer_id']:
-            if not self.manufacturer:
+            if not self._manufacturer:
                 self.add_error('filter_manufacturer_id', ObjectDoesNotExist('Manufacturer id='
                                                                             f'{self.cleaned_data["manufacturer_id"]} '
                                                                             f'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def type_port_presence(self):
+    def type_port_presence(self) -> None:
         if self.cleaned_data['type_port_id']:
-            if not self.type_port:
+            if not self._type_port:
                 self.add_error('filter_type_port_id', ObjectDoesNotExist('Type port id='
                                                                          f'{self.cleaned_data["type_port_id"]} '
                                                                          f'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
+
+    def is_superuser(self) -> None:
+        if not self.cleaned_data['current_user'].is_superuser:
+            self.add_error(
+                "current_user",
+                PermissionDenied(
+                    "User is not superuser"
+                )
+            )
