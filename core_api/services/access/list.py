@@ -11,7 +11,6 @@ from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-
 def _access(object_type: ContentType, uid: int) -> List[Access]:
     try:
         return Access.objects.filter(
@@ -49,7 +48,7 @@ class AccessListService(ServiceWithResult):
         'vlan_presence',
     ]
 
-    def process(self):
+    def process(self) -> "AccessListService":
         self.run_custom_validations()
         if self.is_valid():
             self.result = self._access_filter_list
@@ -204,63 +203,63 @@ class AccessListService(ServiceWithResult):
         if not self._scheme:
             self.add_error('filter_scheme_id', ObjectDoesNotExist('Scheme id='
                                                                   f'{self.cleaned_data["filter_scheme_id"]} '
-                                                                      'not found'))
+                                                                  'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def building_presence(self) -> None:
         if self.cleaned_data['filter_building_id']:
             if not self._building:
                 self.add_error('filter_building_id', ObjectDoesNotExist('Building id='
-                                                                      f'{self.cleaned_data["filter_building_id"]} '
-                                                                      'not found'))
+                                                                        f'{self.cleaned_data["filter_building_id"]} '
+                                                                        'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def room_presence(self) -> None:
         if self.cleaned_data['filter_room_id']:
             if not self._room:
                 self.add_error('filter_room_id', ObjectDoesNotExist('Room id='
-                                                                      f'{self.cleaned_data["filter_room_id"]} '
-                                                                      'not found'))
+                                                                    f'{self.cleaned_data["filter_room_id"]} '
+                                                                    'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def server_rack_presence(self) -> None:
         if self.cleaned_data['filter_server_rack_id']:
             if not self._server_rack:
                 self.add_error('filter_server_rack_id', ObjectDoesNotExist('Server rack id='
-                                                                      f'{self.cleaned_data["filter_server_rack_id"]} '
-                                                                      'not found'))
+                                                                           f'{self.cleaned_data["filter_server_rack_id"]} '
+                                                                           'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def map_presence(self) -> None:
         if self.cleaned_data['filter_map_id']:
             if not self._map:
                 self.add_error('filter_map_id', ObjectDoesNotExist('Map id='
-                                                                      f'{self.cleaned_data["filter_map_id"]} '
-                                                                      'not found'))
+                                                                   f'{self.cleaned_data["filter_map_id"]} '
+                                                                   'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def equipment_presence(self) -> None:
         if self.cleaned_data['filter_equipment_id']:
             if not self._equipment:
                 self.add_error('filter_equipment_id', ObjectDoesNotExist('Equipment id='
-                                                                      f'{self.cleaned_data["filter_equipment_id"]} '
-                                                                      'not found'))
+                                                                         f'{self.cleaned_data["filter_equipment_id"]} '
+                                                                         'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def segment_presence(self) -> None:
         if self.cleaned_data['filter_segment_id']:
             if not self._segment:
                 self.add_error('filter_segment_id', ObjectDoesNotExist('Segment id='
-                                                                      f'{self.cleaned_data["filter_segment_id"]} '
-                                                                      'not found'))
+                                                                       f'{self.cleaned_data["filter_segment_id"]} '
+                                                                       'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def vlan_presence(self) -> None:
         if self.cleaned_data['filter_vlan_id']:
             if not self._vlan:
                 self.add_error('filter_vlan_id', ObjectDoesNotExist('Vlan id='
-                                                                      f'{self.cleaned_data["filter_vlan_id"]} '
-                                                                      'not found'))
+                                                                    f'{self.cleaned_data["filter_vlan_id"]} '
+                                                                    'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_owner_or_superuser(self) -> None:

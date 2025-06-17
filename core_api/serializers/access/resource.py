@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from models_app.models import Access
 
+
 class AccessListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
     user = serializers.SerializerMethodField()

@@ -1,19 +1,10 @@
 from django.conf.urls.static import static
 from django.urls import path, include
 
-from drf_yasg import openapi
-from drf_yasg.views import get_schema_view
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 from cabel.settings import MEDIA_URL, MEDIA_ROOT, STATIC_URL, STATIC_ROOT
 
-
-schema_view = get_schema_view(
-    openapi.Info(
-        title='core-api',
-        default_version='v1',
-    ),
-    public=True,
-)
 
 urlpatterns = [
     path('auth/', include("core_api.urls.auth")),
@@ -41,8 +32,11 @@ urlpatterns = [
     path("vlan_device/", include("core_api.urls.vlan_device")),
     path("vlan/", include("core_api.urls.vlan")),
     path("port_mode/", include("core_api.urls.port_mode")),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
+
 
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
 urlpatterns += static(STATIC_URL, document_root=STATIC_ROOT)

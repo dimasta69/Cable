@@ -180,6 +180,7 @@ class ServiceWithResult(Service, abc.ABC):
         super().__init__(*args, **kwargs)
         self.result = None
         self.response_status = None
+        self.additional_info = None
 
     def run_custom_validations(self):
         for custom_validation in self.__class__.custom_validations:
@@ -195,15 +196,26 @@ class ServiceWithResult(Service, abc.ABC):
             raise InvalidInputsError(errors, self.non_field_errors())
 
     # Modified add_error method to handle Django form errors with no fields keys in our way
-    def add_error(self, field, error):
-        if self._errors.get(field):
-            self._errors[field].append(error)
+    def add_error(self, field, error, field_index=None):
+        if field_index is None:
+            prepared_error = getattr(error, 'errors', None) or getattr(error, 'errors_dict', None) or error
+            if self._errors.get(field):
+                self._errors[field].append(prepared_error)
+            else:
+                self._errors[field] = [prepared_error]
         else:
-            self._errors[field] = [error]
+            prepared_error = getattr(error, 'errors', None) or getattr(error, 'errors_dict', None) or error
+            if self._errors.get(field):
+                if self._errors[field].get(field_index):
+                    self._errors[field][field_index].append(prepared_error)
+                else:
+                    self._errors[field][field_index] = [prepared_error]
+            else:
+                self._errors[field] = { field_index: [prepared_error] }
 
     def stop_process(self):
         if bool(self._errors):
-            raise ServiceObjectLogicError(errors_dict=self._errors, response_status=self.response_status or 400)
+            raise ServiceObjectLogicError(errors_dict=self._errors, response_status=self.response_status or 400, additional_info=self.additional_info)
         else:
             return self
 
@@ -217,14 +229,17 @@ class ServiceOutcome:
         self._errors = {}
         self._result = None
         self._response_status = None
+        self._additional_info = None
         self._outcome = self.execute(service_object, service_object_attributes, service_object_files)
 
     def execute(self, service_object, service_object_attributes, service_object_files):
         outcome = service_object.execute(service_object_attributes, service_object_files)
         self._response_status = outcome.response_status
+        self._additional_info = outcome.additional_info
         if bool(outcome.errors):
             response_status = self.response_status if hasattr(self, "response_status") else 400
-            raise ServiceObjectLogicError(errors_dict=outcome.errors, response_status=response_status)
+            additional_info = self.additional_info if hasattr(self, "additional_info") else None
+            raise ServiceObjectLogicError(errors_dict=outcome.errors, response_status=response_status, additional_info=additional_info)
         else:
             self._result = outcome.result
         return outcome
@@ -248,3 +263,7 @@ class ServiceOutcome:
     @property
     def response_status(self):
         return self._response_status
+
+    @property
+    def additional_info(self):
+        return self._additional_info

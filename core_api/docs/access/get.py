@@ -1,7 +1,7 @@
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
 from utils.helpers.auto_parameters_spectacular import (
-    prepare_parameters_for_docs,
+    prepare_parameters_for_docs, prepare_request_body_for_docs,
 )
 
 from utils.drf_spectacular_constants.response_for_error import RESPONSE_FOR_ERROR
@@ -15,8 +15,15 @@ RESPONSES: dict = {
         response=AccessListSerializer,
         examples=[
             OpenApiExample(
-                name="Created",
-                value={"context": "str"},
+                name="OK",
+                value={
+                    "id": 0,
+                    "user": {
+                        "id": "integer",
+                        "username": "string",
+                    },
+                    "role": "string"
+                },
             )
         ],
     ),
@@ -41,24 +48,12 @@ RESPONSES: dict = {
                     "translation_key": "invalid_request_data",
                     "debug_message": "null",
                     "details": {
-                        "question_id": [
+                        "filter_scheme_id": [
                             {
                                 "translation_key": "required",
                                 "message": "This field is required."
                             }
                         ],
-                        "user_uuid": [
-                            {
-                                "translation_key": "required",
-                                "message": "This field is required."
-                            }
-                        ],
-                        "context": [
-                            {
-                                "translation_key": "required",
-                                "message": "This field is required."
-                            }
-                        ]
                     },
                     "additional_info": {},
                     "backtrace": [],
@@ -66,22 +61,22 @@ RESPONSES: dict = {
             ),
         ],
     ),
-    404: OpenApiResponse(
-        description="Not Found",
+    403: OpenApiResponse(
+        description="Access is not granted",
         response=RESPONSE_FOR_ERROR,
         examples=[
             OpenApiExample(
-                name="Not Found (question)",
+                name="Access to the schema not granted",
                 value={
                     "type": "ServiceObjectLogicError",
-                    "message": "Not found question by id = id",
-                    "translation_key": "not_found",
+                    "message": "Access to the schema id {columns} is not granted",
+                    "translation_key": "invalid",
                     "debug_message": "null",
                     "details": {
-                        "code": [
+                        "current_user": [
                             {
-                                "translation_key": "not_found",
-                                "message": "Code = string not found",
+                                "translation_key": "invalid",
+                                "message": "Access to the schema id = 1 is not granted",
                             }
                         ]
                     },
@@ -89,11 +84,17 @@ RESPONSES: dict = {
                     "backtrace": [],
                 },
             ),
+        ]
+    ),
+    404: OpenApiResponse(
+        description="Not Found",
+        response=RESPONSE_FOR_ERROR,
+        examples=[
             OpenApiExample(
-                name="Not Found (user)",
+                name="Not Found",
                 value={
                     "type": "ServiceObjectLogicError",
-                    "message": "Not found user by uid = uid",
+                    "message": "Not found {columns}}",
                     "translation_key": "not_found",
                     "debug_message": "null",
                     "details": {
@@ -113,11 +114,7 @@ RESPONSES: dict = {
 }
 
 doc: DocsDict = {
-    "tags": ["messages"],
+    "tags": ["access"],
+    "parameters": prepare_parameters_for_docs(AccessListService, exclude=("current_user",), ),
     "responses": RESPONSES,
-    "parameters": prepare_parameters_for_docs(
-        AccessListService,
-        exclude=("current_user",),
-    ),
-    "auth": {"Token: "},
 }

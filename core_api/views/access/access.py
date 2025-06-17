@@ -2,6 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from drf_spectacular.utils import extend_schema
+
 from utils.services import ServiceOutcome
 from core_api.services.access.delete import DeleteAccessService
 from core_api.serializers.access.resource import AccessListSerializer

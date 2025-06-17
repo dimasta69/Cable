@@ -119,7 +119,6 @@ def prepare_parameters_for_docs(
                 parameter_data["enum"] = choices
         parameters_list.append(OpenApiParameter(**parameter_data))
         parameter_data = dict()
-
     return parameters_list
 
 
