@@ -134,4 +134,4 @@ doc: DocsDict = {
     "description": "List of available roles: ['Change', 'Read']",
 }
 
-doc['request']['application/json']['properties']['role']['enum']=['Change', 'Read']
+# doc['request']['application/json']['properties']['role']['enum']=['Change', 'Read']

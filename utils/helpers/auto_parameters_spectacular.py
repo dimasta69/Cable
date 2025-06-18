@@ -328,6 +328,8 @@ def prepare_request_body_for_docs(
                     parameter_type = raw_parameter_type["type"]
 
             request_body[data_type]["properties"][attr_name] = parameter_type
+            # if attr_name == "role":
+            #     request_body[data_type]["properties"][attr_name]['enum'] = ['Change', 'Read']
             if attr.required:
                 required_parameters_set.add(attr_name)
         request_body[data_type]["required"] = list(required_parameters_set)
