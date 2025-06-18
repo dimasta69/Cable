@@ -16,14 +16,24 @@ RESPONSES: dict = {
         examples=[
             OpenApiExample(
                 name="OK",
-                value={
-                    "id": 0,
+                value=[
+                  {
+                    "id": 10,
                     "user": {
-                        "id": "integer",
-                        "username": "string",
+                      "id": 1,
+                      "username": "root"
                     },
-                    "role": "string"
-                },
+                    "role": "Creator"
+                  },
+                  {
+                    "id": 39,
+                    "user": {
+                      "id": 3,
+                      "username": "test"
+                    },
+                    "role": "Read"
+                  }
+                ],
             )
         ],
     ),
