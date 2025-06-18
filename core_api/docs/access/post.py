@@ -1,38 +1,29 @@
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
-from utils.helpers.auto_parameters_spectacular import prepare_parameters_for_docs
+from utils.helpers.auto_parameters_spectacular import prepare_request_body_for_docs
 
 
 from utils.drf_spectacular_constants.response_for_error import RESPONSE_FOR_ERROR
 from utils.types import DocsDict
 from core_api.serializers.access.resource import AccessListSerializer
-from core_api.services.access.list import AccessListService
+from core_api.services.access.create_to_scheme import CreateAccessService
 
 RESPONSES: dict = {
-    200: OpenApiResponse(
-        description="OK",
+    201: OpenApiResponse(
+        description="Created",
         response=AccessListSerializer,
         examples=[
             OpenApiExample(
                 name="OK",
-                value=[
-                  {
-                    "id": 10,
+                value=
+                {
+                    "id": "integer",
                     "user": {
-                      "id": 1,
-                      "username": "root"
+                        "id": "integer",
+                        "username": "string"
                     },
                     "role": "Creator"
-                  },
-                  {
-                    "id": 39,
-                    "user": {
-                      "id": 3,
-                      "username": "test"
-                    },
-                    "role": "Read"
-                  }
-                ],
+                },
             )
         ],
     ),
@@ -57,7 +48,19 @@ RESPONSES: dict = {
                     "translation_key": "invalid_request_data",
                     "debug_message": "null",
                     "details": {
-                        "filter_scheme_id": [
+                        "scheme_id": [
+                            {
+                                "translation_key": "required",
+                                "message": "This field is required."
+                            }
+                        ],
+                        "user_id": [
+                            {
+                                "translation_key": "required",
+                                "message": "This field is required."
+                            }
+                        ],
+                        "role": [
                             {
                                 "translation_key": "required",
                                 "message": "This field is required."
@@ -124,6 +127,11 @@ RESPONSES: dict = {
 
 doc: DocsDict = {
     "tags": ["access"],
-    "parameters": prepare_parameters_for_docs(AccessListService, exclude=("current_user",), ),
+    "request": prepare_request_body_for_docs(
+        CreateAccessService, exclude=("current_user",),
+    ),
     "responses": RESPONSES,
+    "description": "List of available roles: ['Change', 'Read']",
 }
+
+doc['request']['application/json']['properties']['role']['enum']=['Change', 'Read']

@@ -11,6 +11,7 @@ from core_api.services.access.create import CreateAccessService as CreateAccessM
 from utils.services import ServiceOutcome
 
 from core_api.docs.access.get import doc as access_get_doc
+from core_api.docs.access.post import doc as access_post_doc
 
 
 class AccessListView(APIView):
@@ -23,6 +24,7 @@ class AccessListView(APIView):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(AccessListSerializer(outcome.result, many=True).data, status=outcome.response_status)
 
+    @extend_schema(**access_post_doc)
     def post(self, request):
         outcome = ServiceOutcome(CreateAccessService, request.data | {'current_user': request.user})
         if bool(outcome.errors):
