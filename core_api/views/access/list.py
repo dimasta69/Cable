@@ -12,6 +12,7 @@ from utils.services import ServiceOutcome
 
 from core_api.docs.access.get import doc as access_get_doc
 from core_api.docs.access.post import doc as access_post_doc
+from core_api.docs.access.get_more import doc as access_more_doc
 
 
 class AccessListView(APIView):
@@ -35,6 +36,7 @@ class AccessListView(APIView):
 class AccessMoreView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(**access_more_doc)
     def get(self, request):
         outcome = ServiceOutcome(AccessMoreService, dict(request.GET.items()) | {'current_user': request.user})
         if bool(outcome.errors):
