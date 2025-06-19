@@ -1,28 +1,17 @@
 from drf_spectacular.utils import OpenApiExample, OpenApiResponse
 
-from utils.helpers.auto_parameters_spectacular import prepare_request_body_for_docs
+from utils.helpers.auto_parameters_spectacular import prepare_parameters_for_docs
 
 from utils.drf_spectacular_constants.response_for_error import RESPONSE_FOR_ERROR
 from utils.types import DocsDict
-from core_api.serializers.access.resource import AccessListSerializer
-from core_api.services.access.create import CreateAccessService
+from core_api.services.access.delete import DeleteAccessService
 
 RESPONSES: dict = {
-    201: OpenApiResponse(
-        description="CREATE",
-        response=AccessListSerializer,
+    204: OpenApiResponse(
+        description="DELETE",
         examples=[
             OpenApiExample(
                 name="OK",
-                value=
-                    {
-                        "id": 10,
-                        "user": {
-                            "id": 1,
-                            "username": "root"
-                        },
-                        "role": "Creator"
-                    },
             )
         ],
     ),
@@ -47,19 +36,7 @@ RESPONSES: dict = {
                     "translation_key": "invalid_request_data",
                     "debug_message": "null",
                     "details": {
-                        "scheme_id": [
-                            {
-                                "translation_key": "required",
-                                "message": "This field is required."
-                            }
-                        ],
-                        "user_id": [
-                            {
-                                "translation_key": "required",
-                                "message": "This field is required."
-                            }
-                        ],
-                        "role": [
+                        "id": [
                             {
                                 "translation_key": "required",
                                 "message": "This field is required."
@@ -122,11 +99,35 @@ RESPONSES: dict = {
             ),
         ],
     ),
+    422: OpenApiResponse(
+        description="Not Found",
+        response=RESPONSE_FOR_ERROR,
+        examples=[
+            OpenApiExample(
+                name="Not Found",
+                value={
+                    "type": "ServiceObjectLogicError",
+                    "message": "You can't delete the creator",
+                    "translation_key": "invalid",
+                    "debug_message": "null",
+                    "details": {
+                        "code": [
+                            {
+                                "translation_key": "invalid",
+                                "message": "You can't delete the creator",
+                            }
+                        ]
+                    },
+                    "additional_info": {},
+                    "backtrace": [],
+                },
+            ),
+        ],
+    ),
 }
 
 doc: DocsDict = {
     "tags": ["access"],
-    "request": prepare_request_body_for_docs(CreateAccessService, exclude=("current_user",), ),
+    "parameters": prepare_parameters_for_docs(DeleteAccessService, exclude=("current_user", "id"), ),
     "responses": RESPONSES,
-    "description": "Role in Change or Read",
 }
