@@ -5,7 +5,7 @@ from utils.helpers.auto_parameters_spectacular import prepare_request_body_for_d
 from utils.drf_spectacular_constants.response_for_error import RESPONSE_FOR_ERROR
 from utils.types import DocsDict
 from core_api.serializers.access.resource import AccessListSerializer
-from core_api.services.access.create import CreateAccessService
+from core_api.services.access.update import UpdateAccessService
 
 RESPONSES: dict = {
     200: OpenApiResponse(
@@ -47,13 +47,7 @@ RESPONSES: dict = {
                     "translation_key": "invalid_request_data",
                     "debug_message": "null",
                     "details": {
-                        "scheme_id": [
-                            {
-                                "translation_key": "required",
-                                "message": "This field is required."
-                            }
-                        ],
-                        "user_id": [
+                        "id": [
                             {
                                 "translation_key": "required",
                                 "message": "This field is required."
@@ -122,11 +116,36 @@ RESPONSES: dict = {
             ),
         ],
     ),
+    422: OpenApiResponse(
+        description="Not Found",
+        response=RESPONSE_FOR_ERROR,
+        examples=[
+            OpenApiExample(
+                name="Not Found",
+                value={
+                    "type": "ServiceObjectLogicError",
+                    "message": "You can't delete the creator",
+                    "translation_key": "invalid",
+                    "debug_message": "null",
+                    "details": {
+                        "code": [
+                            {
+                                "translation_key": "invalid",
+                                "message": "You can't delete the creator",
+                            }
+                        ]
+                    },
+                    "additional_info": {},
+                    "backtrace": [],
+                },
+            ),
+        ],
+    ),
 }
 
 doc: DocsDict = {
     "tags": ["access"],
-    "request": prepare_request_body_for_docs(CreateAccessService, exclude=("current_user",), ),
+    "request": prepare_request_body_for_docs(UpdateAccessService, exclude=("current_user", "id"), ),
     "responses": RESPONSES,
     "description": "Role in Change or Read",
 }
