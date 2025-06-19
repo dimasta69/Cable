@@ -13,6 +13,7 @@ from utils.services import ServiceOutcome
 from core_api.docs.access.get import doc as access_get_doc
 from core_api.docs.access.post import doc as access_post_doc
 from core_api.docs.access.get_more import doc as access_more_doc
+from core_api.docs.access.post_more import doc as access_post_more_doc
 
 
 class AccessListView(APIView):
@@ -43,6 +44,7 @@ class AccessMoreView(APIView):
             return Response(outcome.errors, status=outcome.response_status)
         return Response(AccessListSerializer(outcome.result, many=True).data, status=outcome.response_status)
 
+    @extend_schema(**access_post_more_doc)
     def post(self, request):
         outcome = ServiceOutcome(CreateAccessMoreService, request.data | {'current_user': request.user})
         if bool(outcome.errors):
