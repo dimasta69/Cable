@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'models_app.apps.ModelsAppConfig',
     'core_api.apps.CoreApiConfig',
+    'license_api.apps.LicenseApiConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
