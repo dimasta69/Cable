@@ -48,13 +48,14 @@ class DeleteSegmentService(ServiceWithResult):
             return None
 
     def segment_presence(self) -> None:
-        self.add_error(
-            "id",
-            NotFound(
-                f"Segment id={self.cleaned_data['id']} not found"
+        if not self._segment:
+            self.add_error(
+                "id",
+                NotFound(
+                    f"Segment id={self.cleaned_data['id']} not found"
+                )
             )
-        )
-        self.response_status = status.HTTP_404_NOT_FOUND
+            self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_presence(self) -> None:
         if self._segment:
