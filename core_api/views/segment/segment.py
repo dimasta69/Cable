@@ -14,8 +14,7 @@ class SegmentView(APIView):
     def patch(self, request,  **kwargs) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             UpdateSegmentService,
-            request.data | {"current_user": request.user},
-            kwargs,
+            request.data | {"current_user": request.user} | kwargs,
         )
         if bool(outcome.errors):
             return Response(
@@ -28,8 +27,7 @@ class SegmentView(APIView):
     def delete(self, request,  **kwargs) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             DeleteSegmentService,
-            request.data | {"current_user": request.user},
-            kwargs,
+            request.data | {"current_user": request.user} | kwargs,
         )
         if bool(outcome.errors):
             return Response(
