@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'license_api.middleware.check_license.LicenseMiddleware',
     'querycount.middleware.QueryCountMiddleware',
 ]
 
