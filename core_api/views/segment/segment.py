@@ -34,5 +34,5 @@ class SegmentView(APIView):
                 outcome.errors, status=outcome.response_status
             )
         return Response(
-            SegmentSerializer(outcome.result).data, status=outcome.response_status
+            {}, status=outcome.response_status
         )
