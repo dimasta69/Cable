@@ -11,10 +11,11 @@ from core_api.services.segment.delete import DeleteSegmentService
 class SegmentView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request) -> Response:
+    def patch(self, request,  **kwargs) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             UpdateSegmentService,
             request.data | {"current_user": request.user},
+            kwargs,
         )
         if bool(outcome.errors):
             return Response(
@@ -24,10 +25,11 @@ class SegmentView(APIView):
             SegmentSerializer(outcome.result).data, status=status.HTTP_200_OK
         )
 
-    def delete(self, request) -> Response:
+    def delete(self, request,  **kwargs) -> Response:
         outcome: ServiceOutcome = ServiceOutcome(
             DeleteSegmentService,
             request.data | {"current_user": request.user},
+            kwargs,
         )
         if bool(outcome.errors):
             return Response(
