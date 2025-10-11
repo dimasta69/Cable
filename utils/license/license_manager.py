@@ -67,7 +67,6 @@ class LicenseManager:
 
     def get_license_info(self, license_key: str) -> dict:
         try:
-            breakpoint()
             combined = base64.urlsafe_b64decode(license_key.encode())
             salt = combined[:16]
             encrypted_data = combined[16:]
