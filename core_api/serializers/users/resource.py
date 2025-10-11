@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 
 class AccessSerializers(serializers.Serializer):
+    id = serializers.IntegerField()
     role = serializers.CharField()
     object_id = serializers.IntegerField()
     object_type = serializers.CharField(source='object_type.model')
