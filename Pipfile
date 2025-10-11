@@ -35,6 +35,7 @@ django-querycount = "*"
 rest-framework-simplejwt = "*"
 decouple = "*"
 drf-spectacular = "*"
+django-crontab = "*"
 
 [requires]
 python_version = "3.11"
