@@ -5,7 +5,7 @@ from models_app.models import Access
 
 class AccessListSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
-    user = serializers.CharField(resource="object_type.model")
+    user = serializers.CharField(source="object_type.model")
     role = serializers.CharField(required=True)
     object_type = serializers.SerializerMethodField()
 
