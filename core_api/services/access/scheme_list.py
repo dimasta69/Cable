@@ -36,7 +36,7 @@ class AccessListService(ServiceWithResult):
         if self.cleaned_data['filter_role']:
             access_list = access_list.filter(role=self.cleaned_data['filter_role'])
         if self.cleaned_data["filter_user_id"]:
-            access_list = access_list.filter(user=self.user)
+            access_list = access_list.filter(user__in=self.user)
         if self.cleaned_data['search_filter']:
             access_list = access_list.filter(
                 Q(user__username__icontains=self.cleaned_data['search_filter']) |
@@ -49,9 +49,8 @@ class AccessListService(ServiceWithResult):
     @property
     @lru_cache()
     def _access(self) -> List[Access]:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
-            return Access.objects.filter(object_type=scheme_content_type, object_id=self._scheme.pk)
+            return Access.objects.all()
         except Access.DoesNotExist:
             return Access.objects.none()
 
