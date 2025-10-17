@@ -205,7 +205,7 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_scheme_id']:
             if not self._scheme:
                 self.add_error('filter_scheme_id', ObjectDoesNotExist(
-                    f'Sheme id={self.cleaned_data["filter_scheme_id"]} not found'))
+                    f'Scheme id={self.cleaned_data["filter_scheme_id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def room_presence(self) -> None:
@@ -227,16 +227,6 @@ class EquipmentListService(ServiceWithResult):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
-
-    def segment_presence(self) -> None:
-        if self.cleaned_data['filter_segment_id'] and not self._segment:
-            self.add_error(
-                "filter_segment_id",
-                ObjectDoesNotExist(
-                    f"Segment id={self.cleaned_data['filter_segment_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def vlan_presence(self) -> None:
         if self.cleaned_data["filter_vlan_list_id"]:
