@@ -6,16 +6,18 @@ from rest_framework import status
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import User
-from models_app.models import Access
+from models_app.models import User, Access, Scheme
 
 
 class UpdateAccessService(ServiceWithResult):
     id = forms.IntegerField(required=True)
+    scheme_id = forms.IntegerField(required=True)
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['access_creator', 'access_presence', 'access_owner_or_superuser', 'role_presence']
+    custom_validations = [
+        'access_creator', 'access_presence', 'role_presence', 'scheme_presence', 'access_owner_or_superuser',
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -40,6 +42,14 @@ class UpdateAccessService(ServiceWithResult):
         except Access.DoesNotExist:
             return None
 
+    @property
+    @lru_cache()
+    def scheme(self) -> Scheme | None:
+        try:
+            return Scheme.objects.get(id=self.cleaned_data['scheme_id'])
+        except Scheme.DoesNotExist:
+            return None
+
     def access_creator(self) -> None:
         if self._access:
             if self._access.role == 'Creator':
@@ -52,8 +62,8 @@ class UpdateAccessService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_owner_or_superuser(self) -> None:
-        if self._access:
-            if (self._access.object.scheme.creator != self.cleaned_data['current_user']
+        if self._access and self.scheme:
+            if (self.scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._access.object.id} is not granted'))
@@ -65,3 +75,10 @@ class UpdateAccessService(ServiceWithResult):
                 self.add_error('filter_role', ObjectDoesNotExist(f"Field in model with "
                                                                  f"{self.cleaned_data['role']} not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND
+
+    def scheme_presence(self) -> None:
+        if not self.scheme:
+            self.add_error("scheme_id", ObjectDoesNotExist(
+                f"Scheme id = {self.cleaned_data['scheme_id']} not found"
+            ))
+            self.response_status = status.HTTP_404_NOT_FOUND
