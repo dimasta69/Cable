@@ -185,7 +185,7 @@ class EquipmentListService(ServiceWithResult):
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def segment_presence(self) -> None:
-        if self.cleaned_data['filter_segment_id'] and None or self._segment is None:
+        if self.cleaned_data['filter_segment_id'] and self._segment is None:
             self.add_error('filter_segment_id', ObjectDoesNotExist(
                 f'Segment id={self.cleaned_data["filter_segment_id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
