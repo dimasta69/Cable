@@ -53,7 +53,7 @@ class UpdateAccessService(ServiceWithResult):
 
     def access_owner_or_superuser(self) -> None:
         if self._access:
-            if (self._access.object.creator != self.cleaned_data['current_user']
+            if (self._access.object.scheme.creator != self.cleaned_data['current_user']
                     and not self.cleaned_data['current_user'].is_superuser):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._access.object.id} is not granted'))
