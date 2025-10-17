@@ -39,10 +39,6 @@ class EquipmentListService(ServiceWithResult):
         'segment_presence',
     ]
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
-        self.equipment_content_type =  ContentType.objects.get_for_model(Equipment)
-
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
@@ -66,7 +62,7 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_segment_id']:
             equipment_list = equipment_list.filter(
                 id__in=Vlan.objects.filter(
-                    segment=self._segment, device__device_type=self.equipment_content_type
+                    segment=self._segment, device__device_type=ContentType.objects.get_for_model(Equipment)
                 ).values_list("device__device_id", flat=True)
             )
         if self.cleaned_data['filter_vlan_list_id']:
