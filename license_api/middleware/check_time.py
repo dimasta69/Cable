@@ -37,19 +37,5 @@ class LicenseOnlineMiddleware:
             date_time_str = response.json()["date_time"]
             return datetime.datetime.fromisoformat(date_time_str.replace('Z', '+00:00'))
         except requests.exceptions.RequestException as e:
-            print(f"Произошла ошибка при запросе: {e}")
+            print(f"Произошла ошибка при запросе: {e} ....удалить")
             return datetime.datetime.now()
-
-
-def add_ten_minutes():
-    start_date_time = cache.get('start_date_time')
-
-    if start_date_time:
-        if isinstance(start_date_time, str):
-            start_date_time = datetime.datetime.fromisoformat(start_date_time)
-        start_date_time += datetime.timedelta(minutes=10)
-    else:
-        start_date_time = datetime.datetime.now()
-
-    cache.set('start_date_time', start_date_time, timeout=None)
-    print(f"Время обновлено: {start_date_time}")

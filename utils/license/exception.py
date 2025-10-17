@@ -63,3 +63,12 @@ class LicenseMacException(LicenseException):
 
     def __str__(self):
         return f"LicenseError: {super().__str__()}"
+
+
+class LicenseTimeException(LicenseException):
+    def __init__(self, time_license: datetime, time_now: datetime):
+        message = f"License has expired: time_license={time_license}, time_now:{time_now}"
+        super().__init__(time_license, time_now)
+
+    def __str__(self):
+        return f"LicenseError: {super().__str__()}"

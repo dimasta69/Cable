@@ -1,3 +1,4 @@
+import datetime
 import os.path
 
 
@@ -32,7 +33,7 @@ class LicenseMiddleware:
     def process_license_content(self, content: str) -> None:
         from models_app import models
         from utils.license.license_manager import LicenseManager
-        from utils.license.exception import LicenseMaxCountException, LicenseMacException
+        from utils.license.exception import LicenseMaxCountException, LicenseMacException, LicenseTimeException
         from utils.license.generete_mac_based_id import generate_stable_id_from_mac
 
         license_engine = LicenseManager(master_key='')
@@ -40,6 +41,9 @@ class LicenseMiddleware:
 
         if parameters['mac_id'] != generate_stable_id_from_mac():
             raise LicenseMacException('Не совпадает mac устройства.')
+        if parameters['time_unlimited'] is None or parameters['period_end_date'] < datetime.datetime.now():
+            raise LicenseTimeException(parameters['period_end_date'], datetime.datetime.now())
+
         for model_name, count in parameters['restrictions'].items():
             if getattr(models, model_name).objects.all().count() >= int(count):
                 raise LicenseMaxCountException(model_name, count)

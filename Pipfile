@@ -35,6 +35,9 @@ django-querycount = "*"
 rest-framework-simplejwt = "*"
 decouple = "*"
 drf-spectacular = "*"
+celery = "*"
+django-redis = "*"
+redis = "*"
 
 [requires]
 python_version = "3.11"

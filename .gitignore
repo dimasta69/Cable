@@ -5,3 +5,4 @@ __pycache__
 cabel/static/
 .DS_Store
 .vscode/PythonImportHelper-v2-Completion.json
+celerybeat-schedule.db
