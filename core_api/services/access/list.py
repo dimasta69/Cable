@@ -5,6 +5,8 @@ from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
 from rest_framework import status
 from typing import List
+from django.core.paginator import Paginator, EmptyPage
+from cabel.settings import REST_FRAMEWORK
 
 from models_app.models import Access, User, Scheme, Building, Room, ServerRack, SchemeMap, Equipment, Segment, Vlan
 from utils.fields import ModelField
@@ -51,9 +53,19 @@ class AccessListService(ServiceWithResult):
     def process(self) -> "AccessListService":
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._access_filter_list
+            self.result = self.access_pagination
             self.response_status = status.HTTP_200_OK
         return self
+
+    @property
+    def access_pagination(self) -> Paginator:
+        try:
+            return (Paginator(self._access_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                  REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self._access_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                  REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def _access_filter_list(self) -> List[Access]:

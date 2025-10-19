@@ -5,6 +5,8 @@ from typing import List
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
+from django.core.paginator import Paginator, EmptyPage
+from cabel.settings import REST_FRAMEWORK
 
 from models_app.models import Access
 from utils.fields import ModelField
@@ -15,6 +17,8 @@ from models_app.models import Scheme
 
 
 class BuildingListService(ServiceWithResult):
+    page = forms.IntegerField(required=False)
+    per_page = forms.IntegerField(required=False)
     filter_scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
@@ -23,9 +27,19 @@ class BuildingListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._building
+            self.result = self.building_pagination
             self.response_status = status.HTTP_200_OK
         return self
+
+    @property
+    def building_pagination(self) -> Paginator:
+        try:
+            return (Paginator(self._building, per_page=(self.cleaned_data['per_page'] or
+                                                        REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self._building, per_page=(self.cleaned_data['per_page'] or
+                                                        REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def _building(self) -> List[Building]:

@@ -6,6 +6,7 @@ from utils.services import ServiceOutcome
 from core_api.serializers.server_rack.list import ServerRackListSerializer
 from core_api.services.server_rack.rack_list import ServerRackListService
 from core_api.services.server_rack.create import CreateServerRackService
+from utils.pagination import CustomPagination
 
 
 class ServerRackListView(APIView):
@@ -14,8 +15,12 @@ class ServerRackListView(APIView):
     def get(self, request):
         outcome = ServiceOutcome(ServerRackListService, dict(request.GET.items()) | {'current_user': request.user})
         if bool(outcome.errors):
-            return Response(outcome.errors)
-        return Response(ServerRackListSerializer(outcome.result, many=True).data, status=outcome.response_status)
+            return Response(outcome.errors, status=outcome.response_status)
+        return Response({'pagination': CustomPagination(outcome.result,
+                                                        current_page=outcome.service.cleaned_data['page'],
+                                                        per_page=outcome.service.cleaned_data['per_page']).to_json(),
+                         'results': ServerRackListSerializer(outcome.result, many=True).data},
+                        status=outcome.response_status)
 
     def post(self, request):
         outcome = ServiceOutcome(CreateServerRackService, request.data | {'current_user': request.user})

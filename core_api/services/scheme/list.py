@@ -1,10 +1,12 @@
 from django.contrib.contenttypes.models import ContentType
+from django.core.paginator import Paginator, EmptyPage
 from service_objects.fields import ModelField
 from rest_framework import status
 from django import forms
 from functools import lru_cache
 from typing import List
 
+from cabel.settings import REST_FRAMEWORK
 from models_app.models import User
 from models_app.models import Scheme
 from models_app.models import Access
@@ -12,6 +14,8 @@ from utils.services import ServiceWithResult
 
 
 class SchemeListService(ServiceWithResult):
+    page = forms.IntegerField(required=False)
+    per_page = forms.IntegerField(required=False)
     current_user = ModelField(User)
     search_filter = forms.CharField(required=False)
 
@@ -19,9 +23,19 @@ class SchemeListService(ServiceWithResult):
 
     def process(self):
         if self.is_valid():
-            self.result = self._filter_list
+            self.result = self.scheme_pagination
             self.response_status = status.HTTP_200_OK
         return self
+
+    @property
+    def scheme_pagination(self):
+        try:
+            return (Paginator(self._filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                           REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self._filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                           REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def _filter_list(self) -> List[Scheme]:

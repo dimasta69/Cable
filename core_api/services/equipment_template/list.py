@@ -4,6 +4,8 @@ from functools import lru_cache
 from rest_framework import status
 from django.db.models import Q
 from typing import List
+from django.core.paginator import Paginator, EmptyPage
+from cabel.settings import REST_FRAMEWORK
 
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
@@ -12,6 +14,8 @@ from models_app.models import Manufacturer
 
 
 class EquipmentTemplateListService(ServiceWithResult):
+    page = forms.IntegerField(required=False)
+    per_page = forms.IntegerField(required=False)
     filter_manufacturer_id = forms.IntegerField(required=False)
     filter_type_id = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
@@ -22,9 +26,19 @@ class EquipmentTemplateListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._equipment_filter_list
+            self.result = self.equipment_pagination
             self.response_status = status.HTTP_200_OK
         return self
+
+    @property
+    def equipment_pagination(self) -> Paginator:
+        try:
+            return (Paginator(self._equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                     REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self._equipment_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                     REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def _equipment_filter_list(self) -> List[EquipmentTemplate]:
