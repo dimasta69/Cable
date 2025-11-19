@@ -4,8 +4,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
 from rest_framework import status
-from typing import List
-from django.core.paginator import Paginator, EmptyPage
+from typing import List, Any
+from django.core.paginator import Paginator, EmptyPage, Page
 from cabel.settings import REST_FRAMEWORK
 
 from models_app.models import Access, User, Scheme, Building, Room, ServerRack, SchemeMap, Equipment, Segment, Vlan
@@ -58,7 +58,7 @@ class AccessListService(ServiceWithResult):
         return self
 
     @property
-    def access_pagination(self) -> Paginator:
+    def access_pagination(self) -> Page[Any]:
         try:
             return (Paginator(self._access_filter_list, per_page=(self.cleaned_data['per_page'] or
                                                                   REST_FRAMEWORK['PAGE_SIZE'])).
