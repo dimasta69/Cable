@@ -2,7 +2,7 @@ from functools import lru_cache
 from django import forms
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from rest_framework import status
 from typing import List, Any
 from django.core.paginator import Paginator, EmptyPage, Page
@@ -13,7 +13,7 @@ from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-def _access(object_type: ContentType, uid: int) -> List[Access]:
+def _access(object_type: ContentType, uid: int) -> QuerySet[Access, Access]:
     try:
         return Access.objects.filter(
             object_type=object_type,
