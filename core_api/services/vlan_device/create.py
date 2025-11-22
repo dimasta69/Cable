@@ -229,19 +229,20 @@ class CreateVlanDeviceService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_port_presence(self) -> None:
-        if self.cleaned_data['device_type'] == "port" and self._port and not self._access_port:
-            self.add_error(
-                "device_id",
-                PermissionError(
-                    f"Access with port id={self._port.id} not found"
+        if not self.cleaned_data["current_user"].is_superuser:
+            if self.cleaned_data['device_type'] == "port" and self._port and not self._access_port:
+                self.add_error(
+                    "device_id",
+                    PermissionError(
+                        f"Access with port id={self._port.id} not found"
+                    )
                 )
-            )
-            self.response_status = status.HTTP_403_FORBIDDEN
-        if self.cleaned_data['device_type'] == "equipment" and self._equipment and not self._access_equipment:
-            self.add_error(
-                "device_id",
-                PermissionError(
-                    f"Access with equipment id={self._equipment.id} not found"
+                self.response_status = status.HTTP_403_FORBIDDEN
+            if (self.cleaned_data['device_type'] == "equipment" and self._equipment and not self._access_equipment):
+                self.add_error(
+                    "device_id",
+                    PermissionError(
+                        f"Access with equipment id={self._equipment.id} not found"
+                    )
                 )
-            )
-            self.response_status = status.HTTP_403_FORBIDDEN
+                self.response_status = status.HTTP_403_FORBIDDEN
