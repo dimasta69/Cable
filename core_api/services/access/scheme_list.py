@@ -51,8 +51,6 @@ class AccessListService(ServiceWithResult):
         if self.cleaned_data['search_filter']:
             access_list = access_list.filter(
                 Q(user__username__icontains=self.cleaned_data['search_filter']) |
-                Q(object__title__icontains=self.cleaned_data['search_filter']) |
-                Q(object__creator__username__icontains=self.cleaned_data['search_filter']) |
                 Q(role__icontains=self.cleaned_data['search_filter'])
             )
         return access_list
