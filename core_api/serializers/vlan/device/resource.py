@@ -8,7 +8,7 @@ class VlanDeviceSerializer(serializers.ModelSerializer):
     device_type = serializers.SerializerMethodField()
 
     def get_device_type(self, obj: VlanDevice) -> str:
-        return obj.device_type.__class__.__name__
+        return obj.device_type.model
 
     class Meta:
         model = VlanDevice

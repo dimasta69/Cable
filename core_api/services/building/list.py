@@ -1,21 +1,24 @@
 from django import forms
+from django.db.models import Q
 from functools import lru_cache
-from typing import List
-
+from typing import Any
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.db.models import QuerySet
 from rest_framework import status
+from django.core.paginator import Paginator, EmptyPage, Page
+from cabel.settings import REST_FRAMEWORK
 
-from models_app.models import Access
+from models_app.models import Access, Building, User, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Building
-from models_app.models import User
-from models_app.models import Scheme
 
 
 class BuildingListService(ServiceWithResult):
+    page = forms.IntegerField(required=False)
+    per_page = forms.IntegerField(required=False)
     filter_scheme_id = forms.IntegerField(required=True)
+    search_filter = forms.CharField(required=False)
     current_user = ModelField(User)
 
     custom_validations = ['access_presence', 'scheme_presence']
@@ -23,12 +26,28 @@ class BuildingListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._building
+            self.result = self.building_pagination
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def _building(self) -> List[Building]:
+    def building_pagination(self) -> Page[Any]:
+        try:
+            return (Paginator(self.building_filter, per_page=(self.cleaned_data['per_page'] or
+                                                        REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self.building_filter, per_page=(self.cleaned_data['per_page'] or
+                                                        REST_FRAMEWORK['PAGE_SIZE'])).page(1))
+    @property
+    def building_filter(self) -> QuerySet[Building, Building]:
+        buildings = self._building
+        if self.cleaned_data['search_filter']:
+            buildings = buildings.filter(Q(name__icontains=self.cleaned_data['search_filter']))
+        return buildings
+
+    @property
+    def _building(self) -> QuerySet[Building, Building]:
         try:
             return Building.objects.filter(scheme=self._scheme).select_related('scheme')
         except Building.DoesNotExist:

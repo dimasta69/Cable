@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
+from utils.pagination import CustomPagination
 
 from core_api.services.access.scheme_list import AccessListService
 from core_api.serializers.access.resource import AccessListSerializer
@@ -24,7 +25,11 @@ class AccessListView(APIView):
         outcome = ServiceOutcome(AccessListService, dict(request.GET.items()) | {'current_user': request.user})
         if bool(outcome.errors):
             return Response(outcome.errors, status=outcome.response_status)
-        return Response(AccessListSerializer(outcome.result, many=True).data, status=outcome.response_status)
+        return Response({'pagination': CustomPagination(outcome.result,
+                                                        current_page=outcome.service.cleaned_data['page'],
+                                                        per_page=outcome.service.cleaned_data['per_page']).to_json(),
+                         'results': AccessListSerializer(outcome.result, many=True).data},
+                        status=outcome.response_status)
 
     @extend_schema(**access_post_doc)
     def post(self, request):

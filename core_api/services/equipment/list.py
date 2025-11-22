@@ -10,8 +10,8 @@ from typing import List
 from cabel.settings import REST_FRAMEWORK
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
-from models_app.models import (Scheme, Room, EquipmentTemplateType, Access, Equipment, Manufacturer, ServerRack, User, 
-                               VlanDevice, Vlan)
+from models_app.models import (Scheme, Room, EquipmentTemplateType, Access, Equipment, Manufacturer, ServerRack, User,
+                               VlanDevice, Vlan, Segment)
 
 
 class EquipmentListService(ServiceWithResult):
@@ -36,6 +36,7 @@ class EquipmentListService(ServiceWithResult):
         'room_presence',
         'type_presence',
         'access_presence',
+        'segment_presence',
     ]
 
     def process(self):
@@ -61,7 +62,7 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_segment_id']:
             equipment_list = equipment_list.filter(
                 id__in=Vlan.objects.filter(
-                    segment=self._segment, device__device_type=self.equipment_content_type
+                    segment=self._segment, device__device_type=ContentType.objects.get_for_model(Equipment)
                 ).values_list("device__device_id", flat=True)
             )
         if self.cleaned_data['filter_vlan_list_id']:
@@ -78,19 +79,15 @@ class EquipmentListService(ServiceWithResult):
             equipment_list = equipment_list.filter(scheme=self._scheme).distinct()
         if self.cleaned_data['filter_server_rack_id']:
             equipment_list = equipment_list.filter(unit__server_rack=self._server_rack).distinct()
-        else:
-            equipment_list = equipment_list.filter(unit__server_rack=None)
         if self.cleaned_data['filter_room_id']:
             equipment_list = equipment_list.filter(room=self._room)
-        else:
-            equipment_list = equipment_list.filter(room=None)
         if self.cleaned_data['search_filter']:
             equipment_list = equipment_list.filter(
                 Q(template__model__icontains=self.cleaned_data['search_filter']) |
-                Q(template__manufacturer__name__icontains=self.cleaned_data['search_filter']) | 
+                Q(template__manufacturer__name__icontains=self.cleaned_data['search_filter']) |
                 Q(id__in=VlanDevice.objects.filter(vlan__segment__scheme=self._scheme).filter(
                     Q(ip__icontains=self.cleaned_data['search_filter'])
-                    ).values_list('device_id', flat=True))
+                ).values_list('device_id', flat=True))
             )
         if self.cleaned_data['order_by']:
             equipment_list = equipment_list.order_by(self.cleaned_data['order_by'])
@@ -118,6 +115,22 @@ class EquipmentListService(ServiceWithResult):
             return Scheme.objects.get(id=self.cleaned_data['filter_scheme_id'])
         except Scheme.DoesNotExist:
             return None
+
+    @property
+    @lru_cache()
+    def _segment(self) -> Segment | None:
+        try:
+            return Segment.objects.get(id=self.cleaned_data['filter_segment_id'])
+        except Segment.DoesNotExist:
+            return None
+
+    @property
+    @lru_cache()
+    def _vlan(self) -> List[Vlan]:
+        try:
+            return Vlan.objects.get(id__in=self.cleaned_data['filter_vlan_list_id'])
+        except Vlan.DoesNotExist:
+            return Vlan.objects.none
 
     @property
     @lru_cache()
@@ -168,8 +181,14 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_manufacturer_id']:
             if not self._manufacturer:
                 self.add_error('filter_manufacturer_id', ObjectDoesNotExist(
-                    'Manufacturer id={self.cleaned_data["filter_manufacturer_id"]} not found'))
+                    f'Manufacturer id={self.cleaned_data["filter_manufacturer_id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
+
+    def segment_presence(self) -> None:
+        if self.cleaned_data['filter_segment_id'] and self._segment is None:
+            self.add_error('filter_segment_id', ObjectDoesNotExist(
+                f'Segment id={self.cleaned_data["filter_segment_id"]} not found'))
+            self.response_status = status.HTTP_404_NOT_FOUND
 
     def server_rack_presence(self) -> None:
         if self.cleaned_data['filter_server_rack_id']:
@@ -182,7 +201,7 @@ class EquipmentListService(ServiceWithResult):
         if self.cleaned_data['filter_scheme_id']:
             if not self._scheme:
                 self.add_error('filter_scheme_id', ObjectDoesNotExist(
-                    f'Sheme id={self.cleaned_data["filter_scheme_id"]} not found'))
+                    f'Scheme id={self.cleaned_data["filter_scheme_id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def room_presence(self) -> None:
@@ -204,16 +223,6 @@ class EquipmentListService(ServiceWithResult):
                 self.add_error('current_user', PermissionDenied('Access to the schema id = '
                                                                 f'{self._scheme.id} is not granted'))
                 self.response_status = status.HTTP_403_FORBIDDEN
-
-    def segment_presence(self) -> None:
-        if self.cleaned_data['filter_segment_id'] and not self._segment:
-            self.add_error(
-                "filter_segment_id",
-                ObjectDoesNotExist(
-                    f"Segment id={self.cleaned_data['filter_segment_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def vlan_presence(self) -> None:
         if self.cleaned_data["filter_vlan_list_id"]:

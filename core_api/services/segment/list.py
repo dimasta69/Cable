@@ -6,14 +6,19 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import NotFound, PermissionDenied
+from django.core.paginator import Paginator, EmptyPage
 
+from cabel.settings import REST_FRAMEWORK
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Segment, Scheme, Access, User
 
 
 class SegmentListService(ServiceWithResult):
+    page = forms.IntegerField(required=False)
+    per_page = forms.IntegerField(required=False)
     scheme_id = forms.IntegerField(required=True)
+    search_filter = forms.CharField(required=False)
     current_user = ModelField(User)
 
     custom_validations = ["scheme_presence", "access_presence"]
@@ -21,8 +26,27 @@ class SegmentListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._segments
+            self.result = self.segment_pagination
         return self
+
+    @property
+    def segment_pagination(self) -> Paginator:
+        try:
+            return (Paginator(self.filter_segment, per_page=(self.cleaned_data['per_page'] or
+                                                             REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self.filter_segment, per_page=(self.cleaned_data['per_page'] or
+                                                             REST_FRAMEWORK['PAGE_SIZE'])).page(1))
+
+    @property
+    def filter_segment(self) -> List[Segment]:
+        segments = self._segments
+        if self.cleaned_data["search_filter"]:
+            segments = segments.filter(
+                Q(name__icontains=self.cleaned_data["search_filter"])
+            )
+        return segments
 
     @property
     def _segments(self) -> List[Segment]:

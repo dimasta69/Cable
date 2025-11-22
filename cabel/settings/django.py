@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'models_app.apps.ModelsAppConfig',
     'core_api.apps.CoreApiConfig',
+    'license_api.apps.LicenseApiConfig',
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
@@ -52,6 +56,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    # 'license_api.middleware.check_license.LicenseMiddleware',
+    # 'license_api.middleware.check_time.LicenseOnlineMiddleware',
     'querycount.middleware.QueryCountMiddleware',
 ]
 
@@ -85,7 +91,7 @@ WSGI_APPLICATION = 'cabel.wsgi.application'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = os.getenv("TIME_ZONE", "Europe/Moscow")
 
 USE_I18N = True
 
@@ -105,4 +111,3 @@ MEDIA_URL = 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOW_ALL_ORIGINS = True
-

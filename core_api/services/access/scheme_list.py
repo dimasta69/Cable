@@ -1,10 +1,11 @@
 from functools import lru_cache
 from django import forms
-from django.contrib.contenttypes.models import ContentType
+from django.core.paginator import Paginator, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
 from rest_framework import status
 from typing import List
+from cabel.settings import REST_FRAMEWORK
 
 from models_app.models import Access, User, Scheme
 from utils.fields import ModelField
@@ -16,17 +17,28 @@ class AccessListService(ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     filter_scheme_id = forms.IntegerField(required=True)
+    filter_user_id = forms.IntegerField(required=False)
     filter_role = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
 
-    custom_validations = ['scheme_presence', 'access_owner_or_superuser', 'filter_role_presence']
+    custom_validations = ['scheme_presence', 'access_owner_or_superuser', 'filter_role_presence', 'user_presence']
 
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._access_filter_list
+            self.result = self._access_pagination
             self.response_status = status.HTTP_200_OK
         return self
+
+    @property
+    def _access_pagination(self) -> Paginator:
+        try:
+            return (Paginator(self._access_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                  REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self._access_filter_list, per_page=(self.cleaned_data['per_page'] or
+                                                                  REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def _access_filter_list(self) -> List[Access]:
@@ -34,11 +46,11 @@ class AccessListService(ServiceWithResult):
             else self._access.exclude(user=self.cleaned_data['current_user'])
         if self.cleaned_data['filter_role']:
             access_list = access_list.filter(role=self.cleaned_data['filter_role'])
+        if self.cleaned_data["filter_user_id"]:
+            access_list = access_list.filter(user__in=self.user)
         if self.cleaned_data['search_filter']:
             access_list = access_list.filter(
                 Q(user__username__icontains=self.cleaned_data['search_filter']) |
-                Q(object__title__icontains=self.cleaned_data['search_filter']) |
-                Q(object__creator__username__icontains=self.cleaned_data['search_filter']) |
                 Q(role__icontains=self.cleaned_data['search_filter'])
             )
         return access_list
@@ -46,11 +58,18 @@ class AccessListService(ServiceWithResult):
     @property
     @lru_cache()
     def _access(self) -> List[Access]:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
         try:
-            return Access.objects.filter(object_type=scheme_content_type, object_id=self._scheme.pk)
+            return Access.objects.all()
         except Access.DoesNotExist:
             return Access.objects.none()
+
+    @property
+    @lru_cache()
+    def user(self) -> User | None:
+        try:
+            return User.objects.filter(id=self.cleaned_data['filter_user_id'])
+        except User.DoesNotExist:
+            return None
 
     @property
     @lru_cache()
@@ -59,6 +78,14 @@ class AccessListService(ServiceWithResult):
             return Scheme.objects.get(id=self.cleaned_data['filter_scheme_id'])
         except Scheme.DoesNotExist:
             return None
+
+    def user_presence(self) -> None:
+        if self.cleaned_data['filter_user_id']:
+            if not self.user:
+                self.add_error('filter_user_id', ObjectDoesNotExist('User id='
+                                                                    f'{self.cleaned_data["filter_user_id"]} '
+                                                                    'not found'))
+                self.response_status = status.HTTP_404_NOT_FOUND
 
     def filter_role_presence(self) -> None:
         if self.cleaned_data['filter_role']:

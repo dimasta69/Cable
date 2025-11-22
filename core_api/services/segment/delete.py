@@ -1,18 +1,17 @@
-from django import forms
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-from rest_framework import status
-from rest_framework.exceptions import NotFound, PermissionDenied
+from django import forms
 from functools import lru_cache
+
+from django.contrib.contenttypes.models import ContentType
+from rest_framework import status
+from rest_framework.exceptions import PermissionDenied, NotFound
 
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Segment, User, Scheme, Access
+from models_app.models import Access, User, Segment, Scheme
 
-
-class UpdateSegmentService(ServiceWithResult):
+class DeleteSegmentService(ServiceWithResult):
     id = forms.IntegerField(required=True)
-    name = forms.CharField(required=True)
     current_user = ModelField(User)
 
     custom_validations = ["segment_presence", "access_presence"]
@@ -20,14 +19,9 @@ class UpdateSegmentService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._update_segment()
+            self.result = self._segment.delete()
+            self.response_status = status.HTTP_204_NO_CONTENT
         return self
-
-    def _update_segment(self) -> Segment:
-        segment = self._segment
-        segment.name = self.cleaned_data['name']
-        segment.save()
-        return segment
 
     @property
     @lru_cache()

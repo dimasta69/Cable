@@ -5,14 +5,18 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
+from django.core.paginator import Paginator, EmptyPage
 from typing import List
 
 from models_app.models import User, Access, Room, ServerRack, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
+from cabel.settings import REST_FRAMEWORK
 
 
 class ServerRackListService(ServiceWithResult):
+    page = forms.IntegerField(required=False)
+    per_page = forms.IntegerField(required=False)
     filter_room_id = forms.IntegerField(required=True)
     order_by = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
@@ -23,9 +27,19 @@ class ServerRackListService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._filter_server_rack_list
+            self.result = self.server_rack_pagination
             self.response_status = status.HTTP_200_OK
         return self
+
+    @property
+    def server_rack_pagination(self):
+        try:
+            return (Paginator(self._filter_server_rack_list, per_page=(self.cleaned_data['per_page'] or
+                                                                       REST_FRAMEWORK['PAGE_SIZE'])).
+                    page(self.cleaned_data['page'] or 1))
+        except EmptyPage:
+            return (Paginator(self._filter_server_rack_list, per_page=(self.cleaned_data['per_page'] or
+                                                                       REST_FRAMEWORK['PAGE_SIZE'])).page(1))
 
     @property
     def _filter_server_rack_list(self) -> List[ServerRack]:

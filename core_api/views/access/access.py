@@ -12,6 +12,7 @@ from core_api.services.access.update import UpdateAccessService
 from core_api.docs.access.put import doc as access_put_docs
 from core_api.docs.access.delete import doc as access_delete_docs
 
+
 class AccessView(APIView):
     permission_classes = [IsAuthenticated]
 
