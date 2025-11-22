@@ -28,6 +28,7 @@ class UpdateVlanService(ServiceWithResult):
         vlan = self._vlan
         if self.cleaned_data['name']:
             vlan.name = self.cleaned_data['name']
+        vlan.save()
         return vlan
 
     @property
