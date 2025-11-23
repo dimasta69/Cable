@@ -6,3 +6,5 @@ cabel/static/
 .DS_Store
 .vscode/PythonImportHelper-v2-Completion.json
 celerybeat-schedule.db
+license_api/license
+license_api/past_license

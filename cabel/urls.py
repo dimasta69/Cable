@@ -27,6 +27,7 @@ from cabel.views import index
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('core_api/', include('core_api.urls.urls')),
+    path('license_api/', include('license_api.urls.urls')),
     path('', index, name='index'),
 ]
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
