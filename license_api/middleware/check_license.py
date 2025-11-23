@@ -36,7 +36,7 @@ class LicenseMiddleware:
         from utils.license.exception import LicenseMaxCountException, LicenseMacException, LicenseTimeException
         from utils.license.generete_mac_based_id import generate_stable_id_from_mac
 
-        license_engine = LicenseManager(master_key='')
+        license_engine = LicenseManager()
         parameters = license_engine.get_license_info(content)
 
         if parameters['mac_id'] != generate_stable_id_from_mac():

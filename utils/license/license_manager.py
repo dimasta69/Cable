@@ -16,8 +16,9 @@ from .exception import (
 
 
 class LicenseManager:
-    def __init__(self, master_key: str) -> None:
-        self.master_key = master_key.encode()
+    master_key = ''
+
+    def __init__(self) -> None:
         self.backend = default_backend()
 
     def _derive_key(self, salt: bytes) -> bytes:
