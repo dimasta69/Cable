@@ -70,11 +70,14 @@ def custom_exception_handler(
     elif isinstance(exception, drf_exceptions.NotAuthenticated):
         exception = exceptions.AuthenticationFailed(details=str(exception))
     elif isinstance(exception, drf_exceptions.AuthenticationFailed):
-        exception.translation_key = exception.detail.code
+        try:
+            exception.translation_key = exception.detail.code
+        except AttributeError:
+            exception.translation_key = 401
         exception.message = str(exception)
         exception = exceptions.AuthenticationFailed(
             message=str(exception),
-            translation_key=exception.detail.code,
+            translation_key=exception.translation_key,
             debug_message="Signature has expired.",
         )
     elif isinstance(exception, drf_exceptions.PermissionDenied):
