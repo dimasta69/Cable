@@ -22,7 +22,7 @@ class UpdateEquipmentTemplate(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = [
-        'equipment_template_presence', 'manufacturer_presence', 'type_presence', 'model_presence', 'is_superuser',
+        'equipment_template_presence', 'manufacturer_presence', 'model_presence', 'is_superuser',
     ]
 
     def process(self):
@@ -74,12 +74,6 @@ class UpdateEquipmentTemplate(ServiceWithResult):
             if not self._manufacturer:
                 self.add_error('id', ObjectDoesNotExist(f'Manufacturer id={self.cleaned_data["manufacturer_id"]} '
                                                         'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def type_presence(self) -> None:
-        if self.cleaned_data['type']:
-            if not any(type_tuple[1] == self.cleaned_data['type'] for type_tuple in EquipmentTemplate.TYPE_CHOICES):
-                self.add_error('type', ObjectDoesNotExist(f'Type {self.cleaned_data["type"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def model_presence(self) -> None:
