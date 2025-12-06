@@ -9,20 +9,20 @@ from rest_framework.exceptions import PermissionDenied
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
-from models_app.models import Manufacturer, User
+from models_app.models import Manufacturer, User, EquipmentTemplateType
 
 
 class UpdateEquipmentTemplate(ServiceWithResult):
     id = forms.IntegerField(required=True)
     manufacturer_id = forms.IntegerField(required=False)
-    type = forms.CharField(required=False)
+    type_id = forms.IntegerField(required=False)
     model = forms.CharField(required=False)
     number_of_units = forms.CharField(required=False)
     power = forms.CharField(required=False)
     current_user = ModelField(User)
 
     custom_validations = [
-        'equipment_template_presence', 'manufacturer_presence', 'model_presence', 'is_superuser',
+        'equipment_template_presence', 'manufacturer_presence', 'model_presence', 'is_superuser', 'type_presence',
     ]
 
     def process(self):
@@ -37,8 +37,8 @@ class UpdateEquipmentTemplate(ServiceWithResult):
         equipment_template = self._equipment_template_list.get(id=self.cleaned_data['id'])
         if self.cleaned_data['manufacturer_id']:
             equipment_template.manufacturer = self._manufacturer
-        if self.cleaned_data['type']:
-            equipment_template.type = self.cleaned_data['type']
+        if self.cleaned_data['type_id']:
+            equipment_template.type = self._type
         if self.cleaned_data['model']:
             equipment_template.model = self.cleaned_data['model']
         if self.cleaned_data['number_of_units']:
@@ -64,6 +64,14 @@ class UpdateEquipmentTemplate(ServiceWithResult):
         except Manufacturer.DoesNotExist:
             return None
 
+    @property
+    @lru_cache()
+    def _type(self) -> EquipmentTemplateType | None:
+        try:
+            return EquipmentTemplateType.objects.get(id=self.cleaned_data['type_id'])
+        except EquipmentTemplateType.DoesNotExist:
+            return None
+
     def equipment_template_presence(self) -> None:
         if not self._equipment_template_list.get(id=self.cleaned_data['id']):
             self.add_error('id', ObjectDoesNotExist(f'Equipment template id={self.cleaned_data["id"]} not found'))
@@ -82,6 +90,13 @@ class UpdateEquipmentTemplate(ServiceWithResult):
                 self.add_error('model', ValidationError(f'Field with model={self.cleaned_data["model"]}'
                                                         ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
+
+    def type_presence(self) -> None:
+        if self.cleaned_data['type_id'] and not self._type:
+            self.add_error(
+                'id', ObjectDoesNotExist(f'EquipmentTemplateType id={self.cleaned_data["type_id"]} not found ')
+            )
+            self.response_status = status.HTTP_404_NOT_FOUND
 
     def is_superuser(self) -> None:
         if not self.cleaned_data['current_user'].is_superuser:
