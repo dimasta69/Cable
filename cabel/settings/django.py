@@ -56,8 +56,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    # 'license_api.middleware.check_license.LicenseMiddleware',
-    # 'license_api.middleware.check_time.LicenseOnlineMiddleware',
+    'license_api.middleware.check_license.LicenseMiddleware',
+    'license_api.middleware.check_time.LicenseOnlineMiddleware',
     'querycount.middleware.QueryCountMiddleware',
 ]
 

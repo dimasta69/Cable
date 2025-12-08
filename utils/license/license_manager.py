@@ -33,7 +33,7 @@ class LicenseManager:
 
     def _generate_signature(self, data: dict, salt: bytes) -> str:
         data_str = json.dumps(data, sort_keys=True, separators=(',', ':'))
-        key = base64.urlsafe_b64decode(self._derive_key(salt))
+        key = base64.urlsafe_b64decode(self._derive_key(salt).decode("utf-8"))
         h = hmac.new(key, data_str.encode(), hashlib.sha256)
         return base64.urlsafe_b64encode(h.digest()).decode()
 
