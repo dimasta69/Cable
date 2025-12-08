@@ -41,8 +41,8 @@ class LicenseMiddleware:
 
         if parameters['mac_id'] != generate_stable_id_from_mac():
             raise LicenseMacException('Не совпадает mac устройства.')
-        if parameters['time_unlimited'] is None or parameters['period_end_date'] < datetime.datetime.now():
-            raise LicenseTimeException(parameters['period_end_date'], datetime.datetime.now())
+        if parameters['time_unlimited'] is None or parameters.get('period_end_date') < datetime.datetime.now():
+            raise LicenseTimeException(parameters.get('period_end_date'), datetime.datetime.now())
 
         for model_name, count in parameters['restrictions'].items():
             if getattr(models, model_name).objects.all().count() >= int(count):
