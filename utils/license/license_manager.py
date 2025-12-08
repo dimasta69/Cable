@@ -29,11 +29,11 @@ class LicenseManager:
             iterations=100000,
             backend=self.backend,
         )
-        return base64.urlsafe_b64encode(kdf.derive(self.master_key))
+        return base64.urlsafe_b64encode(kdf.derive(self.master_key).decode("utf-8"))
 
     def _generate_signature(self, data: dict, salt: bytes) -> str:
         data_str = json.dumps(data, sort_keys=True, separators=(',', ':'))
-        key = base64.urlsafe_b64decode(self._derive_key(salt).decode("utf-8"))
+        key = base64.urlsafe_b64decode(self._derive_key(salt))
         h = hmac.new(key, data_str.encode(), hashlib.sha256)
         return base64.urlsafe_b64encode(h.digest()).decode()
 
