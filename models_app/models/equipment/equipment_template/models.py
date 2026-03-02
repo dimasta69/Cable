@@ -1,4 +1,7 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 from models_app.models.base_model import BaseModel
 
 
@@ -25,3 +28,12 @@ class EquipmentTemplate(BaseModel):
     def __str__(self):
         return str(self.manufacturer.name + " " + self.model) if self.manufacturer and self.model else (
             str(self.pk) + " " + str(self.type))
+
+
+@receiver(pre_delete, sender=EquipmentTemplate)
+def _delete_equipment_template(sender, **kwargs):
+    from models_app.models import Equipment
+    if Equipment.objects.filter(equipment_template_id=kwargs["pk"]).exists():
+        raise ValidationError(
+            "Cannot delete template that is in use by equipment"
+        )
