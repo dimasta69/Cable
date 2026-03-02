@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_delete, pre_save
 from django.dispatch import receiver
 from models_app.models.base_model import BaseModel
 
@@ -30,10 +30,10 @@ class EquipmentTemplate(BaseModel):
             str(self.pk) + " " + str(self.type))
 
 
-@receiver(pre_delete, sender=EquipmentTemplate)
-def _delete_equipment_template(sender, **kwargs):
+@receiver([pre_delete, pre_save], sender=EquipmentTemplate)
+def _delete_equipment_template(sender, instance, **kwargs):
     from models_app.models import Equipment
-    if Equipment.objects.filter(equipment_template_id=kwargs["pk"]).exists():
+    if not Equipment.objects.filter(equipment_template_id=instance.pk).exists():
         raise ValidationError(
             "Cannot delete template that is in use by equipment"
         )
