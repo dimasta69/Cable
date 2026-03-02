@@ -10,6 +10,7 @@ class VlanSerializer(serializers.ModelSerializer):
         model = Vlan
         fields = (
             "id",
+            "id_name",
             "name",
             "segment",
         )

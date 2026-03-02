@@ -3,6 +3,7 @@ from models_app.models.base_model import BaseModel
 
 
 class Vlan(BaseModel):
+    id_name = models.IntegerField(null=False, blank=False)
     name = models.CharField(max_length=255, null=False, blank=False)
     segment = models.ForeignKey(
         'Segment',
@@ -20,4 +21,4 @@ class Vlan(BaseModel):
         db_table = "vlan"
         verbose_name = "Vlan"
         verbose_name_plural = "Vlan's"
-        unique_together = ('name', 'segment')
+        unique_together = ('id_name', 'segment')

@@ -12,6 +12,7 @@ from models_app.models import Vlan, User, Segment, Access, Scheme
 
 class CreateVlanService(ServiceWithResult):
     name = forms.CharField(required=True)
+    id_name = forms.CharField(required=True)
     segment_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
@@ -26,6 +27,7 @@ class CreateVlanService(ServiceWithResult):
     @property
     def _create_vlan(self) -> Vlan:
         return Vlan.objects.create(
+            id_name=self.cleaned_data['id_name'],
             name=self.cleaned_data['name'],
             segment=self._segment,
         )

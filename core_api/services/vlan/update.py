@@ -12,6 +12,7 @@ from models_app.models import Vlan, User, Segment, Access, Scheme
 
 class UpdateVlanService(ServiceWithResult):
     id = forms.IntegerField(required=True)
+    id_name = forms.IntegerField(required=False)
     name = forms.CharField(required=False)
     current_user = ModelField(User)
 
@@ -28,6 +29,10 @@ class UpdateVlanService(ServiceWithResult):
         vlan = self._vlan
         if self.cleaned_data['name']:
             vlan.name = self.cleaned_data['name']
+
+        if self.cleaned_data['id_name']:
+            vlan.id_name = self.cleaned_data['id_name']
+
         vlan.save()
         return vlan
 
