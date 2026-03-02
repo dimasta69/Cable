@@ -29,7 +29,7 @@ class LicenseManager:
             iterations=100000,
             backend=self.backend,
         )
-        return base64.urlsafe_b64encode(kdf.derive(self.master_key))
+        return base64.urlsafe_b64encode(kdf.derive(self.master_key.encode("utf-8")))
 
     def _generate_signature(self, data: dict, salt: bytes) -> str:
         data_str = json.dumps(data, sort_keys=True, separators=(',', ':'))
