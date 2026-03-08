@@ -10,6 +10,11 @@ from drf_spectacular.types import (
     OpenApiTypes,
 )
 from drf_spectacular.utils import OpenApiParameter
+
+# Extend OPENAPI_TYPE_MAPPING for types not present in drf-spectacular (e.g. OBJECT)
+_OPENAPI_TYPE_MAPPING = dict(OPENAPI_TYPE_MAPPING)
+if OpenApiTypes.OBJECT not in _OPENAPI_TYPE_MAPPING:
+    _OPENAPI_TYPE_MAPPING[OpenApiTypes.OBJECT] = {"type": "object"}
 from service_objects.services import Service
 
 logger = logging.getLogger("django")
@@ -110,7 +115,7 @@ def prepare_parameters_for_docs(
             parameter_data["many"] = True
 
         if isinstance(attr, SimpleArrayField):
-            parameter_data["type"]["items"] = OPENAPI_TYPE_MAPPING[
+            parameter_data["type"]["items"] = _OPENAPI_TYPE_MAPPING[
                 parameter_data["type"]["items"]["type"]
             ]
             parameter_data["many"] = True
@@ -319,11 +324,11 @@ def prepare_request_body_for_docs(
                 determine_parameter_type(attr)[0]
             )
             if type(raw_parameter_type) is OpenApiTypes:
-                parameter_type = OPENAPI_TYPE_MAPPING[raw_parameter_type]
+                parameter_type = _OPENAPI_TYPE_MAPPING[raw_parameter_type]
             else:
                 if "items" in raw_parameter_type.keys():
                     parameter_type = raw_parameter_type
-                    parameter_type["items"] = OPENAPI_TYPE_MAPPING[
+                    parameter_type["items"] = _OPENAPI_TYPE_MAPPING[
                         raw_parameter_type["items"]["type"]
                     ]
                 else:
