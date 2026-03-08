@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from drf_spectacular.utils import extend_schema
 
 from core_api.services.equipment.equipments_from_map import EquipmentsFromMapListService
 from core_api.services.equipment.create import CreateEquipmentService
@@ -11,10 +12,14 @@ from core_api.serializers.equipment.list import EquipmentListSerializer
 from utils.pagination import CustomPagination
 from utils.services import ServiceOutcome
 
+from core_api.docs.equipment.get import doc as equipment_get_doc
+from core_api.docs.equipment.post import doc as equipment_post_doc
+
 
 class EquipmentListView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(**equipment_get_doc)
     def get(self, request):
         outcome = ServiceOutcome(
             EquipmentListService, dict(request.GET.items()) | {"current_user": request.user}
@@ -27,6 +32,7 @@ class EquipmentListView(APIView):
                          'results': EquipmentListSerializer(outcome.result, many=True).data},
                         status=outcome.response_status)
 
+    @extend_schema(**equipment_post_doc)
     def post(self, request):
         outcome = ServiceOutcome(CreateEquipmentService, request.data | {"current_user": request.user})
         if bool(outcome.errors):

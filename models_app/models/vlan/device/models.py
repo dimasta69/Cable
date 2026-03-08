@@ -20,6 +20,7 @@ class VlanDevice(BaseModel):
             related_query_name="device",
         )
     ip = models.GenericIPAddressField(verbose_name='IP адрес', null=True, blank=True)
+    mask = models.GenericIPAddressField(verbose_name='Маска подсети', null=True, blank=True)
     device_type = models.ForeignKey(
         ContentType, on_delete=models.CASCADE, null=True, blank=True,
     )

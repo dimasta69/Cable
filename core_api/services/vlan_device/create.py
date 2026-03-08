@@ -1,6 +1,7 @@
 from typing import List
 
 from django import forms
+from django.core.exceptions import ValidationError as DjangoValidationError
 from functools import lru_cache
 
 from django.contrib.contenttypes.models import ContentType
@@ -10,6 +11,7 @@ from rest_framework.exceptions import NotFound
 
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
+from core_api.utils.ip_mask import validate_ip_and_mask
 from models_app.models import User, Equipment, Port, Vlan, VlanDevice, Scheme, Building, Room, ServerRack, Access
 
 
@@ -19,9 +21,11 @@ class CreateVlanDeviceService(ServiceWithResult):
     device_type = forms.CharField(required=True)
     device_id = forms.IntegerField(required=True)
     ip = forms.GenericIPAddressField(required=False)
+    mask = forms.GenericIPAddressField(required=False)
 
     custom_validations = [
         'device_type_presence', 'equipment_presence', 'port_presence', 'vlan_presence', 'access_port_presence',
+        'ip_mask_match',
     ]
 
     def process(self):
@@ -48,7 +52,8 @@ class CreateVlanDeviceService(ServiceWithResult):
             vlan=self._vlan,
             device_id=self.cleaned_data['device_id'],
             device_type=self._device_type,
-            ip=self.cleaned_data['ip'],
+            ip=self.cleaned_data.get('ip'),
+            mask=self.cleaned_data.get('mask'),
         )
 
     @property
@@ -74,6 +79,15 @@ class CreateVlanDeviceService(ServiceWithResult):
             return Vlan.objects.get(id=self.cleaned_data['vlan_id'])
         except Vlan.DoesNotExist:
             return None
+
+    def ip_mask_match(self) -> None:
+        try:
+            validate_ip_and_mask(
+                self.cleaned_data.get('ip'),
+                self.cleaned_data.get('mask'),
+            )
+        except DjangoValidationError as e:
+            self.add_error('mask', e)
 
     def device_type_presence(self) -> None:
         if not self.cleaned_data['device_type'] in ['port', 'equipment']:

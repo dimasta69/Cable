@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from utils.pagination import CustomPagination
 
 from utils.services import ServiceOutcome
@@ -8,10 +9,14 @@ from core_api.serializers.building.resource import BuildingListSerializer
 from core_api.services.building.list import BuildingListService
 from core_api.services.building.create import CreateBuildingService
 
+from core_api.docs.building.get import doc as building_get_doc
+from core_api.docs.building.post import doc as building_post_doc
+
 
 class BuildingListView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(**building_get_doc)
     def get(self, request):
         outcome = ServiceOutcome(BuildingListService, dict(request.GET.items()) | {'current_user': request.user})
         if bool(outcome.errors):
@@ -22,6 +27,7 @@ class BuildingListView(APIView):
                          'results': BuildingListSerializer(outcome.result, many=True).data},
                         status=outcome.response_status)
 
+    @extend_schema(**building_post_doc)
     def post(self, request):
         outcome = ServiceOutcome(CreateBuildingService, request.data | {'current_user': request.user})
         if bool(outcome.errors):

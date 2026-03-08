@@ -16,6 +16,7 @@ class VlanDeviceSerializer(serializers.ModelSerializer):
             "id",
             "vlan",
             "ip",
+            "mask",
             "device_type",
             "device_id",
         )
