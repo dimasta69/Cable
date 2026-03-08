@@ -5,6 +5,7 @@ from django.db.models import Q
 from rest_framework import status
 from functools import lru_cache
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField
 from models_app.models.port.port_template.models import PortTemplate
@@ -12,7 +13,7 @@ from models_app.models import Speed, LineType, TypePort
 from cabel.settings.rest_framework import REST_FRAMEWORK
 
 
-class PortTemplateListService(ServiceWithResult):
+class PortTemplateListService(PresenceChecksMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
@@ -22,7 +23,8 @@ class PortTemplateListService(ServiceWithResult):
     filter_type_port = forms.IntegerField(required=False)
     filter_modular = forms.BooleanField(required=False)
 
-    custom_validations = ['order_presence', 'speed_presence', 'line_type_presence', 'type_port_presence']
+    custom_validations = ['run_presence_checks', 'order_presence', 'speed_presence', 'line_type_presence']
+    presence_checks = [("_type_port", "filter_type_port", "Type port", True)]  # only_if_set
 
     def process(self):
         self.run_custom_validations()
@@ -118,8 +120,3 @@ class PortTemplateListService(ServiceWithResult):
                                                                   f"{self.cleaned_data['filter_line_type']} not found"))
             self.response_status = status.HTTP_404_NOT_FOUND
 
-    def type_port_presence(self):
-        if self.cleaned_data['filter_type_port'] and not self.cleaned_data['filter_type_port']:
-            self.add_error('filter_type_port', ObjectDoesNotExist(f"TypePort =  "
-                                                                  f"{self.cleaned_data['filter_type_port']} not found"))
-            self.response_status = status.HTTP_404_NOT_FOUND

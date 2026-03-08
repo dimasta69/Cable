@@ -1,6 +1,8 @@
 """
 Миксины для проверки доступа в сервисах без дублирования кода.
 
+Проверка наличия объекта по ID (xxx_presence): см. core_api.utils.presence.check_presence.
+
 Использование в сервисе:
   1. Наследовать Service от ResourceAccessMixin (перед ServiceWithResult).
   2. Добавить 'access_presence' в custom_validations.

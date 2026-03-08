@@ -2,24 +2,26 @@ from functools import lru_cache
 from typing import List
 from django import forms
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_building
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from models_app.models import User, Building, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-class UpdateBuildingService(ResourceAccessMixin, ServiceWithResult):
+class UpdateBuildingService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
     name = forms.CharField(required=False)
     coord_x = forms.FloatField(required=False)
     coord_y = forms.FloatField(required=False)
 
-    custom_validations = ['building_presence', 'number_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'number_presence', 'access_presence']
+    presence_checks = [("_building", "id", "Building")]
 
     def process(self):
         self.run_custom_validations()
@@ -57,12 +59,6 @@ class UpdateBuildingService(ResourceAccessMixin, ServiceWithResult):
             return Building.objects.filter(scheme=self._building.scheme)
         except Building.DoesNotExist:
             return Building.objects.none()
-
-    def building_presence(self) -> None:
-        if not self._building:
-            self.add_error('id', ObjectDoesNotExist('Building id='
-                                                    f'{self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def number_presence(self) -> None:
         if self._building and self.cleaned_data.get('name'):

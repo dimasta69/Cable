@@ -2,23 +2,25 @@ from django import forms
 from functools import lru_cache
 from typing import List
 
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from rest_framework import status
 
 from core_api.utils.access_checker import AccessChecker, scope_for_equipment
+from core_api.utils.presence import PresenceChecksMixin
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
 from models_app.models import Port, SfpTemplate, User
 
 
-class AddToPortSfpService(ServiceWithResult):
+class AddToPortSfpService(PresenceChecksMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     port_list = ListIntegerField(required=True)
     current_user = ModelField(User)
 
     custom_validations = [
-        'sfp_template_presence', 'speed_control', 'check_ports', 'access_port_presence', 'line_type_control',
+        'run_presence_checks', 'speed_control', 'check_ports', 'access_port_presence', 'line_type_control',
     ]
+    presence_checks = [("_sfp_template", "id", "Sfp template", True)]  # only_if_set
 
     def process(self):
         self.run_custom_validations()
@@ -66,13 +68,6 @@ class AddToPortSfpService(ServiceWithResult):
             return SfpTemplate.objects.prefetch_related("speed").get(id=self.cleaned_data['id'])
         except SfpTemplate.DoesNotExist:
             return None
-
-    def sfp_template_presence(self) -> None:
-        if self.cleaned_data.get('id'):
-            if not self._sfp_template:
-                self.add_error('id', ObjectDoesNotExist(
-                    f'Sfp template id={self.cleaned_data["id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def check_ports(self) -> None:
         if len(self._port_list) != len(self.cleaned_data['port_list']):

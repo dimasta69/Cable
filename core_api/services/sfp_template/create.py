@@ -6,12 +6,13 @@ from rest_framework import status
 from rest_framework.exceptions import PermissionDenied
 from typing import List
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField, ModelField
 from models_app.models import TypePort, SfpTemplate, Manufacturer, User, LineType, Speed
 
 
-class CreateSfpTemplateService(ServiceWithResult):
+class CreateSfpTemplateService(PresenceChecksMixin, ServiceWithResult):
     manufacturer_id = forms.IntegerField(required=True)
     name = forms.CharField(required=False)
     type_port_id = forms.IntegerField(required=False)
@@ -20,7 +21,11 @@ class CreateSfpTemplateService(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = [
-        'type_port_presence', 'manufacturer_presence', 'line_type_presence', 'is_superuser', 'speed_presence',
+        'run_presence_checks', 'line_type_presence', 'speed_presence', 'is_superuser',
+    ]
+    presence_checks = [
+        ("_manufacturer", "manufacturer_id", "Manufacturer"),
+        ("_type_port", "type_port_id", "Type port", True),
     ]
 
     def process(self):
@@ -88,22 +93,6 @@ class CreateSfpTemplateService(ServiceWithResult):
                     f"Speeds not found"
                 )
             )
-
-    def manufacturer_presence(self) -> None:
-        if self.cleaned_data['manufacturer_id']:
-            if not self._manufacturer:
-                self.add_error('filter_manufacturer_id', ObjectDoesNotExist('Manufacturer id='
-                                                                            f'{self.cleaned_data["manufacturer_id"]} '
-                                                                            f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def type_port_presence(self) -> None:
-        if self.cleaned_data['type_port_id']:
-            if not self._type_port:
-                self.add_error('filter_type_port_id', ObjectDoesNotExist('Type port id='
-                                                                         f'{self.cleaned_data["type_port_id"]} '
-                                                                         f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def is_superuser(self) -> None:
         if not self.cleaned_data['current_user'].is_superuser:

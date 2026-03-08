@@ -1,21 +1,22 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from functools import lru_cache
 
 from core_api.utils.access_checker import scope_for_scheme
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.services import ServiceWithResult
 from models_app.models import User, Scheme, SchemeMap
 from utils.fields import ModelField
 
 
-class CreateMapService(ResourceAccessMixin, ServiceWithResult):
+class CreateMapService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     name = forms.CharField(required=True)
     scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['access_presence', 'scheme_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_scheme", "scheme_id", "Scheme")]
 
     def process(self):
         self.run_custom_validations()
@@ -40,9 +41,3 @@ class CreateMapService(ResourceAccessMixin, ServiceWithResult):
             return Scheme.objects.get(id=self.cleaned_data['scheme_id'])
         except Scheme.DoesNotExist:
             return None
-
-    def scheme_presence(self) -> None:
-        if not self._scheme:
-            self.add_error('scheme_id', ObjectDoesNotExist(
-                'Scheme id=' f'{self.cleaned_data["scheme_id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND

@@ -1,21 +1,22 @@
 from django import forms
 from functools import lru_cache
 from rest_framework import status
-from rest_framework.exceptions import NotFound
 
 from core_api.utils.access_checker import scope_for_scheme
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Scheme, Segment, User
 
 
-class CreateSegmentService(ResourceAccessMixin, ServiceWithResult):
+class CreateSegmentService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     name = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ["scheme_presence", "access_presence"]
+    custom_validations = ["run_presence_checks", "access_presence"]
+    presence_checks = [("_scheme", "scheme_id", "Scheme")]
 
     def process(self):
         self.run_custom_validations()
@@ -41,13 +42,3 @@ class CreateSegmentService(ResourceAccessMixin, ServiceWithResult):
             return Scheme.objects.get(id=self.cleaned_data["scheme_id"])
         except Scheme.DoesNotExist:
             return None
-
-    def scheme_presence(self) -> None:
-        if not self._scheme:
-            self.add_error(
-                "scheme_id",
-                NotFound(
-                    f"Scheme id={self.cleaned_data['scheme_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND

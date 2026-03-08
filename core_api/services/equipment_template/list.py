@@ -7,13 +7,14 @@ from typing import List
 from django.core.paginator import Paginator, EmptyPage
 from cabel.settings import REST_FRAMEWORK
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
 from models_app.models import EquipmentTemplateType
 from models_app.models import Manufacturer
 
 
-class EquipmentTemplateListService(ServiceWithResult):
+class EquipmentTemplateListService(PresenceChecksMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     filter_manufacturer_id = forms.IntegerField(required=False)
@@ -21,7 +22,11 @@ class EquipmentTemplateListService(ServiceWithResult):
     search_filter = forms.CharField(required=False)
     order_by = forms.CharField(required=False)
 
-    custom_validations = ['type_presence', 'order_presence', 'manufacturer_presence', 'type_presence']
+    custom_validations = ['run_presence_checks', 'order_presence']
+    presence_checks = [
+        ("_type", "filter_type_id", "Type", True),
+        ("_manufacturer", "filter_manufacturer_id", "Manufacturer", True),
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -79,13 +84,6 @@ class EquipmentTemplateListService(ServiceWithResult):
         except EquipmentTemplateType.DoesNotExist:
             return None
 
-    def type_presence(self) -> None:
-        if self.cleaned_data['filter_type_id'] and self._type is None:
-            self.add_error('filter_type', ObjectDoesNotExist('Type id='
-                                                             f'{self.cleaned_data["filter_type_id"]} '
-                                                             f'not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
     def order_presence(self) -> None:
         if self.cleaned_data['order_by']:
             if not self.cleaned_data['order_by'] in ['power', '-power', 'number_of_units', '-number_of_units',
@@ -93,9 +91,3 @@ class EquipmentTemplateListService(ServiceWithResult):
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def manufacturer_presence(self) -> None:
-        if self.cleaned_data['filter_manufacturer_id'] and not self._manufacturer:
-            self.add_error('filter_manufacturer', ObjectDoesNotExist('Manufacturer id='
-                                                                     f'{self.cleaned_data["filter_manufacturer_id"]} '
-                                                                     f'not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND

@@ -1,18 +1,19 @@
 from django import forms
 from functools import lru_cache
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from rest_framework import status
 from typing import List
 
 from rest_framework.exceptions import PermissionDenied
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models.equipment.equipment_template.models import EquipmentTemplate
 from models_app.models import Manufacturer, User, EquipmentTemplateType
 
 
-class UpdateEquipmentTemplate(ServiceWithResult):
+class UpdateEquipmentTemplate(PresenceChecksMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     manufacturer_id = forms.IntegerField(required=False)
     type_id = forms.IntegerField(required=False)
@@ -22,7 +23,12 @@ class UpdateEquipmentTemplate(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = [
-        'equipment_template_presence', 'manufacturer_presence', 'model_presence', 'is_superuser', 'type_presence',
+        'run_presence_checks', 'model_presence', 'is_superuser',
+    ]
+    presence_checks = [
+        ("_equipment_template", "id", "Equipment template"),
+        ("_manufacturer", "manufacturer_id", "Manufacturer", True),
+        ("_type", "type_id", "Type", True),
     ]
 
     def process(self):
@@ -34,7 +40,7 @@ class UpdateEquipmentTemplate(ServiceWithResult):
 
     @property
     def _update_equipment_template(self) -> EquipmentTemplate:
-        equipment_template = self._equipment_template_list.get(id=self.cleaned_data['id'])
+        equipment_template = self._equipment_template
         if self.cleaned_data['manufacturer_id']:
             equipment_template.manufacturer = self._manufacturer
         if self.cleaned_data['type_id']:
@@ -57,6 +63,13 @@ class UpdateEquipmentTemplate(ServiceWithResult):
             return EquipmentTemplate.objects.none()
 
     @property
+    def _equipment_template(self) -> EquipmentTemplate | None:
+        try:
+            return self._equipment_template_list.get(id=self.cleaned_data['id'])
+        except EquipmentTemplate.DoesNotExist:
+            return None
+
+    @property
     @lru_cache()
     def _manufacturer(self) -> Manufacturer | None:
         try:
@@ -72,31 +85,15 @@ class UpdateEquipmentTemplate(ServiceWithResult):
         except EquipmentTemplateType.DoesNotExist:
             return None
 
-    def equipment_template_presence(self) -> None:
-        if not self._equipment_template_list.get(id=self.cleaned_data['id']):
-            self.add_error('id', ObjectDoesNotExist(f'Equipment template id={self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def manufacturer_presence(self) -> None:
-        if self.cleaned_data['manufacturer_id']:
-            if not self._manufacturer:
-                self.add_error('id', ObjectDoesNotExist(f'Manufacturer id={self.cleaned_data["manufacturer_id"]} '
-                                                        'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
     def model_presence(self) -> None:
+        if not self.cleaned_data.get('model'):
+            return
+        current_id = self.cleaned_data.get('id')
         for equipment in self._equipment_template_list:
-            if self.cleaned_data['model'] == equipment.model:
+            if equipment.id != current_id and self.cleaned_data['model'] == equipment.model:
                 self.add_error('model', ValidationError(f'Field with model={self.cleaned_data["model"]}'
                                                         ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def type_presence(self) -> None:
-        if self.cleaned_data['type_id'] and not self._type:
-            self.add_error(
-                'id', ObjectDoesNotExist(f'EquipmentTemplateType id={self.cleaned_data["type_id"]} not found ')
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def is_superuser(self) -> None:
         if not self.cleaned_data['current_user'].is_superuser:

@@ -6,6 +6,7 @@ from functools import lru_cache
 from typing import List
 
 from core_api.utils.access_checker import scope_for_equipment
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
@@ -13,7 +14,7 @@ from core_api.utils.change_mode_port import change_mode_port
 from models_app.models import Port, User, LineType, PortMode
 
 
-class UpdatePortService(ResourceAccessMixin, ServiceWithResult):
+class UpdatePortService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     line_type_id = ListIntegerField(required=False)
     mode_id = forms.IntegerField(required=False)
@@ -30,7 +31,11 @@ class UpdatePortService(ResourceAccessMixin, ServiceWithResult):
     )
     current_user = ModelField(User)
 
-    custom_validations = ['port_presence', 'line_type_presence', 'port_mode_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'line_type_presence', 'access_presence']
+    presence_checks = [
+        ("_port", "id", "Port"),
+        ("_mode", "mode_id", "Port mode", True),
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -88,15 +93,6 @@ class UpdatePortService(ResourceAccessMixin, ServiceWithResult):
         except PortMode.DoesNotExist:
             return None
 
-    def port_mode_presence(self) -> None:
-        if self.cleaned_data.get('mode_id') and not self._mode:
-            self.add_error(
-                'mode_id',
-                ObjectDoesNotExist(
-                    f"Port mode id={self.cleaned_data['mode_id']} not found"
-                )
-            )
-
     def line_type_presence(self) -> None:
         if self.cleaned_data.get('line_type_id'):
             if len(self._line_type) != len(self.cleaned_data['line_type_id']):
@@ -106,8 +102,3 @@ class UpdatePortService(ResourceAccessMixin, ServiceWithResult):
                 )
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def port_presence(self) -> None:
-        if not self._port:
-            self.add_error('id', ObjectDoesNotExist(
-                f"Port id ={self.cleaned_data['id']} not found"))
-            self.response_status = status.HTTP_404_NOT_FOUND

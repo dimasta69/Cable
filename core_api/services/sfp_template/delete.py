@@ -1,19 +1,21 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from rest_framework import status
 from functools import lru_cache
 from typing import List
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from models_app.models import SfpTemplate, Port, User
 
 
-class DeleteSfpTemplateService(ServiceWithResult):
+class DeleteSfpTemplateService(PresenceChecksMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['sfp_template_presence', 'is_superuser']
+    custom_validations = ['run_presence_checks', 'is_superuser']
+    presence_checks = [("_sfp_template", "id", "Sfp template")]
 
     def process(self):
         self.run_custom_validations()
@@ -46,13 +48,6 @@ class DeleteSfpTemplateService(ServiceWithResult):
             return Port.objects.filter(sfp=self._sfp_template)
         except Port.DoesNotExist:
             return Port.objects.none()
-
-    def sfp_template_presence(self) -> None:
-        if self.cleaned_data['id']:
-            if not self._sfp_template:
-                self.add_error('id', ObjectDoesNotExist('Sfp template id='
-                                                        f'{self.cleaned_data["id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def is_superuser(self) -> None:
         if not self.cleaned_data['current_user'].is_superuser:

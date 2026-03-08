@@ -1,20 +1,22 @@
 from django import forms
 from functools import lru_cache
 
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from rest_framework import status
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import User, Scheme, Building, Room, ServerRack
 from models_app.models import Access
 
 
-class DeleteAccessService(ServiceWithResult):
+class DeleteAccessService(PresenceChecksMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['access_creator', 'access_presence', 'access_owner_or_superuser']
+    custom_validations = ['access_creator', 'run_presence_checks', 'access_owner_or_superuser']
+    presence_checks = [("_access", "id", "Access")]
 
     def process(self):
         self.run_custom_validations()
@@ -40,11 +42,6 @@ class DeleteAccessService(ServiceWithResult):
             if self._access.role == 'Creator':
                 self.add_error('id', PermissionDenied("You can't delete the creator"))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def access_presence(self) -> None:
-        if not self._access:
-            self.add_error('id', ObjectDoesNotExist(f'Access id={self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_owner_or_superuser(self) -> None:
         if self._access:

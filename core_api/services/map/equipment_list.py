@@ -7,13 +7,14 @@ from rest_framework import status
 from rest_framework.exceptions import NotFound
 
 from core_api.utils.access_checker import AccessChecker, scope_for_map
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
 from models_app.models import EquipmentScheme, SchemeMap, User, Vlan, Segment, Equipment
 
 
-class EquipmentListService(ResourceAccessMixin, ServiceWithResult):
+class EquipmentListService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     filter_segment_id = forms.IntegerField(required=False)
     filter_vlan_list_id = ListIntegerField(required=False)
@@ -21,10 +22,13 @@ class EquipmentListService(ResourceAccessMixin, ServiceWithResult):
 
     access_required_roles = AccessChecker.ROLES_READ
     custom_validations = [
-        'map_presence',
+        'run_presence_checks',
         'access_presence',
-        'segment_presence',
         'vlan_presence',
+    ]
+    presence_checks = [
+        ("_map", "id", "Map"),
+        ("_segment", "filter_segment_id", "Segment", True),
     ]
 
     def process(self):
@@ -91,26 +95,6 @@ class EquipmentListService(ResourceAccessMixin, ServiceWithResult):
             )
         except Vlan.DoesNotExist:
             return Vlan.objects.none()
-
-    def map_presence(self) -> None:
-        if not self._map:
-            self.add_error(
-                "id",
-                NotFound(
-                    f"Map id={self.cleaned_data['id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def segment_presence(self) -> None:
-        if self.cleaned_data.get('filter_segment_id') and not self._segment:
-            self.add_error(
-                "filter_segment_id",
-                NotFound(
-                    f"Segment id={self.cleaned_data['filter_segment_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def vlan_presence(self) -> None:
         if self.cleaned_data.get("filter_vlan_list_id"):

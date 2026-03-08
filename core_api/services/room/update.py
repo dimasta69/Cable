@@ -1,16 +1,17 @@
 from functools import lru_cache
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_room
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from models_app.models import User, Equipment, Room
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-class UpdateRoomService(ResourceAccessMixin, ServiceWithResult):
+class UpdateRoomService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     number = forms.CharField(required=False)
     is_server_room = forms.BooleanField(required=False)
@@ -18,7 +19,8 @@ class UpdateRoomService(ResourceAccessMixin, ServiceWithResult):
     floor = forms.IntegerField(required=False)
     equipment_id = forms.IntegerField(required=False)
 
-    custom_validations = ['room_presence', 'access_presence', 'equipment_presence']
+    custom_validations = ['run_presence_checks', 'access_presence', 'equipment_presence']
+    presence_checks = [("_room", "id", "Room")]
 
     def process(self):
         self.run_custom_validations()
@@ -60,11 +62,6 @@ class UpdateRoomService(ResourceAccessMixin, ServiceWithResult):
             return Equipment.objects.get(id=self.cleaned_data.get('equipment_id'))
         except Equipment.DoesNotExist:
             return None
-
-    def room_presence(self) -> None:
-        if not self._room:
-            self.add_error('id', ObjectDoesNotExist(f'Room id={self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def equipment_presence(self) -> None:
         if self.cleaned_data['equipment_id'] and self._equipment is None:

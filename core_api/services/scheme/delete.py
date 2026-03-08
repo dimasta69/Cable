@@ -3,18 +3,20 @@ from functools import lru_cache
 
 from utils.services import ServiceWithResult
 from django import forms
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
+from django.core.exceptions import PermissionDenied
 from service_objects.fields import ModelField
 
+from core_api.utils.presence import PresenceChecksMixin
 from models_app.models import Scheme
 from models_app.models import User
 
 
-class SchemeDeleteService(ServiceWithResult):
+class SchemeDeleteService(PresenceChecksMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['scheme_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_scheme", "id", "Scheme")]
 
     def process(self):
         self.run_custom_validations()
@@ -33,11 +35,6 @@ class SchemeDeleteService(ServiceWithResult):
             return Scheme.objects.get(id=self.cleaned_data['id'])
         except Scheme.DoesNotExist:
             return None
-
-    def scheme_presence(self) -> None:
-        if not self._scheme:
-            self.add_error('id', ObjectDoesNotExist(f'Scheme id =  {self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_presence(self) -> None:
         if (self._scheme and (self._scheme.creator != self.cleaned_data['current_user']) and not

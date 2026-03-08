@@ -8,6 +8,7 @@ from rest_framework import status
 from typing import List
 
 from core_api.utils.access_checker import AccessChecker, scope_for_scheme
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from cabel.settings import REST_FRAMEWORK
 from utils.errors import NotFound
@@ -19,7 +20,7 @@ from models_app.models import (
 )
 
 
-class EquipmentsFromMapListService(ResourceAccessMixin, ServiceWithResult):
+class EquipmentsFromMapListService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
@@ -36,15 +37,18 @@ class EquipmentsFromMapListService(ResourceAccessMixin, ServiceWithResult):
 
     access_required_roles = AccessChecker.ROLES_READ
     custom_validations = [
+        'run_presence_checks',
         'order_presence',
-        'manufacturer_presence',
-        'server_rack_presence',
-        'scheme_presence',
-        'room_presence',
-        'type_presence',
         'access_presence',
-        'segment_presence',
         'vlan_presence',
+    ]
+    presence_checks = [
+        ("_scheme", "filter_scheme_id", "Scheme"),
+        ("_manufacturer", "filter_manufacturer_id", "Manufacturer", True),
+        ("_server_rack", "filter_server_rack_id", "Server rack", True),
+        ("_room", "filter_room_id", "Room", True),
+        ("_type", "filter_type_id", "Type", True),
+        ("_segment", "filter_segment_id", "Segment", True),
     ]
 
     def process(self):
@@ -168,7 +172,7 @@ class EquipmentsFromMapListService(ResourceAccessMixin, ServiceWithResult):
     @lru_cache()
     def _segment(self) -> Segment | None:
         try:
-            return Segment.objects.get(id=self.cleaned_data["filter_scheme_id"])
+            return Segment.objects.get(id=self.cleaned_data["filter_segment_id"])
         except Segment.DoesNotExist:
             return None
 
@@ -188,50 +192,6 @@ class EquipmentsFromMapListService(ResourceAccessMixin, ServiceWithResult):
                                                      'free_ports', '-free_ports']:
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
-
-    def manufacturer_presence(self) -> None:
-        if self.cleaned_data['filter_manufacturer_id']:
-            if not self._manufacturer:
-                self.add_error('filter_manufacturer_id', ObjectDoesNotExist(
-                    f'Manufacturer id={self.cleaned_data["filter_manufacturer_id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def server_rack_presence(self) -> None:
-        if self.cleaned_data['filter_server_rack_id']:
-            if not self._server_rack:
-                self.add_error('filter_server_rack_id', ObjectDoesNotExist(
-                    f'Server rack id={self.cleaned_data["filter_server_rack_id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def scheme_presence(self) -> None:
-        if self.cleaned_data['filter_scheme_id']:
-            if not self._scheme:
-                self.add_error('filter_scheme_id', ObjectDoesNotExist(
-                    f'Server rack id={self.cleaned_data["filter_scheme_id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def room_presence(self) -> None:
-        if self.cleaned_data["filter_room_id"] and not self._room:
-            self.add_error('filter_room_id', ObjectDoesNotExist(f"Room id ={self.cleaned_data['filter_room_id']} "
-                                                                "not found"))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def type_presence(self) -> None:
-        if self.cleaned_data['filter_type_id'] and self._type is None:
-            self.add_error('filter_type', ObjectDoesNotExist('Type id='
-                                                             f'{self.cleaned_data["filter_type_id"]} '
-                                                             f'not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def segment_presence(self) -> None:
-        if self.cleaned_data['filter_segment_id'] and not self._segment:
-            self.add_error(
-                "filter_segment_id",
-                NotFound(
-                    f"Segment id={self.cleaned_data['filter_segment_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def vlan_presence(self) -> None:
         if self.cleaned_data["filter_vlan_list_id"]:

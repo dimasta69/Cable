@@ -1,22 +1,23 @@
 from django import forms
 from functools import lru_cache
-from rest_framework.exceptions import NotFound
 from rest_framework import status
 from typing import List
 
 from core_api.utils.access_checker import AccessChecker, scope_for_map
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from models_app.models import Figure, User, SchemeMap
 
 
-class FigureListService(ResourceAccessMixin, ServiceWithResult):
+class FigureListService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     current_user = ModelField(User)
     filter_map_id = forms.IntegerField(required=True)
 
     access_required_roles = AccessChecker.ROLES_READ
-    custom_validations = ["access_presence", "map_presence"]
+    custom_validations = ["run_presence_checks", "access_presence"]
+    presence_checks = [("_map", "filter_map_id", "Map")]
 
     def process(self):
         self.run_custom_validations()
@@ -41,13 +42,3 @@ class FigureListService(ResourceAccessMixin, ServiceWithResult):
             return SchemeMap.objects.select_related('scheme').get(id=self.cleaned_data['filter_map_id'])
         except SchemeMap.DoesNotExist:
             return None
-
-    def map_presence(self) -> None:
-        if not self._map:
-            self.add_error(
-                "filter_map_id",
-                NotFound(
-                    f"Map id={self.cleaned_data['filter_map_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND

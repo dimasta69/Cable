@@ -2,14 +2,16 @@ from django import forms
 from functools import lru_cache
 from django.core.exceptions import ObjectDoesNotExist
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from models_app.models import Equipment, PortShip
 
 
-class PortShipListService(ServiceWithResult):
+class PortShipListService(PresenceChecksMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
 
-    custom_validations = ["equipment_presence", "port_ship_presence"]
+    custom_validations = ["run_presence_checks", "port_ship_presence"]
+    presence_checks = [("_equipment", "id", "Equipment")]
 
     def process(self):
         self.run_custom_validations()
@@ -32,15 +34,6 @@ class PortShipListService(ServiceWithResult):
             return PortShip.objects.filter(equipment_template=self._equipment.template)
         except PortShip.DoesNotExist:
             return PortShip.objects.none()
-
-    def equipment_presence(self):
-        if not self._equipment:
-            self.add_error(
-                "id",
-                ObjectDoesNotExist(
-                    f"Equipment with id={self.cleaned_data['id']} does not exist"
-                )
-            )
 
     def port_ship_presence(self):
         if not self._port_ship:

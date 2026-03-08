@@ -6,16 +6,18 @@ from rest_framework import status
 from rest_framework.exceptions import NotFound
 
 from core_api.utils.access_checker import AccessChecker, scope_for_equipment
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from models_app.models import User, Equipment, Port, VlanDevice
 
 
-class DeleteVlanDeviceService(ServiceWithResult):
+class DeleteVlanDeviceService(PresenceChecksMixin, ServiceWithResult):
     current_user = ModelField(User)
     id = forms.IntegerField(required=True)
 
-    custom_validations = ['equipment_presence', 'port_presence', 'vlan_device_presence', 'access_port_presence']
+    custom_validations = ['run_presence_checks', 'equipment_presence', 'port_presence', 'access_port_presence']
+    presence_checks = [("_vlan_device", "id", "Vlan device")]
 
     def process(self):
         self.run_custom_validations()
@@ -74,14 +76,6 @@ class DeleteVlanDeviceService(ServiceWithResult):
             self.add_error(
                 'device_id',
                 NotFound(f"Device id={self.cleaned_data.get('device_id', '')} not found")
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def vlan_device_presence(self) -> None:
-        if self.cleaned_data.get('id') and not self._vlan_device:
-            self.add_error(
-                'id',
-                NotFound(f"Vlan device id={self.cleaned_data['id']} not found")
             )
             self.response_status = status.HTTP_404_NOT_FOUND
 

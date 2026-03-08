@@ -1,21 +1,22 @@
 from django import forms
 from functools import lru_cache
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_equipment
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.services import ServiceWithResult
 from utils.fields import JsonIpField, ModelField
 from models_app.models import Equipment, User
 
 
-class UpdateEquipmentService(ResourceAccessMixin, ServiceWithResult):
+class UpdateEquipmentService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     vlan_ip = JsonIpField(required=False)
     current_user = ModelField(User)
 
-    custom_validations = ['equipment_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_equipment", "id", "Equipment")]
 
     def process(self):
         self.run_custom_validations()
@@ -46,8 +47,3 @@ class UpdateEquipmentService(ResourceAccessMixin, ServiceWithResult):
             )
         except Equipment.DoesNotExist:
             return None
-
-    def equipment_presence(self) -> None:
-        if not self._equipment:
-            self.add_error('id', ObjectDoesNotExist(f'Equipment id={self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND

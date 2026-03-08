@@ -1,21 +1,25 @@
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist
 from functools import lru_cache
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_scheme
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from models_app.models import Scheme, Equipment, EquipmentTemplate, User
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 
 
-class CreateEquipmentService(ResourceAccessMixin, ServiceWithResult):
+class CreateEquipmentService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     equipment_template_id = forms.IntegerField(required=True)
     scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ["equipment_template_presence", "scheme_presence", "access_presence"]
+    custom_validations = ["run_presence_checks", "access_presence"]
+    presence_checks = [
+        ("_equipment_template", "equipment_template_id", "Equipment template"),
+        ("_scheme", "scheme_id", "Scheme"),
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -47,16 +51,3 @@ class CreateEquipmentService(ResourceAccessMixin, ServiceWithResult):
             ).get(id=self.cleaned_data['scheme_id'])
         except Scheme.DoesNotExist:
             return None
-
-    def equipment_template_presence(self) -> None:
-        if not self._equipment_template:
-            self.add_error('equipment_template_id', ObjectDoesNotExist('Equipment template id='
-                                                                       f'{self.cleaned_data["equipment_template_id"]}'
-                                                                       ' not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def scheme_presence(self) -> None:
-        if not self._scheme:
-            self.add_error('scheme_id', ObjectDoesNotExist(
-                f'Scheme id={self.cleaned_data["scheme_id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND

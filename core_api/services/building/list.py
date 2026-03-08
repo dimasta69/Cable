@@ -2,20 +2,20 @@ from django import forms
 from django.db.models import Q
 from functools import lru_cache
 from typing import Any
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet
 from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage, Page
 from cabel.settings import REST_FRAMEWORK
 
 from core_api.utils.access_checker import AccessChecker, scope_for_scheme
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from models_app.models import Building, User, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-class BuildingListService(ResourceAccessMixin, ServiceWithResult):
+class BuildingListService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     filter_scheme_id = forms.IntegerField(required=True)
@@ -23,7 +23,8 @@ class BuildingListService(ResourceAccessMixin, ServiceWithResult):
     current_user = ModelField(User)
 
     access_required_roles = AccessChecker.ROLES_READ
-    custom_validations = ['access_presence', 'scheme_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_scheme", "filter_scheme_id", "Scheme")]
 
     def process(self):
         self.run_custom_validations()
@@ -66,9 +67,3 @@ class BuildingListService(ResourceAccessMixin, ServiceWithResult):
             return Scheme.objects.get(id=self.cleaned_data['filter_scheme_id'])
         except Scheme.DoesNotExist:
             return None
-
-    def scheme_presence(self) -> None:
-        if not self._scheme:
-            self.add_error('filter_scheme_id', ObjectDoesNotExist('Scheme id='
-                                                                  f'{self.cleaned_data["filter_scheme_id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND

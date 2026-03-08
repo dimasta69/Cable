@@ -1,22 +1,23 @@
 from django import forms
 from functools import lru_cache
 from django.db import transaction
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_equipment
 from core_api.utils.connection import delete_port_from_connection
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Equipment, User
 
 
-class DeleteEquipmentService(ResourceAccessMixin, ServiceWithResult):
+class DeleteEquipmentService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['equipment_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_equipment", "id", "Equipment")]
 
     def process(self):
         self.run_custom_validations()
@@ -48,8 +49,3 @@ class DeleteEquipmentService(ResourceAccessMixin, ServiceWithResult):
             )
         except Equipment.DoesNotExist:
             return None
-
-    def equipment_presence(self) -> None:
-        if not self._equipment:
-            self.add_error('id', ObjectDoesNotExist(f'Equipment id={self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND

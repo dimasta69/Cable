@@ -7,6 +7,7 @@ from rest_framework import status
 from typing import List
 
 from core_api.utils.access_checker import AccessChecker, scope_for_room
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from models_app.models import User, Room, ServerRack
 from utils.fields import ModelField
@@ -14,7 +15,7 @@ from utils.services import ServiceWithResult
 from cabel.settings import REST_FRAMEWORK
 
 
-class ServerRackListService(ResourceAccessMixin, ServiceWithResult):
+class ServerRackListService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     filter_room_id = forms.IntegerField(required=True)
@@ -23,7 +24,8 @@ class ServerRackListService(ResourceAccessMixin, ServiceWithResult):
     current_user = ModelField(User)
 
     access_required_roles = AccessChecker.ROLES_READ
-    custom_validations = ['room_presence', 'order_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'order_presence', 'access_presence']
+    presence_checks = [("_room", "filter_room_id", "Room")]
 
     def process(self):
         self.run_custom_validations()
@@ -70,14 +72,6 @@ class ServerRackListService(ResourceAccessMixin, ServiceWithResult):
             )
         except Room.DoesNotExist:
             return None
-
-    def room_presence(self) -> None:
-        if self.cleaned_data['filter_room_id']:
-            if not self._room:
-                self.add_error('filter_room_id', ObjectDoesNotExist('Room id='
-                                                                    f'{self.cleaned_data["filter_room_id"]} '
-                                                                    'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def order_presence(self) -> None:
         if self.cleaned_data['order_by']:

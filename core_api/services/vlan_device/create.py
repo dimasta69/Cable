@@ -8,12 +8,13 @@ from rest_framework.exceptions import NotFound
 
 from core_api.utils.access_checker import AccessChecker, scope_for_equipment
 from core_api.utils.ip_mask import validate_ip_and_mask
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from models_app.models import User, Equipment, Port, Vlan, VlanDevice
 
 
-class CreateVlanDeviceService(ServiceWithResult):
+class CreateVlanDeviceService(PresenceChecksMixin, ServiceWithResult):
     current_user = ModelField(User)
     vlan_id = forms.IntegerField(required=True)
     device_type = forms.CharField(required=True)
@@ -22,9 +23,10 @@ class CreateVlanDeviceService(ServiceWithResult):
     mask = forms.GenericIPAddressField(required=False)
 
     custom_validations = [
-        'device_type_presence', 'equipment_presence', 'port_presence', 'vlan_presence', 'access_port_presence',
-        'ip_mask_match',
+        'run_presence_checks', 'device_type_presence', 'equipment_presence', 'port_presence',
+        'access_port_presence', 'ip_mask_match',
     ]
+    presence_checks = [("_vlan", "vlan_id", "Vlan")]
 
     def process(self):
         self.run_custom_validations()
@@ -116,14 +118,6 @@ class CreateVlanDeviceService(ServiceWithResult):
             self.add_error(
                 'device_id',
                 NotFound(f"Device id={self.cleaned_data['device_id']} not found")
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def vlan_presence(self) -> None:
-        if self.cleaned_data.get('vlan_id') and not self._vlan:
-            self.add_error(
-                'vlan_id',
-                NotFound(f"Vlan id={self.cleaned_data['vlan_id']} not found")
             )
             self.response_status = status.HTTP_404_NOT_FOUND
 

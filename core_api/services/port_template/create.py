@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError, ObjectDoesNotExist, Permissi
 from rest_framework import status
 from functools import lru_cache
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField, ModelField
 from models_app.models.port.port_template.models import PortTemplate
@@ -10,7 +11,7 @@ from models_app.models.equipment.equipment_template.models import EquipmentTempl
 from models_app.models import TypePort, Speed, LineType, User
 
 
-class CreatePortTemplateService(ServiceWithResult):
+class CreatePortTemplateService(PresenceChecksMixin, ServiceWithResult):
     name = forms.CharField(required=False)
     type_port_id = forms.IntegerField(required=False)
     modular = forms.BooleanField(required=False)
@@ -19,13 +20,14 @@ class CreatePortTemplateService(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = [
+        'run_presence_checks',
         'name_presence',
-        'type_port_presence',
         'type_and_modular_presence',
         'speed_presence',
         'line_presence',
         'is_superuser',
     ]
+    presence_checks = [("type_port", "type_port_id", "Type port", True)]  # only_if_set
 
     def process(self):
         self.run_custom_validations()
@@ -91,13 +93,6 @@ class CreatePortTemplateService(ServiceWithResult):
                 self.add_error('name', ValidationError(f'Field with title={self.cleaned_data["name"]}'
                                                        ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def type_port_presence(self):
-        if self.cleaned_data['type_port_id']:
-            if not self.type_port:
-                self.add_error('type_port_id', ObjectDoesNotExist('Type port id='
-                                                                  f'{self.cleaned_data["type_port_id"]} not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
 
     def type_and_modular_presence(self):
         if not self.type_port and (not self.cleaned_data['modular'] or self.cleaned_data['modular'] is False):

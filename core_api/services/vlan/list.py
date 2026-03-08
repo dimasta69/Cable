@@ -11,18 +11,19 @@ from core_api.utils.access_checker import (
     AccessChecker,
     scope_for_segment,
 )
-from utils.errors import NotFound
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from models_app.models import Vlan, Segment, User, Access, Scheme
 
 
-class VlanListService(ServiceWithResult):
+class VlanListService(PresenceChecksMixin, ServiceWithResult):
     current_user = ModelField(User)
     segment_id = forms.IntegerField(required=True)
     search_field = forms.CharField(required=False)
 
-    custom_validations = ['segment_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_segment", "segment_id", "Segment")]
 
     def process(self):
         self.run_custom_validations()
@@ -88,16 +89,6 @@ class VlanListService(ServiceWithResult):
             object_type=vlan_content_type,
             object_id__in=self._segment.vlans.values_list('id', flat=True),
         )
-
-    def segment_presence(self) -> None:
-        if self.cleaned_data['segment_id'] and not self._segment:
-            self.add_error(
-                "segment_id",
-                NotFound(
-                    f"Segment with id={self.cleaned_data['segment_id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_presence(self) -> None:
         if not self._segment:

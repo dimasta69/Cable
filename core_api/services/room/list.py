@@ -7,6 +7,7 @@ from rest_framework import status
 from typing import List
 
 from core_api.utils.access_checker import AccessChecker, scope_for_building
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from cabel.settings import REST_FRAMEWORK
 from models_app.models import User, Room, Building
@@ -14,7 +15,7 @@ from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-class RoomListService(ResourceAccessMixin, ServiceWithResult):
+class RoomListService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     current_user = ModelField(User)
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
@@ -25,7 +26,8 @@ class RoomListService(ResourceAccessMixin, ServiceWithResult):
     search_filter = forms.CharField(required=False)
 
     access_required_roles = AccessChecker.ROLES_READ
-    custom_validations = ['building_presence', 'order_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'order_presence', 'access_presence']
+    presence_checks = [("_building", "filter_building_id", "Building")]
 
     def process(self):
         self.run_custom_validations()
@@ -82,10 +84,3 @@ class RoomListService(ResourceAccessMixin, ServiceWithResult):
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def building_presence(self) -> None:
-        if self.cleaned_data['filter_building_id']:
-            if not self._building:
-                self.add_error('filter_building_id', ObjectDoesNotExist('Building id='
-                                                                        f'{self.cleaned_data["filter_building_id"]} '
-                                                                        'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND

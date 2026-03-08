@@ -1,22 +1,23 @@
 from django import forms
 from functools import lru_cache
-from rest_framework.exceptions import NotFound
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_map
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
 from models_app.models import EquipmentScheme, User
 
 
-class UpdateEquipmentService(ResourceAccessMixin, ServiceWithResult):
+class UpdateEquipmentService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     coord_x = forms.IntegerField(required=False)
     coord_y = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
-    custom_validations = ['equipment_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_equipment", "id", "Equipment map")]
 
     def process(self):
         self.run_custom_validations()
@@ -46,13 +47,3 @@ class UpdateEquipmentService(ResourceAccessMixin, ServiceWithResult):
             ).get(id=self.cleaned_data['id'])
         except EquipmentScheme.DoesNotExist:
             return None
-
-    def equipment_presence(self) -> None:
-        if not self._equipment:
-            self.add_error(
-                "id",
-                NotFound(
-                    f"Equipment map with id={self.cleaned_data['id']} not found"
-                )
-            )
-            self.response_status = status.HTTP_404_NOT_FOUND

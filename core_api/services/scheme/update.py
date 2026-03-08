@@ -1,7 +1,7 @@
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from django import forms
 from service_objects.fields import ModelField
@@ -11,12 +11,13 @@ from models_app.models import Scheme
 from models_app.models import User
 
 
-class SchemeUpdateService(ServiceWithResult):
+class SchemeUpdateService(PresenceChecksMixin, ServiceWithResult):
     current_user = ModelField(User)
     title = forms.CharField(required=True)
     id = forms.IntegerField(required=True)
 
-    custom_validations = ['scheme_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'access_presence']
+    presence_checks = [("_scheme", "id", "Scheme")]
 
     def process(self):
         self.run_custom_validations()
@@ -47,8 +48,3 @@ class SchemeUpdateService(ServiceWithResult):
                                                             f'allowed. Only the creator or administrator has access to '
                                                             f'delete'))
             self.response_status = status.HTTP_403_FORBIDDEN
-
-    def scheme_presence(self) -> None:
-        if not self._scheme:
-            self.add_error('id', ObjectDoesNotExist(f'Scheme id =  {self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND

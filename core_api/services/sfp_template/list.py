@@ -5,6 +5,7 @@ from rest_framework import status
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.services import ServiceWithResult
 from cabel.settings.rest_framework import REST_FRAMEWORK
 from models_app.models.sfp_temaplate.models import SfpTemplate
@@ -12,7 +13,7 @@ from models_app.models import Manufacturer, Access
 from models_app.models import TypePort
 
 
-class SfpTemplateListService(ServiceWithResult):
+class SfpTemplateListService(PresenceChecksMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
@@ -22,7 +23,11 @@ class SfpTemplateListService(ServiceWithResult):
     filter_speed = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
 
-    custom_validations = ['line_type_presence', 'order_presence', 'manufacturer_presence', 'type_port_presence']
+    custom_validations = ['run_presence_checks', 'line_type_presence', 'order_presence']
+    presence_checks = [
+        ("manufacturer", "filter_manufacturer_id", "Manufacturer", True),
+        ("type_port", "filter_type_port_id", "Type port", True),
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -100,18 +105,3 @@ class SfpTemplateListService(ServiceWithResult):
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def manufacturer_presence(self):
-        if self.cleaned_data['filter_manufacturer_id']:
-            if not self.manufacturer:
-                self.add_error('filter_manufacturer_id',
-                               ObjectDoesNotExist(f'Manufacturer id={self.cleaned_data["filter_manufacturer_id"]} '
-                                                  'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def type_port_presence(self):
-        if self.cleaned_data['filter_type_port_id']:
-            if not self.type_port:
-                self.add_error('filter_type_port_id', ObjectDoesNotExist('Type port id='
-                                                                         f'{self.cleaned_data["filter_type_port_id"]} '
-                                                                         f'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND

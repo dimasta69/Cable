@@ -4,20 +4,22 @@ from rest_framework import status
 from functools import lru_cache
 
 from core_api.utils.access_checker import AccessChecker, scope_for_equipment
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Port, User, Equipment
 
 
-class PortListService(ResourceAccessMixin, ServiceWithResult):
+class PortListService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     filter_equipment = forms.IntegerField(required=True)
     filter_vlan = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
     current_user = ModelField(User)
 
     access_required_roles = AccessChecker.ROLES_READ
-    custom_validations = ['order_presence', 'equipment_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'order_presence', 'access_presence']
+    presence_checks = [("equipment", "filter_equipment", "Equipment")]
 
     def process(self):
         self.run_custom_validations()
@@ -66,8 +68,3 @@ class PortListService(ResourceAccessMixin, ServiceWithResult):
                     f"Field in model with {self.cleaned_data['order_by']} not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
-    def equipment_presence(self):
-        if not self.equipment:
-            self.add_error('filter_equipment', ObjectDoesNotExist(
-                f"Equipment id = {self.cleaned_data['filter_equipment']} not found"))
-            self.response_status = status.HTTP_404_NOT_FOUND

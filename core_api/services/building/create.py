@@ -2,22 +2,24 @@ from functools import lru_cache
 from typing import List
 
 from django import forms
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ValidationError
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_scheme
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from models_app.models import User, Building, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-class CreateBuildingService(ResourceAccessMixin, ServiceWithResult):
+class CreateBuildingService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     name = forms.CharField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['scheme_presence', 'number_presence', 'access_presence']
+    custom_validations = ['run_presence_checks', 'number_presence', 'access_presence']
+    presence_checks = [("_scheme", "scheme_id", "Scheme")]
 
     def process(self):
         self.run_custom_validations()
@@ -48,12 +50,6 @@ class CreateBuildingService(ResourceAccessMixin, ServiceWithResult):
             return Building.objects.filter(scheme=self._scheme)
         except Building.DoesNotExist:
             return Building.objects.none()
-
-    def scheme_presence(self):
-        if not self._scheme:
-            self.add_error('scheme_id', ObjectDoesNotExist('Scheme id='
-                                                           f'{self.cleaned_data["scheme_id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
 
     def number_presence(self):
         for building in self.building_list:

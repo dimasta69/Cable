@@ -1,15 +1,16 @@
 from django import forms
 from rest_framework import status
 from functools import lru_cache
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import PermissionDenied
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.errors import ValidationError
 from utils.fields import ListIntegerField, ModelField
 from utils.services import ServiceWithResult
 from models_app.models import EquipmentTemplate, PortTemplate, PortShip, User
 
 
-class ConnectionPortShipService(ServiceWithResult):
+class ConnectionPortShipService(PresenceChecksMixin, ServiceWithResult):
     equipment_template_id = forms.IntegerField(required=True)
     port_template_id = forms.IntegerField(required=True)
     count = forms.IntegerField(required=True)
@@ -18,7 +19,11 @@ class ConnectionPortShipService(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = [
-        'lines_presence', 'count_unit', 'unit_max', 'port_presence', 'equipment_presence', 'is_superuser',
+        'run_presence_checks', 'lines_presence', 'count_unit', 'unit_max', 'is_superuser',
+    ]
+    presence_checks = [
+        ("_equipment_template", "equipment_template_id", "Equipment template"),
+        ("_port_template", "port_template_id", "Port template"),
     ]
 
     def process(self):
@@ -70,17 +75,6 @@ class ConnectionPortShipService(ServiceWithResult):
             if max(self.cleaned_data['unit']) > self._equipment_template.number_of_units:
                 self.add_error('unit', ValidationError('The number of units is less than the available unit'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def port_presence(self):
-        if self.cleaned_data['port_template_id'] and self._port_template is None:
-            self.add_error('port_template_id', ObjectDoesNotExist(f"Port template with id="
-                                                                  f"{self.cleaned_data['port_template_id']} not found"))
-
-    def equipment_presence(self):
-        if self.cleaned_data['equipment_template_id'] and self._port_template is None:
-            self.add_error('equipment_template_id', ObjectDoesNotExist("Equipment template with id="
-                                                                       f"{self.cleaned_data['equipment_template_id']}"
-                                                                       " not found"))
 
     def is_superuser(self) -> None:
         if not self.cleaned_data['current_user'].is_superuser:

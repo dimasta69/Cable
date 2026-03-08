@@ -7,20 +7,22 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import status
 
 from core_api.utils.access_checker import scope_for_server_rack
+from core_api.utils.presence import PresenceChecksMixin
 from core_api.utils.scheme_access import ResourceAccessMixin
 from models_app.models import User, Unit, ServerRack, Equipment
 from utils.services import ServiceWithResult
 from utils.fields import ListIntegerField, ModelField
 
 
-class AddEquipmentUnitService(ResourceAccessMixin, ServiceWithResult):
+class AddEquipmentUnitService(PresenceChecksMixin, ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     unit_list_id = ListIntegerField(required=True)
     current_user = ModelField(User)
 
     custom_validations = [
-        'unit_list_presence', 'equipment_presence', 'count_unit_presence', 'power_presence', 'access_presence'
+        'run_presence_checks', 'unit_list_presence', 'count_unit_presence', 'power_presence', 'access_presence'
     ]
+    presence_checks = [("_equipment", "id", "Equipment")]
 
     def process(self):
         self.run_custom_validations()
@@ -81,12 +83,6 @@ class AddEquipmentUnitService(ResourceAccessMixin, ServiceWithResult):
         if not self._unit_list_int:
             self.add_error('unit_list_id', ObjectDoesNotExist(
                 'Unit list id=' f'{self.cleaned_data["unit_list_id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def equipment_presence(self) -> None:
-        if not self._equipment:
-            self.add_error('id', ObjectDoesNotExist(
-                f'Equipment id={self.cleaned_data["id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def count_unit_presence(self) -> None:
