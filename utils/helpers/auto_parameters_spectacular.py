@@ -3,6 +3,7 @@ from typing import Any, Literal, Tuple, Type, Union
 
 from django import forms
 from django.contrib.postgres.forms import SimpleArrayField
+from utils.fields import JsonIpField
 from drf_spectacular.types import (
     OPENAPI_TYPE_MAPPING,
     PYTHON_TYPE_MAPPING,
@@ -33,6 +34,7 @@ FIELDS_PARAMETERS_MAPPER: dict[Type[forms.Field], Type[OpenApiTypes]] = {
     forms.GenericIPAddressField: OpenApiTypes.STR,
     forms.FilePathField: OpenApiTypes.STR,
     forms.JSONField: OpenApiTypes.OBJECT,
+    JsonIpField: OpenApiTypes.OBJECT,
     forms.SlugField: OpenApiTypes.STR,
     forms.UUIDField: OpenApiTypes.UUID,
 }
