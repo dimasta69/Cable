@@ -3,7 +3,7 @@ from typing import Any, Literal, Tuple, Type, Union
 
 from django import forms
 from django.contrib.postgres.forms import SimpleArrayField
-from utils.fields import JsonIpField
+from utils.fields import JsonIpField, ListIntegerField
 from drf_spectacular.types import (
     OPENAPI_TYPE_MAPPING,
     PYTHON_TYPE_MAPPING,
@@ -121,6 +121,11 @@ def prepare_parameters_for_docs(
             parameter_data["many"] = True
             if choices:
                 parameter_data["description"] += f" One or several of: {choices}"
+        elif isinstance(parameter_data["type"], dict) and "items" in parameter_data["type"]:
+            parameter_data["type"]["items"] = _OPENAPI_TYPE_MAPPING[
+                parameter_data["type"]["items"]["type"]
+            ]
+            parameter_data["many"] = True
         else:
             if choices:
                 parameter_data["enum"] = choices
@@ -254,6 +259,11 @@ def determine_parameter_type(
             "max_items": field_obj.max_length,
             "items": {"type": determine_parameter_type(field_obj.base_field)[0]},
         }  # add anyOf / oneOf if we have choices
+    elif isinstance(field_obj, ListIntegerField):
+        parameter_type = {
+            "type": "array",
+            "items": {"type": OpenApiTypes.INT},
+        }
     elif isinstance(field_obj, forms.ComboField):
         array_choices_types = list()
         for field in field_obj.fields:
