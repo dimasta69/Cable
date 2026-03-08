@@ -1,21 +1,20 @@
 from functools import lru_cache
 from django import forms
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
+from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator, EmptyPage
 from rest_framework import status
 from typing import List
 
+from core_api.utils.access_checker import AccessChecker, scope_for_building
+from core_api.utils.scheme_access import ResourceAccessMixin
 from cabel.settings import REST_FRAMEWORK
-from models_app.models import Access, User, Scheme
+from models_app.models import User, Room, Building
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Room
-from models_app.models import Building
 
 
-class RoomListService(ServiceWithResult):
+class RoomListService(ResourceAccessMixin, ServiceWithResult):
     current_user = ModelField(User)
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
@@ -25,6 +24,7 @@ class RoomListService(ServiceWithResult):
     filter_floor = forms.IntegerField(required=False)
     search_filter = forms.CharField(required=False)
 
+    access_required_roles = AccessChecker.ROLES_READ
     custom_validations = ['building_presence', 'order_presence', 'access_presence']
 
     def process(self):
@@ -65,24 +65,15 @@ class RoomListService(ServiceWithResult):
         except Room.DoesNotExist:
             return Room.objects.none()
 
+    def get_access_scope(self):
+        return scope_for_building(self._building)
+
     @property
     @lru_cache()
     def _building(self) -> Building | None:
         try:
             return Building.objects.select_related("scheme").get(id=self.cleaned_data['filter_building_id'])
         except Building.DoesNotExist:
-            return None
-
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.get(
-                user=self.cleaned_data['current_user'],
-                object_type=scheme_content_type,
-                object_id=self._building.scheme.pk,
-            )
-        except Access.DoesNotExist:
             return None
 
     def order_presence(self) -> None:
@@ -98,10 +89,3 @@ class RoomListService(ServiceWithResult):
                                                                         f'{self.cleaned_data["filter_building_id"]} '
                                                                         'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if self._building:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._building.scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

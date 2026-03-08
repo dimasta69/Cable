@@ -1,17 +1,17 @@
 from django import forms
 from rest_framework.exceptions import NotFound
 from rest_framework import status
-from django.core.exceptions import PermissionDenied
-from django.contrib.contenttypes.models import ContentType
-
 from functools import lru_cache
+
+from core_api.utils.access_checker import scope_for_scheme
+from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.services import ServiceWithResult
 from core_api.utils.refresh_connection_building import refresh_connection_building
-from models_app.models import Scheme, User, Access
+from models_app.models import Scheme, User
 from utils.fields import ModelField
 
 
-class RefreshBuildingConnectionService(ServiceWithResult):
+class RefreshBuildingConnectionService(ResourceAccessMixin, ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
@@ -26,24 +26,15 @@ class RefreshBuildingConnectionService(ServiceWithResult):
     def _refresh_connection_buildings(self) -> None:
         refresh_connection_building(self._scheme)
 
+    def get_access_scope(self):
+        return scope_for_scheme(self._scheme)
+
     @property
     @lru_cache()
     def _scheme(self) -> Scheme | None:
         try:
             return Scheme.objects.prefetch_related("buildings").get(id=self.cleaned_data['scheme_id'])
         except Scheme.DoesNotExist:
-            return None
-
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.get(
-                user=self.cleaned_data['current_user'],
-                object_type=scheme_content_type,
-                object_id=self._scheme.pk,
-            )
-        except Access.DoesNotExist:
             return None
 
     def scheme_presence(self) -> None:
@@ -55,11 +46,3 @@ class RefreshBuildingConnectionService(ServiceWithResult):
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if self._scheme:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.cleaned_data["filter_scheme_id"]} is '
-                                                                'not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

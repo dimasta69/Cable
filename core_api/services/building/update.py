@@ -1,18 +1,18 @@
 from functools import lru_cache
 from typing import List
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import status
 
-from models_app.models import User, Access
+from core_api.utils.access_checker import scope_for_building
+from core_api.utils.scheme_access import ResourceAccessMixin
+from models_app.models import User, Building, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Building, Scheme
 
 
-class UpdateBuildingService(ServiceWithResult):
+class UpdateBuildingService(ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
     name = forms.CharField(required=False)
@@ -35,14 +35,13 @@ class UpdateBuildingService(ServiceWithResult):
             building.name = self.cleaned_data['name']
         if self.cleaned_data['coord_x']:
             building.coord_x = self.cleaned_data['coord_x']
-        # else:
-        #     building.coord_x = None 
         if self.cleaned_data['coord_y']:
             building.coord_y = self.cleaned_data['coord_y']
-        # else:
-        #     building.coord_y = None
         building.save()
         return building
+
+    def get_access_scope(self):
+        return scope_for_building(self._building)
 
     @property
     @lru_cache()
@@ -59,21 +58,6 @@ class UpdateBuildingService(ServiceWithResult):
         except Building.DoesNotExist:
             return Building.objects.none()
 
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        building_content_type = ContentType.objects.get_for_model(Building)
-        try:
-            return Access.objects.filter(
-                Q(object_type=scheme_content_type, object_id=self._building.scheme.id) |
-                Q(object_type=building_content_type, object_id=self._building.id)
-            ).filter(
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator'],
-            )
-        except Access.DoesNotExist:
-            return None
-
     def building_presence(self) -> None:
         if not self._building:
             self.add_error('id', ObjectDoesNotExist('Building id='
@@ -81,16 +65,9 @@ class UpdateBuildingService(ServiceWithResult):
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def number_presence(self) -> None:
-        if self._building:
+        if self._building and self.cleaned_data.get('name'):
             for building in self._building_list:
                 if building.name.lower() == self.cleaned_data['name'].lower():
                     self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["name"]}'
                                                              ' already exists'))
                     self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def access_presence(self) -> None:
-        if self._building:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._building.scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

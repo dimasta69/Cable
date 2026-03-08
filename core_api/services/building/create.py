@@ -2,18 +2,17 @@ from functools import lru_cache
 from typing import List
 
 from django import forms
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, ValidationError, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from rest_framework import status
 
-from models_app.models import Access, User
+from core_api.utils.access_checker import scope_for_scheme
+from core_api.utils.scheme_access import ResourceAccessMixin
+from models_app.models import User, Building, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Building
-from models_app.models import Scheme
 
 
-class CreateBuildingService(ServiceWithResult):
+class CreateBuildingService(ResourceAccessMixin, ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     name = forms.CharField(required=True)
     current_user = ModelField(User)
@@ -31,6 +30,9 @@ class CreateBuildingService(ServiceWithResult):
     def _create_building(self) -> Building:
         return Building.objects.create(scheme=self._scheme, name=self.cleaned_data['name'])
 
+    def get_access_scope(self):
+        return scope_for_scheme(self._scheme)
+
     @property
     @lru_cache()
     def _scheme(self):
@@ -47,19 +49,6 @@ class CreateBuildingService(ServiceWithResult):
         except Building.DoesNotExist:
             return Building.objects.none()
 
-    @property
-    def _access(self):
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.get(
-                user=self.cleaned_data['current_user'],
-                object_type=scheme_content_type,
-                object_id=self._scheme.pk,
-                role__in=['Change', 'Creator']
-            )
-        except Access.DoesNotExist:
-            return None
-
     def scheme_presence(self):
         if not self._scheme:
             self.add_error('scheme_id', ObjectDoesNotExist('Scheme id='
@@ -72,10 +61,3 @@ class CreateBuildingService(ServiceWithResult):
                 self.add_error('number', ValidationError(f'Field with number={self.cleaned_data["name"]}'
                                                          ' already exists'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def access_presence(self):
-        if self._scheme:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.cleaned_data["scheme_id"]} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

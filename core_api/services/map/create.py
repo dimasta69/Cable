@@ -1,17 +1,16 @@
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
 from functools import lru_cache
 
+from core_api.utils.access_checker import scope_for_scheme
+from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.services import ServiceWithResult
-from models_app.models import User, Access, Scheme, SchemeMap
+from models_app.models import User, Scheme, SchemeMap
 from utils.fields import ModelField
 
 
-class CreateMapService(ServiceWithResult):
+class CreateMapService(ResourceAccessMixin, ServiceWithResult):
     name = forms.CharField(required=True)
     scheme_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
@@ -31,6 +30,9 @@ class CreateMapService(ServiceWithResult):
             scheme=self._scheme,
         )
 
+    def get_access_scope(self):
+        return scope_for_scheme(self._scheme)
+
     @property
     @lru_cache()
     def _scheme(self) -> Scheme | None:
@@ -39,31 +41,8 @@ class CreateMapService(ServiceWithResult):
         except Scheme.DoesNotExist:
             return None
 
-    @property
-    def _access(self):
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._scheme.pk,
-                ),
-            ).filter(
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator']
-            )
-        except Access.DoesNotExist:
-            return None
-
-    def access_presence(self) -> None:
-        if self.cleaned_data['scheme_id']:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self.cleaned_data["scheme_id"]} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN
-
     def scheme_presence(self) -> None:
         if not self._scheme:
-            self.add_error('id', ObjectDoesNotExist('Scheme id='
-                                                    f'{self.cleaned_data["scheme_id"]} not found'))
+            self.add_error('scheme_id', ObjectDoesNotExist(
+                'Scheme id=' f'{self.cleaned_data["scheme_id"]} not found'))
             self.response_status = status.HTTP_404_NOT_FOUND

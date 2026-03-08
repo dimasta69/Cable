@@ -1,20 +1,22 @@
 from functools import lru_cache
 from django import forms
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 from rest_framework import status
 from typing import List
 
+from core_api.utils.access_checker import AccessChecker, scope_for_scheme
+from core_api.utils.scheme_access import ResourceAccessMixin
 from cabel.settings import REST_FRAMEWORK
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
-from models_app.models import (Scheme, Room, EquipmentTemplateType, Access, Equipment, Manufacturer, ServerRack, User,
+from models_app.models import (Scheme, Room, EquipmentTemplateType, Equipment, Manufacturer, ServerRack, User,
                                VlanDevice, Vlan, Segment)
 
 
-class EquipmentListService(ServiceWithResult):
+class EquipmentListService(ResourceAccessMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
@@ -28,6 +30,7 @@ class EquipmentListService(ServiceWithResult):
     filter_server_rack_id = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
+    access_required_roles = AccessChecker.ROLES_READ
     custom_validations = [
         'order_presence',
         'manufacturer_presence',
@@ -156,17 +159,8 @@ class EquipmentListService(ServiceWithResult):
         except EquipmentTemplateType.DoesNotExist:
             return None
 
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.filter(
-                user=self.cleaned_data['current_user'],
-                object_type=scheme_content_type,
-                object_id=self._scheme.id,
-            )
-        except Access.DoesNotExist:
-            return None
+    def get_access_scope(self):
+        return scope_for_scheme(self._scheme)
 
     def order_presence(self) -> None:
         if self.cleaned_data['order_by']:
@@ -216,13 +210,6 @@ class EquipmentListService(ServiceWithResult):
                                                              f'{self.cleaned_data["filter_type_id"]} '
                                                              f'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if self._scheme:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN
 
     def vlan_presence(self) -> None:
         if self.cleaned_data["filter_vlan_list_id"]:

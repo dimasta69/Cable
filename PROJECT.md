@@ -207,3 +207,17 @@ Cable — это Django REST API для кабельного журнала с �
 ## Правила подлкючения портов
 - Нельзя подключать порты с разной скоростью, видом передачи данных (одномодовый, многомодовый, ethernet кабель и тд.). Если у нас оборудование предусматривает подлкючение в нее sfp модулей, то так же проверка между ими.  
 
+## Авторизация
+
+1. **Единый слой проверки доступа** (`core_api.utils.access_checker`):
+   - **AccessChecker** — класс без состояния: по `user`, списку ролей (`Read` / `Change` / `Creator`) и «области» (scope: `scheme_id`, опционально `building_id`, `room_id`, `server_rack_id`) определяет, есть ли у пользователя доступ.
+   - Иерархия (схема → здание → комната → стойка) и обращение к модели `Access` инкапсулированы в одном месте. Добавление нового уровня иерархии делается один раз.
+
+2. **Строительство scope по объекту** — функции вида `scope_for_scheme(scheme)`, `scope_for_building(building)`, `scope_for_room(room)`, `scope_for_equipment(equipment)`, `scope_for_segment(segment)` возвращают словарь для `AccessChecker`. Это убирает дублирование цепочек `room.building.scheme.id` и т.п.
+
+3. **Миксины для сервисов** (`core_api.utils.scheme_access`):
+   - **ResourceAccessMixin** (или раздельно `SchemeAccessMixin`, `BuildingAccessMixin` при необходимости): сервис объявляет `access_required_roles` (например `['Change', 'Creator']` для изменений или `['Read', 'Change', 'Creator']` для чтения) и реализует один метод `get_access_scope(self) -> dict | None`. Если `None` — проверка не выполняется (например, объект не найден).
+   - Миксин добавляет `'access_presence'` в `custom_validations` и реализует `access_presence()`: вызывает `AccessChecker.has_permission(user, roles, scope)` и при отказе выставляет ошибку и 403.
+   - В каждом сервисе остаётся только: наследование миксина, объявление `access_required_roles` и реализация `get_access_scope()`. Код `_access` и дублирующая логика `access_presence` удаляются.
+
+4. **Исключения:** отдельные кейсы (например удаление схемы — только создатель или суперюзер) остаются в сервисе своей проверкой или вызовом отдельного метода `AccessChecker` с особыми правилами.

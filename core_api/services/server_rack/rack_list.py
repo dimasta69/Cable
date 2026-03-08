@@ -1,20 +1,20 @@
 from django import forms
 from functools import lru_cache
-
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import Q
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
-from rest_framework import status
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
+from rest_framework import status
 from typing import List
 
-from models_app.models import User, Access, Room, ServerRack, Scheme
+from core_api.utils.access_checker import AccessChecker, scope_for_room
+from core_api.utils.scheme_access import ResourceAccessMixin
+from models_app.models import User, Room, ServerRack
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from cabel.settings import REST_FRAMEWORK
 
 
-class ServerRackListService(ServiceWithResult):
+class ServerRackListService(ResourceAccessMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     filter_room_id = forms.IntegerField(required=True)
@@ -22,6 +22,7 @@ class ServerRackListService(ServiceWithResult):
     search_filter = forms.CharField(required=False)
     current_user = ModelField(User)
 
+    access_required_roles = AccessChecker.ROLES_READ
     custom_validations = ['room_presence', 'order_presence', 'access_presence']
 
     def process(self):
@@ -57,24 +58,17 @@ class ServerRackListService(ServiceWithResult):
         except ServerRack.DoesNotExist:
             return ServerRack.objects.none()
 
+    def get_access_scope(self):
+        return scope_for_room(self._room)
+
     @property
     @lru_cache()
     def _room(self) -> Room | None:
         try:
-            return Room.objects.get(id=self.cleaned_data['filter_room_id'])
-        except Room.DoesNotExist:
-            return None
-
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.get(
-                user=self.cleaned_data['current_user'],
-                object_type=scheme_content_type,
-                object_id=self._room.building.scheme.pk,
+            return Room.objects.select_related('building', 'building__scheme').get(
+                id=self.cleaned_data['filter_room_id']
             )
-        except Access.DoesNotExist:
+        except Room.DoesNotExist:
             return None
 
     def room_presence(self) -> None:
@@ -91,10 +85,3 @@ class ServerRackListService(ServiceWithResult):
                                                      '-free_power', 'free_units', '-free_units']:
                 self.add_error('order', ObjectDoesNotExist(f'Order {self.cleaned_data["order_by"]} is not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if self._room:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._room.building.scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

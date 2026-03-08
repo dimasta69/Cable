@@ -1,18 +1,16 @@
-from typing import List
-
 from django import forms
 from django.core.exceptions import ValidationError as DjangoValidationError
 from functools import lru_cache
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from rest_framework import status
 from rest_framework.exceptions import NotFound
 
+from core_api.utils.access_checker import AccessChecker, scope_for_equipment
+from core_api.utils.ip_mask import validate_ip_and_mask
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
-from core_api.utils.ip_mask import validate_ip_and_mask
-from models_app.models import User, Equipment, Port, VlanDevice, Scheme, Building, Room, ServerRack, Access
+from models_app.models import User, Equipment, Port, VlanDevice
 
 
 class UpdateVlanDeviceService(ServiceWithResult):
@@ -46,138 +44,33 @@ class UpdateVlanDeviceService(ServiceWithResult):
     @lru_cache()
     def _equipment(self) -> Equipment | None:
         try:
-            return Equipment.objects.get(id=self._vlan_device.device_id)
-        except Equipment.DoesNotExist:
+            return Equipment.objects.select_related(
+                'scheme', 'room', 'room__building'
+            ).prefetch_related(
+                'units__server_rack__room__building'
+            ).get(id=self._vlan_device.device_id)
+        except (Equipment.DoesNotExist, AttributeError):
             return None
 
     @property
     @lru_cache()
     def _port(self) -> Port | None:
         try:
-            return Port.objects.get(id=self._vlan_device.device_id)
-        except Port.DoesNotExist:
+            return Port.objects.select_related(
+                'equipment', 'equipment__scheme',
+                'equipment__room', 'equipment__room__building',
+            ).prefetch_related(
+                'equipment__units__server_rack__room__building',
+            ).get(id=self._vlan_device.device_id)
+        except (Port.DoesNotExist, AttributeError):
             return None
 
     @property
     @lru_cache()
     def _vlan_device(self) -> VlanDevice | None:
         try:
-            return VlanDevice.objects.get(id=self.cleaned_data['id'])
+            return VlanDevice.objects.select_related('device_type').get(id=self.cleaned_data['id'])
         except VlanDevice.DoesNotExist:
-            return None
-
-    @property
-    def _access_port(self) -> List[Access] | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        building_content_type = ContentType.objects.get_for_model(Building)
-        room_content_type = ContentType.objects.get_for_model(Room)
-        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-        equipment_content_type = ContentType.objects.get_for_model(Equipment)
-        try:
-            access_list = Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._port.equipment.scheme.id,
-                ) |
-                Q(
-                    object_type=equipment_content_type,
-                    object_id=self._port.equipment.id
-                )
-            )
-            if self._port.equipment.room:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._port.equipment.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._port.equipment.room.id
-                            ),
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-            if self._port.equipment.units:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._port.equipment.units.all()[0].server_rack.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._port.equipment.units.all()[0].server_rack.room.id
-                            ) |
-                            Q(
-                                object_type=server_rack_content_type,
-                                object_id=self._port.equipment.units.all()[0].server_rack.id
-                            )
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-        except Access.DoesNotExist:
-            return None
-
-    @property
-    def _access_equipment(self) -> List[Access] | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        building_content_type = ContentType.objects.get_for_model(Building)
-        room_content_type = ContentType.objects.get_for_model(Room)
-        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-        equipment_content_type = ContentType.objects.get_for_model(Equipment)
-        try:
-            access_list = Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._equipment.scheme.id,
-                ) |
-                Q(
-                    object_type=equipment_content_type,
-                    object_id=self._equipment.id
-                )
-            )
-            if self._equipment.room:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._equipment.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._equipment.room.id
-                            ),
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-            if self._equipment.units:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.room.id
-                            ) |
-                            Q(
-                                object_type=server_rack_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.id
-                            )
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-        except Access.DoesNotExist:
             return None
 
     def ip_mask_match(self) -> None:
@@ -193,54 +86,46 @@ class UpdateVlanDeviceService(ServiceWithResult):
 
     def equipment_presence(self) -> None:
         equipment_content_type = ContentType.objects.get_for_model(Equipment)
-        if self._vlan_device.device_type == equipment_content_type and not self._equipment:
+        if (self._vlan_device and self._vlan_device.device_type_id == equipment_content_type.id
+                and not self._equipment):
             self.add_error(
                 'device_id',
-                NotFound(
-                    f"Device id={self.cleaned_data['device_id']} not found"
-                )
+                NotFound(f"Device id={self.cleaned_data.get('device_id', '')} not found")
             )
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def port_presence(self) -> None:
         port_content_type = ContentType.objects.get_for_model(Port)
-        if self._vlan_device.device_type == port_content_type and not self._port:
+        if (self._vlan_device and self._vlan_device.device_type_id == port_content_type.id
+                and not self._port):
             self.add_error(
                 'device_id',
-                NotFound(
-                    f"Device id={self.cleaned_data['device_id']} not found"
-                )
+                NotFound(f"Device id={self.cleaned_data.get('device_id', '')} not found")
             )
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def vlan_device_presence(self) -> None:
-        if self.cleaned_data['id'] == 'port' and not self._vlan_device:
+        if self.cleaned_data.get('id') and not self._vlan_device:
             self.add_error(
-                'vlan_id',
-                NotFound(
-                    f"Vlan id={self.cleaned_data['vlan_id']} not found"
-                )
+                'id',
+                NotFound(f"Vlan device id={self.cleaned_data['id']} not found")
             )
             self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_port_presence(self) -> None:
         port_content_type = ContentType.objects.get_for_model(Port)
         equipment_content_type = ContentType.objects.get_for_model(Equipment)
-        if self._vlan_device.device_type == port_content_type and self._port and not self._access_port:
-            self.add_error(
-                "device_id",
-                PermissionError(
-                    f"Access with port id={self._port.id} not found"
-                )
-            )
-            self.response_status = status.HTTP_403_FORBIDDEN
+        user = self.cleaned_data['current_user']
 
-        if (self._vlan_device.device_type == equipment_content_type and self._equipment
-                and not self._access_equipment):
-            self.add_error(
-                "device_id",
-                PermissionError(
-                    f"Access with equipment id={self._equipment.id} not found"
-                )
-            )
-            self.response_status = status.HTTP_403_FORBIDDEN
+        if self._vlan_device and self._vlan_device.device_type_id == port_content_type.id and self._port:
+            scope = scope_for_equipment(self._port.equipment)
+            if not AccessChecker.has_permission(user, AccessChecker.ROLES_CHANGE, scope):
+                self.add_error("device_id", PermissionError(f"Access with port id={self._port.id} not found"))
+                self.response_status = status.HTTP_403_FORBIDDEN
+                return
+
+        if self._vlan_device and self._vlan_device.device_type_id == equipment_content_type.id and self._equipment:
+            scope = scope_for_equipment(self._equipment)
+            if not AccessChecker.has_permission(user, AccessChecker.ROLES_CHANGE, scope):
+                self.add_error("device_id", PermissionError(f"Access with equipment id={self._equipment.id} not found"))
+                self.response_status = status.HTTP_403_FORBIDDEN

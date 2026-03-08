@@ -7,19 +7,19 @@ from django.db.models import Q
 from rest_framework import status
 from typing import List
 
-from rest_framework.exceptions import PermissionDenied
-
+from core_api.utils.access_checker import AccessChecker, scope_for_scheme
+from core_api.utils.scheme_access import ResourceAccessMixin
 from cabel.settings import REST_FRAMEWORK
 from utils.errors import NotFound
 from utils.fields import ListIntegerField, ModelField
 from utils.services import ServiceWithResult
 from models_app.models import (
-    Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, Access, User, Vlan,
+    Scheme, Room, EquipmentTemplateType, EquipmentScheme, Equipment, Manufacturer, ServerRack, User, Vlan,
     Segment, VlanDevice
 )
 
 
-class EquipmentsFromMapListService(ServiceWithResult):
+class EquipmentsFromMapListService(ResourceAccessMixin, ServiceWithResult):
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
     order_by = forms.CharField(required=False)
@@ -34,6 +34,7 @@ class EquipmentsFromMapListService(ServiceWithResult):
     map_id = forms.IntegerField(required=False)
     current_user = ModelField(User)
 
+    access_required_roles = AccessChecker.ROLES_READ
     custom_validations = [
         'order_presence',
         'manufacturer_presence',
@@ -160,21 +161,11 @@ class EquipmentsFromMapListService(ServiceWithResult):
         except EquipmentTemplateType.DoesNotExist:
             return None
 
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.filter(
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator'],
-                object_type=scheme_content_type,
-                object_id=self._scheme.id,
-            )
-        except Access.DoesNotExist:
-            return None
+    def get_access_scope(self):
+        return scope_for_scheme(self._scheme)
 
     @property
-    @lru_cache
+    @lru_cache()
     def _segment(self) -> Segment | None:
         try:
             return Segment.objects.get(id=self.cleaned_data["filter_scheme_id"])
@@ -231,13 +222,6 @@ class EquipmentsFromMapListService(ServiceWithResult):
                                                              f'{self.cleaned_data["filter_type_id"]} '
                                                              f'not found'))
             self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if self._scheme:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN
 
     def segment_presence(self) -> None:
         if self.cleaned_data['filter_segment_id'] and not self._segment:

@@ -1,17 +1,17 @@
 from django import forms
 from functools import lru_cache
-from django.db.models import Q
 
-from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
 
-from models_app.models import User, Access, Scheme, ServerRack, Room, Building
+from core_api.utils.access_checker import scope_for_room
+from core_api.utils.scheme_access import ResourceAccessMixin
+from models_app.models import User, ServerRack, Room
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-class CreateServerRackService(ServiceWithResult):
+class CreateServerRackService(ResourceAccessMixin, ServiceWithResult):
     number_of_units = forms.IntegerField(required=True)
     room_id = forms.IntegerField(required=True)
     title = forms.CharField(required=False)
@@ -37,6 +37,9 @@ class CreateServerRackService(ServiceWithResult):
         )
         return server_rack
 
+    def get_access_scope(self):
+        return scope_for_room(self._room)
+
     @property
     @lru_cache()
     def _room(self) -> Room | None:
@@ -46,32 +49,6 @@ class CreateServerRackService(ServiceWithResult):
                 "building__scheme",
             ).get(id=self.cleaned_data['room_id'])
         except Room.DoesNotExist:
-            return None
-
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        building_content_type = ContentType.objects.get_for_model(Building)
-        room_content_type = ContentType.objects.get_for_model(Room)
-        try:
-            return (Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._room.building.scheme.id,
-                )|
-                Q(
-                    object_type=building_content_type,
-                    object_id=self._room.building.id,
-                )|
-                Q(
-                    object_type=room_content_type,
-                    object_id=self._room.id,
-                ),
-            ).filter(
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator'],
-            ))
-        except Access.DoesNotExist:
             return None
 
     def room_presence(self) -> None:
@@ -88,10 +65,3 @@ class CreateServerRackService(ServiceWithResult):
                                                              f'{self.cleaned_data["room_id"]} '
                                                              'is not server'))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
-
-    def access_presence(self) -> None:
-        if self._room:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._room.building.scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

@@ -1,20 +1,18 @@
 from functools import lru_cache
-from typing import List
 
 from django import forms
-from django.db.models import Q
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import status
-from rest_framework.exceptions import PermissionDenied
 
+from core_api.utils.access_checker import scope_for_equipment
 from core_api.utils.connection import delete_port_from_connection
+from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Equipment, Unit, Port, Scheme, Building, Room, ServerRack, Access, User
+from models_app.models import Equipment, Unit, Port, User
 
 
-class ReleaseEquipmentService(ServiceWithResult):
+class ReleaseEquipmentService(ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
@@ -43,11 +41,16 @@ class ReleaseEquipmentService(ServiceWithResult):
         equipment.save()
         return equipment
 
+    def get_access_scope(self):
+        return scope_for_equipment(self._equipment)
+
     @property
     @lru_cache()
-    def _units(self) -> Unit | None:
+    def _units(self):
         try:
-            return Unit.objects.filter(equipment=self._equipment)
+            return Unit.objects.filter(equipment=self._equipment).select_related(
+                'server_rack', 'server_rack__room', 'server_rack__room__building'
+            )
         except Unit.DoesNotExist:
             return Unit.objects.none()
 
@@ -56,71 +59,15 @@ class ReleaseEquipmentService(ServiceWithResult):
     def _equipment(self) -> Equipment | None:
         try:
             return Equipment.objects.select_related(
-                "scheme",
-            ).get(id=self.cleaned_data['id'])
-        except Equipment.DoesNotExist:
-            return None
-
-    def _access(self, port_id: int) -> List[Access] | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        building_content_type = ContentType.objects.get_for_model(Building)
-        room_content_type = ContentType.objects.get_for_model(Room)
-        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-
-        try:
-            access_list = Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._equipment.scheme.id,
-                )
+                "scheme", "room", "room__building"
+            ).prefetch_related("units__server_rack__room__building").get(
+                id=self.cleaned_data['id']
             )
-            if self._equipment.room:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._equipment.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._equipment.room.id
-                            ),
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-            if self._equipment.units:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.room.id
-                            ),
-                            Q(
-                                object_type=server_rack_content_type,
-                                object_id=self._equipment.units.all()[0].server_rack.id
-                            ),
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-        except Access.DoesNotExist:
+        except Equipment.DoesNotExist:
             return None
 
     def equipment_presence(self) -> None:
         if not self._equipment:
-            self.add_error('id', ObjectDoesNotExist(f"Equipment id ={self.cleaned_data['id']} not found"))
+            self.add_error('id', ObjectDoesNotExist(
+                f"Equipment id ={self.cleaned_data['id']} not found"))
             self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if self._equipment:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schema id = '
-                                                                f'{self._equipment.scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

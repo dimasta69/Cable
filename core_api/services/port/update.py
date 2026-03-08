@@ -1,29 +1,36 @@
 from django import forms
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.validators import RegexValidator
 from rest_framework import status
 from functools import lru_cache
 from typing import List
-from django.db.models import Q
 
+from core_api.utils.access_checker import scope_for_equipment
+from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
 from core_api.utils.change_mode_port import change_mode_port
-from models_app.models import Port, User, LineType, PortMode, Access, Scheme, Building, Room, Equipment, ServerRack
+from models_app.models import Port, User, LineType, PortMode
 
-class UpdatePortService(ServiceWithResult):
+
+class UpdatePortService(ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     line_type_id = ListIntegerField(required=False)
     mode_id = forms.IntegerField(required=False)
-    mac = forms.CharField(max_length=17, validators=[RegexValidator(
-        regex=r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$',
-        message='Введите корректный MAC-адрес.',
-        code='invalid_mac_address'
-    )], required=False)
-
-    custom_validations = ['port_presence', 'line_type_presence', 'port_mode_presence', 'access_port_presence']
+    mac = forms.CharField(
+        max_length=17,
+        validators=[
+            RegexValidator(
+                regex=r'^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$',
+                message='Введите корректный MAC-адрес.',
+                code='invalid_mac_address'
+            )
+        ],
+        required=False
+    )
     current_user = ModelField(User)
+
+    custom_validations = ['port_presence', 'line_type_presence', 'port_mode_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -35,21 +42,33 @@ class UpdatePortService(ServiceWithResult):
     @property
     def _update_port(self) -> Port:
         port = self._port
-        if self.cleaned_data['line_type_id']:
+        if self.cleaned_data.get('line_type_id'):
             port.line_type = self._line_type
-        if self.cleaned_data['mode_id']:
+        if self.cleaned_data.get('mode_id'):
             change_mode_port(port.pk)
             port.mode = self._mode
-        if self.cleaned_data['mac']:
+        if self.cleaned_data.get('mac'):
             port.mac = self.cleaned_data['mac']
         port.save()
         return port
+
+    def get_access_scope(self):
+        if self._port and getattr(self._port, 'equipment', None):
+            return scope_for_equipment(self._port.equipment)
+        return None
 
     @property
     @lru_cache()
     def _port(self) -> Port | None:
         try:
-            return Port.objects.get(id=self.cleaned_data['id'])
+            return Port.objects.select_related(
+                'equipment',
+                'equipment__scheme',
+                'equipment__room',
+                'equipment__room__building',
+            ).prefetch_related(
+                'equipment__units__server_rack__room__building',
+            ).get(id=self.cleaned_data['id'])
         except Port.DoesNotExist:
             return None
 
@@ -57,7 +76,7 @@ class UpdatePortService(ServiceWithResult):
     @lru_cache()
     def _line_type(self) -> List[LineType]:
         try:
-            return LineType.objects.filter(id__in=self.cleaned_data['line_type_id'])
+            return LineType.objects.filter(id__in=self.cleaned_data.get('line_type_id') or [])
         except LineType.DoesNotExist:
             return LineType.objects.none()
 
@@ -69,66 +88,8 @@ class UpdatePortService(ServiceWithResult):
         except PortMode.DoesNotExist:
             return None
 
-    @property
-    def _access_port(self) -> List[Access] | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        building_content_type = ContentType.objects.get_for_model(Building)
-        room_content_type = ContentType.objects.get_for_model(Room)
-        equipment_content_type = ContentType.objects.get_for_model(Equipment)
-        server_rack_content_type = ContentType.objects.get_for_model(ServerRack)
-        try:
-            access_list = Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._port.equipment.scheme.id,
-                ) |
-                Q(
-                    object_type=equipment_content_type,
-                    object_id=self._port.equipment.id
-                ),
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator'],
-            )
-            if self._port.equipment.room:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._port.equipment.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._port.equipment.room.id
-                            ),
-                            user=self.cleaned_data['current_user'],
-                            role__in=['Change', 'Creator'],
-                        ) | access_list
-
-                )
-            if self._port.equipment.units:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._port.equipment.units.all()[0].server_rack.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._port.equipment.units.all()[0].server_rack.room.id
-                            ),
-                            Q(
-                                object_type=server_rack_content_type,
-                                object_id=self._port.equipment.units.all()[0].server_rack.id
-                            ),
-                            user=self.cleaned_data['current_user'],
-                            role__in=['Change', 'Creator'],
-                        ) | access_list
-                )
-        except Access.DoesNotExist:
-            return None
-
     def port_mode_presence(self) -> None:
-        if self.cleaned_data['mode_id'] and not self._mode:
+        if self.cleaned_data.get('mode_id') and not self._mode:
             self.add_error(
                 'mode_id',
                 ObjectDoesNotExist(
@@ -137,27 +98,16 @@ class UpdatePortService(ServiceWithResult):
             )
 
     def line_type_presence(self) -> None:
-        if self.cleaned_data['line_type_id']:
+        if self.cleaned_data.get('line_type_id'):
             if len(self._line_type) != len(self.cleaned_data['line_type_id']):
                 self.add_error(
                     'line_type_id',
-                    ObjectDoesNotExist(
-                        "Line type ids not found"
-                    )
+                    ObjectDoesNotExist("Line type ids not found")
                 )
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def port_presence(self) -> None:
         if not self._port:
-            self.add_error('id', ObjectDoesNotExist(f"Port id ={self.cleaned_data['id']} not found"))
+            self.add_error('id', ObjectDoesNotExist(
+                f"Port id ={self.cleaned_data['id']} not found"))
             self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_port_presence(self) -> None:
-        if not self._access_port and not self.cleaned_data['current_user'].is_superuser:
-            self.add_error(
-                "front_port_list",
-                PermissionError(
-                    f"Access with port id={self._port.id} not found"
-                )
-            )
-            self.response_status = status.HTTP_403_FORBIDDEN

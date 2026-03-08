@@ -1,22 +1,22 @@
 from django import forms
-from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from functools import lru_cache
 from rest_framework import status
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound
 
+from core_api.utils.access_checker import scope_for_segment
+from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.services import ServiceWithResult
 from utils.fields import ModelField
-from models_app.models import Vlan, User, Segment, Access, Scheme
+from models_app.models import Vlan, User, Segment
 
 
-class CreateVlanService(ServiceWithResult):
+class CreateVlanService(ResourceAccessMixin, ServiceWithResult):
     name = forms.CharField(required=True)
     id_name = forms.CharField(required=True)
     segment_id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
-    custom_validations = ['segment_presence', 'access_presence', ]
+    custom_validations = ['segment_presence', 'access_presence']
 
     def process(self):
         self.run_custom_validations()
@@ -32,33 +32,15 @@ class CreateVlanService(ServiceWithResult):
             segment=self._segment,
         )
 
+    def get_access_scope(self):
+        return scope_for_segment(self._segment)
+
     @property
     @lru_cache()
     def _segment(self) -> Segment | None:
         try:
-            return Segment.objects.get(id=self.cleaned_data["segment_id"])
+            return Segment.objects.select_related('scheme').get(id=self.cleaned_data["segment_id"])
         except Segment.DoesNotExist:
-            return None
-
-    @property
-    def _access(self) -> Access | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        segment_content_type = ContentType.objects.get_for_model(Segment)
-        try:
-            return Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._segment.scheme.pk,
-                ) |
-                Q(
-                    object_type=segment_content_type,
-                    object_id=self._segment.pk,
-                )
-            ).filter(
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator']
-            )
-        except Access.DoesNotExist:
             return None
 
     def segment_presence(self) -> None:
@@ -70,10 +52,3 @@ class CreateVlanService(ServiceWithResult):
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if not self._access:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schem id = '
-                                                                f'{self._segment.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN

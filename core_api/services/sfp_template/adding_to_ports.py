@@ -2,15 +2,13 @@ from django import forms
 from functools import lru_cache
 from typing import List
 
-from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db.models import Q
 from rest_framework import status
 
-from utils.fields import ModelField
+from core_api.utils.access_checker import AccessChecker, scope_for_equipment
+from utils.fields import ModelField, ListIntegerField
 from utils.services import ServiceWithResult
-from utils.fields import ListIntegerField
-from models_app.models import Port, SfpTemplate, User, Access, Scheme, Building, Room, Equipment
+from models_app.models import Port, SfpTemplate, User
 
 
 class AddToPortSfpService(ServiceWithResult):
@@ -33,13 +31,12 @@ class AddToPortSfpService(ServiceWithResult):
     def _add_sfp(self) -> List[Port]:
         for port in self._port_list:
             port.sfp = self._sfp_template
-
         Port.objects.bulk_update(self._port_list, ['sfp'])
         return self._port_list
 
     @property
     @lru_cache()
-    def _port_list(self) -> List[Port]:
+    def _port_list(self):
         try:
             return Port.objects.filter(
                 id__in=self.cleaned_data["port_list"],
@@ -48,9 +45,11 @@ class AddToPortSfpService(ServiceWithResult):
                 port_template__modular=True,
             ).select_related(
                 "equipment",
+                "equipment__scheme",
                 "equipment__template__manufacturer",
                 "equipment__template__type",
                 "equipment__room",
+                "equipment__room__building",
             ).prefetch_related(
                 "equipment__units",
                 "equipment__units__server_rack",
@@ -59,57 +58,6 @@ class AddToPortSfpService(ServiceWithResult):
             )
         except Port.DoesNotExist:
             return Port.objects.none()
-
-    def _access_port(self, port_id: int) -> List[Access] | None:
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        building_content_type = ContentType.objects.get_for_model(Building)
-        room_content_type = ContentType.objects.get_for_model(Room)
-        equipment_content_type = ContentType.objects.get_for_model(Equipment)
-        try:
-            access_list = Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._port_list[port_id].equipment.scheme.id,
-                ) |
-                Q(
-                    object_type=equipment_content_type,
-                    object_id=self._port_list[port_id].equipment.id
-                )
-            )
-            if self._port_list[port_id].equipment.room:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._port_list[port_id].equipment.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._port_list[port_id].equipment.room.id
-                            ),
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-            if self._port_list[port_id].equipment.units:
-                return (
-                        Access.objects.filter(
-                            Q(
-                                object_type=building_content_type,
-                                object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.room.building.id
-                            ) |
-                            Q(
-                                object_type=room_content_type,
-                                object_id=self._port_list[port_id].equipment.units.all()[0].server_rack.room.id
-                            ),
-                        ) | access_list
-                ).filter(
-                    user=self.cleaned_data['current_user'],
-                    role__in=['Change', 'Creator'],
-                )
-        except Access.DoesNotExist:
-            return None
 
     @property
     @lru_cache()
@@ -120,10 +68,10 @@ class AddToPortSfpService(ServiceWithResult):
             return None
 
     def sfp_template_presence(self) -> None:
-        if self.cleaned_data['id']:
-            if not self._port_list:
-                self.add_error('id', ObjectDoesNotExist('Sfp template id='
-                                                        f'{self.cleaned_data["id"]} not found'))
+        if self.cleaned_data.get('id'):
+            if not self._sfp_template:
+                self.add_error('id', ObjectDoesNotExist(
+                    f'Sfp template id={self.cleaned_data["id"]} not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def check_ports(self) -> None:
@@ -149,28 +97,28 @@ class AddToPortSfpService(ServiceWithResult):
                         )
                     )
 
-    def line_type_control(self):
+    def line_type_control(self) -> None:
         line_types = {
-            item["port_template__line_type"] for item in self._port_list.values("port_template__line_type")
+            item["port_template__line_type"]
+            for item in self._port_list.values("port_template__line_type")
         }
-
         if not set(line_types) & set(self._sfp_template.line_type.values_list("id", flat=True)):
             self.add_error(
                 "id",
-                ValidationError(
-                    "The given ports do not correspond to sfp in line_type",
-                )
+                ValidationError("The given ports do not correspond to sfp in line_type"),
             )
             self.response_status = status.HTTP_400_BAD_REQUEST
 
     def access_port_presence(self) -> None:
-        if self._port_list:
-            ports = list(map(self._access_port,  range(len(self._port_list))))
-            if any(port is None for port in ports):
+        if not self._port_list:
+            return
+        user = self.cleaned_data['current_user']
+        for port in self._port_list:
+            scope = scope_for_equipment(port.equipment)
+            if not AccessChecker.has_permission(user, AccessChecker.ROLES_CHANGE, scope):
                 self.add_error(
-                    "front_port_list",
-                    PermissionError(
-                        f"Access with port id={self._ports[0].id} not found"
-                    )
+                    "port_list",
+                    PermissionError(f"Access with port id={port.id} not found"),
                 )
                 self.response_status = status.HTTP_403_FORBIDDEN
+                return

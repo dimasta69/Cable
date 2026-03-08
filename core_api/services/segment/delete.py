@@ -1,16 +1,16 @@
-from django.db.models import Q
 from django import forms
+from rest_framework import status
+from rest_framework.exceptions import NotFound
 from functools import lru_cache
 
-from django.contrib.contenttypes.models import ContentType
-from rest_framework import status
-from rest_framework.exceptions import PermissionDenied, NotFound
-
+from core_api.utils.access_checker import scope_for_segment
+from core_api.utils.scheme_access import ResourceAccessMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
-from models_app.models import Access, User, Segment, Scheme
+from models_app.models import Segment, User
 
-class DeleteSegmentService(ServiceWithResult):
+
+class DeleteSegmentService(ResourceAccessMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     current_user = ModelField(User)
 
@@ -23,28 +23,15 @@ class DeleteSegmentService(ServiceWithResult):
             self.response_status = status.HTTP_204_NO_CONTENT
         return self
 
+    def get_access_scope(self):
+        return scope_for_segment(self._segment)
+
     @property
     @lru_cache()
     def _segment(self) -> Segment | None:
         try:
             return Segment.objects.select_related("scheme").get(id=self.cleaned_data['id'])
         except Segment.DoesNotExist:
-            return None
-
-    @property
-    def _access(self):
-        scheme_content_type = ContentType.objects.get_for_model(Scheme)
-        try:
-            return Access.objects.filter(
-                Q(
-                    object_type=scheme_content_type,
-                    object_id=self._segment.scheme.pk,
-                ),
-            ).filter(
-                user=self.cleaned_data['current_user'],
-                role__in=['Change', 'Creator']
-            )
-        except Access.DoesNotExist:
             return None
 
     def segment_presence(self) -> None:
@@ -56,10 +43,3 @@ class DeleteSegmentService(ServiceWithResult):
                 )
             )
             self.response_status = status.HTTP_404_NOT_FOUND
-
-    def access_presence(self) -> None:
-        if self._segment:
-            if not self._access and not self.cleaned_data['current_user'].is_superuser:
-                self.add_error('current_user', PermissionDenied('Access to the schem id = '
-                                                                f'{self._segment.scheme.id} is not granted'))
-                self.response_status = status.HTTP_403_FORBIDDEN
