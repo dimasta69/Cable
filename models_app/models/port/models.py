@@ -3,7 +3,6 @@ from django.db import models
 from models_app.models.base_model import BaseModel
 from django.db.models.signals import post_save, pre_delete, post_delete
 from django.dispatch import receiver
-from core_api.utils.connection import delete_port_from_connection
 
 
 class Port(BaseModel):
@@ -63,6 +62,7 @@ def check_count_ports_from_template(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=Port)
 def delete_connection(sender, instance, **kwargs):
     if instance.line:
+        from core_api.utils.connection import delete_port_from_connection
         delete_port_from_connection(instance)
 
 
