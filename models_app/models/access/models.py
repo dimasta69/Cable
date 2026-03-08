@@ -23,6 +23,8 @@ class Access(BaseModel):
         ('Change', 'Изменение'),
         ('Creator', 'Создатель'),
     ]
+    ROLE_VALUES = [choice[0] for choice in ROLE_CHOICES]
+    ASSIGNABLE_ROLE_VALUES = [choice[0] for choice in ROLE_CHOICES if choice[0] != 'Creator']
     role = models.CharField(choices=ROLE_CHOICES, null=False, blank=False, max_length=255)
 
     class Meta:

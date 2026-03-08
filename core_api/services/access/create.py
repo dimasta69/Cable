@@ -1,10 +1,11 @@
 from django import forms
 from functools import lru_cache
 
-from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.core.exceptions import PermissionDenied
 from rest_framework import status
 from django.contrib.contenttypes.models import ContentType
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import Scheme, Building, Room, ServerRack, SchemeMap, Vlan, Segment, Equipment
@@ -12,7 +13,7 @@ from models_app.models import User
 from models_app.models import Access
 
 
-class CreateAccessService(ServiceWithResult):
+class CreateAccessService(PresenceChecksMixin, ServiceWithResult):
     scheme_id = forms.IntegerField(required=True)
     user_id = forms.IntegerField(required=True)
     building_id = forms.IntegerField(required=False)
@@ -26,17 +27,20 @@ class CreateAccessService(ServiceWithResult):
     current_user = ModelField(User)
 
     custom_validations = [
-        'scheme_presence',
+        'run_presence_checks',
         'role_presence',
-        'user_presence',
         'access_owner_or_superuser',
-        'building_presence',
-        'room_presence',
-        'server_rack_presence',
-        'map_presence',
-        'equipment_presence',
-        'vlan_presence',
-        'segment_presence',
+    ]
+    presence_checks = [
+        ("_scheme", "scheme_id", "Scheme"),
+        ("_user", "user_id", "User"),
+        ("_building", "building_id", "Building", True),
+        ("_room", "room_id", "Room", True),
+        ("_server_rack", "server_rack_id", "Server rack", True),
+        ("_map", "map_id", "Map", True),
+        ("_equipment", "equipment_id", "Equipment", True),
+        ("_vlan", "vlan_id", "Vlan", True),
+        ("_segment", "segment_id", "Segment", True),
     ]
 
     def process(self):
@@ -148,77 +152,9 @@ class CreateAccessService(ServiceWithResult):
         except SchemeMap.DoesNotExist:
             return None
 
-    def scheme_presence(self) -> None:
-        if not self._scheme:
-            self.add_error('scheme_id', ObjectDoesNotExist('Scheme id='
-                                                                  f'{self.cleaned_data["scheme_id"]} '
-                                                                  'not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
-    def equipment_presence(self) -> None:
-        if self.cleaned_data['equipment_id']:
-            if not self._equipment:
-                self.add_error('equipment_id', ObjectDoesNotExist('Equipment id='
-                                                                      f'{self.cleaned_data["equipment_id"]} '
-                                                                      'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def vlan_presence(self) -> None:
-        if self.cleaned_data['vlan_id']:
-            if not self._vlan:
-                self.add_error('vlan_id', ObjectDoesNotExist('Vlan id='
-                                                                      f'{self.cleaned_data["vlan_id"]} '
-                                                                      'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def segment_presence(self) -> None:
-        if self.cleaned_data['segment_id']:
-            if not self._segment:
-                self.add_error('segment_id', ObjectDoesNotExist('Segment id='
-                                                                      f'{self.cleaned_data["segment_id"]} '
-                                                                      'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def building_presence(self) -> None:
-        if self.cleaned_data['building_id']:
-            if not self._building:
-                self.add_error('building_id', ObjectDoesNotExist('Building id='
-                                                                        f'{self.cleaned_data["building_id"]} '
-                                                                        'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def room_presence(self) -> None:
-        if self.cleaned_data['room_id']:
-            if not self._room:
-                self.add_error('room_id', ObjectDoesNotExist('Room id='
-                                                                    f'{self.cleaned_data["room_id"]} '
-                                                                    'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def server_rack_presence(self) -> None:
-        if self.cleaned_data['server_rack_id']:
-            if not self._server_rack:
-                self.add_error('server_rack_id', ObjectDoesNotExist('Server rack id='
-                                                                           f'{self.cleaned_data["server_rack_id"]} '
-                                                                           'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def map_presence(self) -> None:
-        if self.cleaned_data['map_id']:
-            if not self._map:
-                self.add_error('map_id', ObjectDoesNotExist('Map id='
-                                                                   f'{self.cleaned_data["map_id"]} '
-                                                                   'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def user_presence(self) -> None:
-        if not self._user:
-            self.add_error('user_id', ObjectDoesNotExist(f'User id={self.cleaned_data["user_id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
     def role_presence(self) -> None:
         if self.cleaned_data['role']:
-            if not self.cleaned_data.get('role') in ['Change', 'Read']:
+            if self.cleaned_data.get('role') not in Access.ASSIGNABLE_ROLE_VALUES:
                 self.add_error('filter_role', ObjectDoesNotExist(f"Field in model with "
                                                                  f"{self.cleaned_data['role']} not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND

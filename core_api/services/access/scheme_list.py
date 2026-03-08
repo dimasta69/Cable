@@ -7,12 +7,13 @@ from rest_framework import status
 from typing import List
 from cabel.settings import REST_FRAMEWORK
 
+from core_api.utils.presence import PresenceChecksMixin
 from models_app.models import Access, User, Scheme
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 
 
-class AccessListService(ServiceWithResult):
+class AccessListService(PresenceChecksMixin, ServiceWithResult):
     current_user = ModelField(User)
     page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
@@ -21,7 +22,11 @@ class AccessListService(ServiceWithResult):
     filter_role = forms.CharField(required=False)
     search_filter = forms.CharField(required=False)
 
-    custom_validations = ['scheme_presence', 'access_owner_or_superuser', 'filter_role_presence', 'user_presence']
+    custom_validations = ['run_presence_checks', 'access_owner_or_superuser', 'filter_role_presence']
+    presence_checks = [
+        ("_scheme", "filter_scheme_id", "Scheme"),
+        ("_user", "filter_user_id", "User", True),
+    ]
 
     def process(self):
         self.run_custom_validations()
@@ -46,8 +51,8 @@ class AccessListService(ServiceWithResult):
             else self._access.exclude(user=self.cleaned_data['current_user'])
         if self.cleaned_data['filter_role']:
             access_list = access_list.filter(role=self.cleaned_data['filter_role'])
-        if self.cleaned_data["filter_user_id"]:
-            access_list = access_list.filter(user__in=self.user)
+        if self.cleaned_data["filter_user_id"] and self._user:
+            access_list = access_list.filter(user=self._user)
         if self.cleaned_data['search_filter']:
             access_list = access_list.filter(
                 Q(user__username__icontains=self.cleaned_data['search_filter']) |
@@ -65,11 +70,10 @@ class AccessListService(ServiceWithResult):
 
     @property
     @lru_cache()
-    def user(self) -> User | None:
-        try:
-            return User.objects.filter(id=self.cleaned_data['filter_user_id'])
-        except User.DoesNotExist:
+    def _user(self) -> User | None:
+        if not self.cleaned_data.get('filter_user_id'):
             return None
+        return User.objects.filter(id=self.cleaned_data['filter_user_id']).first()
 
     @property
     @lru_cache()
@@ -79,27 +83,11 @@ class AccessListService(ServiceWithResult):
         except Scheme.DoesNotExist:
             return None
 
-    def user_presence(self) -> None:
-        if self.cleaned_data['filter_user_id']:
-            if not self.user:
-                self.add_error('filter_user_id', ObjectDoesNotExist('User id='
-                                                                    f'{self.cleaned_data["filter_user_id"]} '
-                                                                    'not found'))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
     def filter_role_presence(self) -> None:
         if self.cleaned_data['filter_role']:
-            if not self.cleaned_data.get('filter_role') in ['Change', 'Creator', 'Read']:
+            if self.cleaned_data.get('filter_role') not in Access.ROLE_VALUES:
                 self.add_error('filter_role', ObjectDoesNotExist(f"Field in model with "
                                                                  f"{self.cleaned_data['filter_role']} not found"))
-                self.response_status = status.HTTP_404_NOT_FOUND
-
-    def scheme_presence(self) -> None:
-        if self.cleaned_data['filter_scheme_id']:
-            if not self._scheme:
-                self.add_error('filter_scheme_id', ObjectDoesNotExist('Scheme id='
-                                                                      f'{self.cleaned_data["filter_scheme_id"]} '
-                                                                      'not found'))
                 self.response_status = status.HTTP_404_NOT_FOUND
 
     def access_owner_or_superuser(self) -> None:

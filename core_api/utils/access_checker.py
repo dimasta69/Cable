@@ -21,8 +21,8 @@ class AccessChecker:
     Суперпользователь всегда имеет доступ.
     """
 
-    ROLES_READ = ['Read', 'Change', 'Creator']
-    ROLES_CHANGE = ['Change', 'Creator']
+    ROLES_READ = Access.ROLE_VALUES
+    ROLES_CHANGE = [r for r in Access.ROLE_VALUES if r != 'Read']
 
     @classmethod
     def has_permission(cls, user, required_roles, scope):

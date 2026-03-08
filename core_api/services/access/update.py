@@ -4,19 +4,24 @@ from functools import lru_cache
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from rest_framework import status
 
+from core_api.utils.presence import PresenceChecksMixin
 from utils.fields import ModelField
 from utils.services import ServiceWithResult
 from models_app.models import User, Access, Scheme
 
 
-class UpdateAccessService(ServiceWithResult):
+class UpdateAccessService(PresenceChecksMixin, ServiceWithResult):
     id = forms.IntegerField(required=True)
     scheme_id = forms.IntegerField(required=True)
     role = forms.CharField(required=True)
     current_user = ModelField(User)
 
     custom_validations = [
-        'access_creator', 'access_presence', 'role_presence', 'scheme_presence', 'access_owner_or_superuser',
+        'access_creator', 'run_presence_checks', 'role_presence', 'access_owner_or_superuser',
+    ]
+    presence_checks = [
+        ("_access", "id", "Access"),
+        ("scheme", "scheme_id", "Scheme"),
     ]
 
     def process(self):
@@ -56,11 +61,6 @@ class UpdateAccessService(ServiceWithResult):
                 self.add_error('id', PermissionDenied("You can't delete the creator"))
                 self.response_status = status.HTTP_422_UNPROCESSABLE_ENTITY
 
-    def access_presence(self) -> None:
-        if not self._access:
-            self.add_error('id', ObjectDoesNotExist(f'Access id={self.cleaned_data["id"]} not found'))
-            self.response_status = status.HTTP_404_NOT_FOUND
-
     def access_owner_or_superuser(self) -> None:
         if self._access and self.scheme:
             if (self.scheme.creator != self.cleaned_data['current_user']
@@ -71,14 +71,7 @@ class UpdateAccessService(ServiceWithResult):
 
     def role_presence(self) -> None:
         if self.cleaned_data['role']:
-            if not self.cleaned_data.get('role') in ['Change', 'Read']:
-                self.add_error('filter_role', ObjectDoesNotExist(f"Field in model with "
-                                                                 f"{self.cleaned_data['role']} not found"))
+            if self.cleaned_data.get('role') not in Access.ASSIGNABLE_ROLE_VALUES:
+                self.add_error('filter_role', ObjectDoesNotExist(
+                    f"Field in model with {self.cleaned_data['role']} not found"))
                 self.response_status = status.HTTP_404_NOT_FOUND
-
-    def scheme_presence(self) -> None:
-        if not self.scheme:
-            self.add_error("scheme_id", ObjectDoesNotExist(
-                f"Scheme id = {self.cleaned_data['scheme_id']} not found"
-            ))
-            self.response_status = status.HTTP_404_NOT_FOUND
