@@ -1,4 +1,8 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
 from models_app.models.base_model import BaseModel
 
 
@@ -28,3 +32,14 @@ class SfpTemplate(BaseModel):
         db_table = 'sfp_template'
         verbose_name = 'Sfp шаблон'
         verbose_name_plural = 'Sfp шаблоны'
+
+
+@receiver(pre_save, sender=SfpTemplate)
+def prevent_sfp_template_update_when_used(sender, instance, **kwargs):
+    """Запрет обновления полей шаблона, если существуют порты с этим SFP-шаблоном."""
+    if instance.pk:
+        from models_app.models import Port
+        if Port.objects.filter(sfp_id=instance.pk).exists():
+            raise ValidationError(
+                'Невозможно изменить шаблон SFP: существуют порты, использующие этот шаблон.'
+            )
