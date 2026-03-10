@@ -1,17 +1,29 @@
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
-from rest_framework import status
-from typing import List
+from django.core.paginator import EmptyPage, Page, Paginator
+from typing import Any, List
 
-from core_api.utils.presence import PresenceChecksMixin
-from utils.services import ServiceWithResult
 from django import forms
+from django.db.models import Q, QuerySet
 from functools import lru_cache
-from models_app.models import User, Building, Room, ServerRack, SchemeMap, Vlan, Segment, Equipment
+from rest_framework import status
+
+from cabel.settings import REST_FRAMEWORK
+from core_api.utils.presence import PresenceChecksMixin
+from models_app.models import (
+    Access,
+    Building,
+    Equipment,
+    Room,
+    Scheme,
+    SchemeMap,
+    Segment,
+    ServerRack,
+    User,
+    Vlan,
+)
 from utils.fields import ModelField
-from models_app.models import Scheme
-from models_app.models import Access
-from django.db.models import Q
+from utils.services import ServiceWithResult
 
 
 class UsersListServices(PresenceChecksMixin, ServiceWithResult):
@@ -47,12 +59,25 @@ class UsersListServices(PresenceChecksMixin, ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._scheme_list_filter
+            self.result = self.users_pagination
             self.response_status = status.HTTP_200_OK
         return self
 
     @property
-    def _scheme_list_filter(self) -> List[User]:
+    def users_pagination(self) -> Page[Any]:
+        try:
+            return Paginator(
+                self._scheme_list_filter,
+                per_page=self.cleaned_data["per_page"] or REST_FRAMEWORK["PAGE_SIZE"],
+            ).page(self.cleaned_data["page"] or 1)
+        except EmptyPage:
+            return Paginator(
+                self._scheme_list_filter,
+                per_page=self.cleaned_data["per_page"] or REST_FRAMEWORK["PAGE_SIZE"],
+            ).page(1)
+
+    @property
+    def _scheme_list_filter(self) -> QuerySet[User]:
         user_list = self._users
         if self.cleaned_data['filter_building_id']:
             user_list = user_list.access.filter(
