@@ -33,7 +33,7 @@ class EquipmentTemplate(BaseModel):
 @receiver([pre_delete, pre_save], sender=EquipmentTemplate)
 def _delete_equipment_template(sender, instance, **kwargs):
     from models_app.models import Equipment
-    if not Equipment.objects.filter(equipment_template_id=instance.pk).exists():
+    if Equipment.objects.filter(template_id=instance.pk).exists():
         raise ValidationError(
             "Cannot delete template that is in use by equipment"
         )
